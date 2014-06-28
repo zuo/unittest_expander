@@ -4,7 +4,6 @@ import inspect
 import itertools
 import sys
 import types
-import unittest
 
 _PY3 = sys.version_info[0] >= 3
 _PARAM_SOURCES_ATTR = '__param_item_sources'
@@ -51,71 +50,6 @@ class MyTest(unittest.TestCase):
         self.assertIn(bar, text)
 """
 
-
-
-class ParamSeq(object):
-
-    def __init__(*posargs, **some_param_source_dict):
-        try:
-            self, some_param_source = posargs
-        except ValueError:
-            try:
-                [self] = posargs
-            except ValueError:
-                raise TypeError(
-                    '__init__() takes 1 or 2 positional arguments '
-                    '({0} given)'.format(len(posargs)))
-            self._init_with_param_sources((some_param_source_dict,))
-        else:
-            self._init_with_param_sources(
-                (some_param_source, some_param_source_dict))
-
-    @classmethod
-    def _from_param_sources(cls, param_sources):
-        self = cls.__new__(cls)
-        self._init_with_param_sources(param_sources)
-
-    def _init_with_param_sources(self, param_sources):
-        param_sources = tuple(param_sources)
-        for param_src in param_sources:
-            if not self._is_instance_of_legal_param_source_class(param_src):
-                raise TypeError(
-                    'class {0.__class__!r} (of {0!r}) is not a '
-                    'legal param source class'.format(param_src))
-        self._param_sources = param_sources
-
-    def __add__(self, other):
-        if self._is_instance_of_legal_param_source_class(other):
-            return self._from_param_sources(self._param_sources + (other,))
-        return NotImplemented
-
-    @staticmethod
-    def _is_instance_of_legal_param_source_class(obj):
-        return isinstance(obj, (
-            ParamSeq,
-            collections.Sequence,
-            collections.Mapping,
-            collections.Callable)
-        ) and not isinstance(obj, (str if _PY3 else basestring))
-
-    def _iter_params(self, test_cls):
-        for param_src in self._param_sources:
-            if isinstance(param_src, ParamSeq):
-                for param in param_src._iter_params():
-                    yield param
-            elif isinstance(param_src, collections.Mapping):
-                for label, param_item in param_src.items():
-                    yield Param._from_param_item(param_item).with_label(label)
-            else:
-                if isinstance(param_src, collections.Callable):
-                    try:
-                        param_src = param_src(test_cls)
-                    except TypeError:
-                        param_src = param_src()
-                else:
-                    assert isinstance(param_src, collections.Sequence)
-                for param_item in param_src:
-                    yield Param._from_param_item(param_item)
 
 
 class Context(object):
@@ -182,6 +116,7 @@ class Param(object):
             else:
                 raise ValueError('wrong param item: {0!r}'.format(param_item))
             return new
+        return cls(param_item)
 
     @classmethod
     def _combine_instances(cls, param_instances):
@@ -236,13 +171,13 @@ class Param(object):
 
     def _get_label_text(self):
         if self._label_list:
-            return '__'.join(label._label_text for label in self._label_list)
+            return ', '.join(label._label_text for label in self._label_list)
         else:
             sr = self._short_repr
             args_reprs = (sr(val) for val in self._args)
             kwargs_reprs = ('{0}={1}'.format(key, sr(val))
                             for key, val in sorted(self._kwargs.items()))
-            return '_'.join(itertools.chain(args_reprs, kwargs_reprs))
+            return ','.join(itertools.chain(args_reprs, kwargs_reprs))
 
     @staticmethod
     def _short_repr(obj, max_len=12):
@@ -252,14 +187,83 @@ class Param(object):
         return r
 
 
+class ParamSeq(object):
+
+    def __init__(*posargs, **some_param_source_dict):
+        try:
+            self, some_param_source = posargs
+        except ValueError:
+            try:
+                [self] = posargs
+            except ValueError:
+                raise TypeError(
+                    '__init__() takes 1 or 2 positional arguments '
+                    '({0} given)'.format(len(posargs)))
+            self._init_with_param_sources((some_param_source_dict,))
+        else:
+            self._init_with_param_sources(
+                (some_param_source, some_param_source_dict))
+
+    @classmethod
+    def _from_param_sources(cls, param_sources):
+        self = cls.__new__(cls)
+        self._init_with_param_sources(param_sources)
+        return self
+
+    def _init_with_param_sources(self, param_sources):
+        param_sources = tuple(param_sources)
+        for param_src in param_sources:
+            if not self._is_instance_of_legal_param_source_class(param_src):
+                raise TypeError(
+                    'class {0.__class__!r} (of {0!r}) is not a '
+                    'legal param source class'.format(param_src))
+        self._param_sources = param_sources
+
+    def __add__(self, other):
+        if self._is_instance_of_legal_param_source_class(other):
+            return self._from_param_sources(self._param_sources + (other,))
+        return NotImplemented
+
+    @staticmethod
+    def _is_instance_of_legal_param_source_class(obj):
+        return isinstance(obj, (
+            ParamSeq,
+            collections.Sequence,
+            collections.Set,
+            collections.Mapping,
+            collections.Callable)
+        ) and not isinstance(obj, (str if _PY3 else basestring))
+
+    def _iter_params(self, test_cls):
+        for param_src in self._param_sources:
+            if isinstance(param_src, ParamSeq):
+                for param in param_src._iter_params(test_cls):
+                    yield param
+            elif isinstance(param_src, collections.Mapping):
+                for label, param_item in param_src.items():
+                    yield Param._from_param_item(param_item).with_label(label)
+            else:
+                if isinstance(param_src, collections.Callable):
+                    try:
+                        param_src = param_src(test_cls)
+                    except TypeError:
+                        param_src = param_src()
+                else:
+                    assert isinstance(param_src, (collections.Sequence,
+                                                  collections.Set))
+                for param_item in param_src:
+                    yield Param._from_param_item(param_item)
+
+
+# test case *class* decorator...
 def parametrize(test_cls):
-    """Test case class decorator..."""
-    attrs_to_remove = set()
+    all_attrs = vars(test_cls)
+    seen_names = set(all_attrs)
+    attrs_to_replace_with_counts = dict()
     attrs_to_add = dict()
-    seen_names = set()
-    for base_name, obj in vars(test_cls).items():
+    for base_name, obj in all_attrs.items():
         param_sources = getattr(obj, _PARAM_SOURCES_ATTR, None)
-        if param_sources:
+        if param_sources is not None:
             if not isinstance(obj, types.FunctionType):
                 raise TypeError(
                     '{0!r} is not a function and only functions '
@@ -269,47 +273,53 @@ def parametrize(test_cls):
             can_take_context_targets = (
                 'context_targets' in arg_spec.args or
                 arg_spec.keywords is not None)
+            count = 0
             for func in _generate_parametrized_functions(
                     test_cls, param_sources,
                     base_name, base_func, seen_names,
                     can_take_context_targets):
                 attrs_to_add[func.__name__] = func
-            attrs_to_remove.add(base_name)
-    for base_name in attrs_to_remove:
-        delattr(test_cls, base_name)
-    for base_name, obj in attrs_to_add:
-        setattr(test_cls, base_name, obj)
+                count += 1
+            attrs_to_replace_with_counts[base_name] = count
+    for name, count in attrs_to_replace_with_counts.items():
+        setattr(test_cls, name, count)
+    for name, obj in attrs_to_add.items():
+        setattr(test_cls, name, obj)
     return test_cls
 
 
-def expand(*param_sources):
-    """Test case method decorator..."""
-    def decorator(parametrized_func):
-        param_sources = getattr(parametrized_func, _PARAM_SOURCES_ATTR, None)
-        if param_sources is None:
-            param_sources = []
-            setattr(parametrized_func, param_sources)
-        assert isinstance(param_sources, list)
-        param_sources.extend(param_sources)
-        return parametrized_func
-    return decorator
-
-
+# test case *class* decorator...
 def _parametrize_expand(*param_sources, **kwargs):
-    """Test case class decorator..."""
-    test_loader = kwargs.pop('test_loader', unittest.defaultTestLoader)
+    _into = kwargs.pop('into', None)
     if kwargs:
         raise TypeError(
             'expand_to_suite() got unexpected keyword arguments: ' +
             ', '.join(sorted(map(repr, kwargs))))
     def decorator(base_test_cls):
-        seen_names = set()
-        suite = unittest.TestSuite()
+        into = _resolve_the_into_arg(_into, globals_frame_depth=2)
+        seen_names = set(list(into.keys()) + [base_test_cls.__name__])
+        count = 0
+        parametrize(base_test_cls)
         for cls in _generate_parametrized_classes(
                 base_test_cls, param_sources, seen_names):
-            subsuite = test_loader.loadTestsFromTestCase(cls)
-            suite.addTest(subsuite)
-        return suite
+            into[cls.__name__] = cls
+            count += 1
+        return count
+    return decorator
+
+parametrize.expand = _parametrize_expand
+
+
+# test case *method* decorator...
+def expand(*param_sources):
+    def decorator(parametrized_func):
+        stored_param_sources = getattr(parametrized_func, _PARAM_SOURCES_ATTR, None)
+        if stored_param_sources is None:
+            stored_param_sources = []
+            setattr(parametrized_func, _PARAM_SOURCES_ATTR, stored_param_sources)
+        assert isinstance(stored_param_sources, list)
+        stored_param_sources.extend(param_sources)
+        return parametrized_func
     return decorator
 
 
@@ -327,10 +337,10 @@ def _generate_parametrized_classes(base_test_cls, param_sources, seen_names):
 
 
 def _generate_params_from_sources(param_sources, test_cls):
-    src_params_iterables = (
+    src_params_iterables = [
         ParamSeq(param_src)._iter_params(test_cls)
-        for param_src in param_sources)
-    for params_row in enumerate(itertools.product(*src_params_iterables)):
+        for param_src in param_sources]
+    for params_row in itertools.product(*src_params_iterables):
         yield Param._combine_instances(params_row)
 
 
@@ -393,7 +403,7 @@ def _make_parametrized_cls(base_test_cls, param, seen_names):
 
 
 def _format_name_for_parametrized(base_name, label_text, seen_names):
-    name = '{0}__{1}'.format(base_name, label_text)
+    name = '{0} :: {1}'.format(base_name, label_text)
     if name in seen_names:
         count = 1
         while True:
@@ -413,3 +423,18 @@ def _set_qualname(base_obj, target_obj):
         parent_qualname, _ = qualname.rsplit('.', 1)
         target_obj.__qualname__ = '{0}.{1}'.format(
             parent_qualname, target_obj.__name__)
+
+
+def _resolve_the_into_arg(into, globals_frame_depth):
+    orig_into = into
+    if into is None:
+        into = sys._getframe(globals_frame_depth).f_globals['__name__']
+    if isinstance(into, (str if _PY3 else basestring)):
+        into = __import__(into, globals(), locals(), ['*'], 0)
+    if inspect.ismodule(into):
+        into = vars(into)
+    if not isinstance(into, collections.MutableMapping):
+        raise TypeError(
+            "resolved 'into' argument is not a mutable mapping "
+            "({!r} given; resolved to {!r})".format(orig_into, into))
+    return into
