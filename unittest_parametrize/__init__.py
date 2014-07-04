@@ -7,18 +7,22 @@ The library provides the following utilities:
 
 How to use them?
 
+
+Basic use of *@parametrize* and *@extend*
+=========================================
+
 Let's assume we have a (somewhat trivial, in fact) function that checks
 whether the given number is even or not:
 
 >>> def is_even(n):
 ...     return n % 2 == 0
 
-For such a trivial function it seems to be enough but in the real world
-our code units and their tests are more complex, and usually it is a bad
-idea to test many cases within one test case method (harder debugging,
-lack of test separation...).
+Of course, in the real world our code units are more complex.  And
+usually it is a bad idea to test many cases in a loop within one test
+method -- because of lack of test separation, less information on
+failures, harder debugging etc.
 
-So let's prepare our tests in a smarter way:
+So let's see how to prepare our tests in a smarter way...
 
 >>> import unittest, sys
 >>>
@@ -81,9 +85,12 @@ test_is_even__<2,True> ... ok
 Ran 5 tests...
 OK
 
-It could also be written in more descriptive way, i.e. also using
-keyword arguments (especially useful when there are more test method
-parameters):
+
+More flexibility: *param*
+=========================
+
+Our tests could also be written in more descriptive way -- specifying
+our parameters using also keyword arguments:
 
 >>> @parametrize
 ... class Test_is_even(unittest.TestCase):
@@ -111,6 +118,7 @@ Ran 5 tests...
 OK
 
 But what to do, if we need to *label* our parameters explicitly?
+
 We can use a dict:
 
 >>> @parametrize
@@ -132,7 +140,7 @@ test_is_even__<sys.maxsize> ... ok
 Ran 2 tests...
 OK
 
-...or just the label() method of `param` objects:
+...or just the param.label() method:
 
 >>> @parametrize
 ... class Test_is_even(unittest.TestCase):
@@ -154,15 +162,19 @@ test_is_even__<string> ... ok
 Ran 2 tests...
 OK
 
-(Note: if a test method accepts the `label` keyword argument, the
+Note: if a test method accepts the `label` keyword argument, the
 appropriate label -- either explicitly specified or auto-generated --
-will be passed in as that argument.)
+will be passed in as that argument.
 
-But now, how to concatenate separately defined param collections?
-(sequences, mappings or sets)
 
-Let's transform them into `paramseq` instances and then just add one to
-another:
+Introducing *paramseq*
+======================
+
+But now, how to concatenate separately defined param collections --
+sequences, mappings or sets?
+
+Let's transform them (or at least first of them) into `paramseq`
+instances and then just add one to another:
 
 >>> @parametrize
 ... class Test_is_even(unittest.TestCase):
@@ -186,12 +198,16 @@ another:
 ...         string=param('%s', expected=False),
 ...     )
 ...
-...     spam = paramseq(set([
-...         (18, True),
-...     ]))
+...     spam = {
+...         '18->True': (18, True),
+...     }
+...
+...     ham = [
+...         param(99999999999999999, False),
+...     ]
 ...
 ...     # just add them -- one to another
-...     all_params = basic_params + huge_params + strange_params + spam
+...     all_params = basic_params + huge_params + strange_params + spam + ham
 ...
 ...     @expand(all_params)
 ...     def test_is_even(self, n, expected):
@@ -204,14 +220,15 @@ test_is_even__<-1,expected=False> ... ok
 test_is_even__<-14,expected=True> ... ok
 test_is_even__<-sys.maxsize> ... ok
 test_is_even__<17,expected=False> ... ok
-test_is_even__<18,True> ... ok
+test_is_even__<18->True> ... ok
 test_is_even__<2,expected=True> ... ok
+test_is_even__<<99999999999...>,False> ... ok
 test_is_even__<just zero, why not?> ... ok
 test_is_even__<noninteger> ... ok
 test_is_even__<string> ... ok
 test_is_even__<sys.maxsize> ... ok
 ...
-Ran 10 tests...
+Ran 11 tests...
 OK
 
 Note that the sequences/mappings/sets/paramseq instances do not need
@@ -224,7 +241,8 @@ returns a sequence or other iterable (e.g. generator).  Let's assume
 we need to generate some random param values:
 
 >>> from random import randint
->>> @paramseq
+>>>
+>>> @paramseq   # <- yes, used as a decorator
 ... def randomized(test_case_cls):
 ...     yield param(randint(test_case_cls.FROM, test_case_cls.TO) * 2,
 ...                 expected=True).label('random even')
@@ -264,10 +282,14 @@ Ran 7 tests...
 OK
 
 Note: the callable object (in this case a generator function) is called
--- and its iterable result iterated over -- when the @parametrize
-decorator is called, before generating parametrized test methods.
-The callable object can take zero arguments or one positional argument
--- in the latter case the test case class is passed in.
+(and its iterable result iterated over) when the @parametrize decorator
+is called, before generating parametrized test methods.  The callable
+object can take zero arguments or one positional argument -- in the
+latter case the test case class is passed in.
+
+
+Multiple *@expand* and kind-of-dependency-injection parametrization
+===================================================================
 
 Another feature: combining different parameter sequences/sets/
 /mappings/paramseq instances -- to produce cartesian product of
@@ -327,6 +349,10 @@ test_is_even__<integer, random odd> ... ok
 ...
 Ran 14 tests...
 OK
+
+
+Fixtures -- part I: contexts
+============================
 
 And what about fixtures?  Sometimes the standard setUp()/tearDown()
 (and addCleanup()) are just not enough (or not enough convenient).
@@ -627,11 +653,14 @@ True
 >>> isinstance(p, param) and isinstance(p2, param) and isinstance(p3, param)
 True
 
-Now, what about using @expand as a class decoratorw?
 
-It's similar to using @expand as a method decorator, except that you
-must remeber to place the @parametrize decorator as the topmost (the
-outer) decorator (above all @expand decorators).
+Fixtures -- part II: @expand as a class decorator
+=================================================
+
+Now, what about using @expand as a class decorator? It's similar to
+using @expand as a method decorator, except that you must remeber to
+place the @parametrize decorator as the topmost (the outer) decorator
+(above all @expand decorators).
 
 Also, when using @expand as a class decorator, you can -- or should,
 if you want to prevent the library from hackish interpreter stack
@@ -989,6 +1018,10 @@ test_save_load (...TestSaveLoad__<load='abc',save='abc'>) ... ok
 Ran 2 tests...
 OK
 
+
+Custom method/class name formatting
+===================================
+
 One more thing: if you don't like how parametrized method names or class
 names are formatted -- you can customize it globally by:
 
@@ -1105,9 +1138,13 @@ to None:
 >>> parametrize.name_pattern = None
 >>> parametrize.name_formatter = None
 
-Also, note that the library automatically does its best to avoid name
-clashes -- when it detects a clash it adds a suffix to a newly formatted
-name, e.g.:
+
+Name clashes avoided automatically
+==================================
+
+Note that the library automatically does its best to avoid name clashes
+-- when it detects a clash it adds a suffix to a newly formatted name,
+e.g.:
 
 >>> def setting_attrs(attr_dict):
 ...     def deco(cls):
@@ -1168,13 +1205,15 @@ OK
 """
 
 from unittest_parametrize._internal import (
+    Substitute,
     expand,
     parametrize,
-    Param as param,
-    ParamSeq as paramseq,
+    param,
+    paramseq,
 )
 
 __all__ = (
+    'Substitute',
     'expand',
     'parametrize',
     'param',
@@ -1182,17 +1221,8 @@ __all__ = (
 )
 
 
+Substitute.__module__ = __name__
 expand.__module__ = __name__
 parametrize.__module__ = __name__
 param.__module__ = __name__
 paramseq.__module__ = __name__
-
-param.__name__ = 'param'
-if hasattr(param, '__qualname__'):
-    # relevant to Python 3.3+
-    param.__qualname__ = param.__name__
-
-paramseq.__name__ = 'paramseq'
-if hasattr(paramseq, '__qualname__'):
-    # relevant to Python 3.3+
-    paramseq.__qualname__ = paramseq.__name__
