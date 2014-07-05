@@ -658,7 +658,7 @@ True
 Fixtures -- part II: @foreach as a class decorator
 ==================================================
 
-Now, what about using @foreach as a class decorator? It's similar to
+Now, what about using @foreach as a class decorator?  It's similar to
 using @foreach as a method decorator, except that you must remeber to
 place the @expand decorator as the topmost (the outer) decorator (above
 all @foreach decorators).
@@ -876,12 +876,12 @@ FAILED (failures=1, errors=7)
 ... ]
 True
 
-(Note: contexts attached to test *class* params [in contrast to those
-attached to test *method* params] are dispatched within setUp()
+Note: contexts attached to test *class* params (in contrast to those
+attached to test *method* params) are dispatched within setUp()
 and (if applicable) tearDown() -- so setUp() and tearDown() *are*
 affected by errors related to those contexts.  On the other hand,
 context finalization (__exit__) is *not* affected by any exceptions
-from actual test methods.)
+from actual test methods.
 
 One could ask: "What the @expand decorator does with the original
 objects (classes or methods) decorated with @foreach?".  They cannot be
