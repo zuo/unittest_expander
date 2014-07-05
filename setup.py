@@ -11,7 +11,7 @@ setup(
     long_description=(
         'A library of flexible and easy-to-use tools to parameterize '
         '(multiply by specified params) your unit tests, especially '
-        'those written with the standard unittest module.'),
+        'those using the standard unittest module.'),
     license='MIT',
     keywords='unittest testing parameterization parametrization',
     url='https://github.com/zuo/unittest_expander',
