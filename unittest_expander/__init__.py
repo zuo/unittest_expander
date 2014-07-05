@@ -1,15 +1,15 @@
 """
 The library provides the following utilities:
 
-* test case method (or class) decorator: @expand,
-* test case class decorator: @parametrize,
+* test case method (or class) decorator: @foreach,
+* test case class decorator: @expand,
 * two helper classes: param and paramseq.
 
 How to use them?
 
 
-Basic use of *@parametrize* and *@extend*
-=========================================
+Basic use of *@expand* and *@foreach*
+=====================================
 
 Let's assume we have a (somewhat trivial, in fact) function that checks
 whether the given number is even or not:
@@ -26,14 +26,14 @@ So let's see how to prepare our tests in a smarter way...
 
 >>> import unittest, sys
 >>>
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @expand([0, 2, -14])
+...     @foreach([0, 2, -14])
 ...     def test_even(self, n):
 ...         self.assertTrue(is_even(n))
 ...
-...     @expand([-1, 17])
+...     @foreach([-1, 17])
 ...     def test_odd(self, n):
 ...         self.assertFalse(is_even(n))
 ...
@@ -60,10 +60,10 @@ OK
 Another approach could be to define one test method with a couple
 of arguments:
 
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @expand([
+...     @foreach([
 ...         (-14, True),
 ...         (-1, False),
 ...         (0, True),
@@ -92,10 +92,10 @@ More flexibility: *param*
 Our tests could also be written in more descriptive way -- specifying
 our parameters using also keyword arguments:
 
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @expand([
+...     @foreach([
 ...         param(-14, expected=True),
 ...         param(-1, expected=False),
 ...         param(0, expected=True),
@@ -121,10 +121,10 @@ But what to do, if we need to *label* our parameters explicitly?
 
 We can use a dict:
 
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @expand({
+...     @foreach({
 ...         'sys.maxsize': param(sys.maxsize, expected=False),
 ...         '-sys.maxsize': param(-sys.maxsize, expected=False),
 ...     })
@@ -142,10 +142,10 @@ OK
 
 ...or just the param.label() method:
 
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @expand([
+...     @foreach([
 ...         param(1.2345, expected=False).label('noninteger'),
 ...         param('%s', expected=False).label('string'),
 ...     ])
@@ -176,7 +176,7 @@ sequences, mappings or sets?
 Let's transform them (or at least first of them) into `paramseq`
 instances and then just add one to another:
 
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
 ...     basic_params = paramseq([
@@ -209,7 +209,7 @@ instances and then just add one to another:
 ...     # just add them -- one to another
 ...     all_params = basic_params + huge_params + strange_params + spam + ham
 ...
-...     @expand(all_params)
+...     @foreach(all_params)
 ...     def test_is_even(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
@@ -249,7 +249,7 @@ we need to generate some random param values:
 ...     yield param(randint(test_case_cls.FROM, test_case_cls.TO) * 2 + 1,
 ...                 expected=False).label('random odd')
 ...
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
 ...     FROM = -(10 ** 6)
@@ -263,7 +263,7 @@ we need to generate some random param values:
 ...         param(17, expected=False),
 ...     ]
 ...
-...     @expand(input_values_and_results)
+...     @foreach(input_values_and_results)
 ...     def test_is_even(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
@@ -282,20 +282,20 @@ Ran 7 tests...
 OK
 
 Note: the callable object (in this case a generator function) is called
-(and its iterable result iterated over) when the @parametrize decorator
-is called, before generating parametrized test methods.  The callable
+(and its iterable result iterated over) when the @expand decorator is
+ called, before generating parametrized test methods.  The callable
 object can take zero arguments or one positional argument -- in the
 latter case the test case class is passed in.
 
 
-Multiple *@expand* and kind-of-dependency-injection parametrization
-===================================================================
+Multiple *@foreach* and kind-of-dependency-injection parametrization
+====================================================================
 
 Another feature: combining different parameter sequences/sets/
 /mappings/paramseq instances -- to produce cartesian product of
-their elements -- just by applying two or more @expand decorators:
+their elements -- just by applying two or more @foreach decorators:
 
->>> @parametrize
+>>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
 ...     FROM = -(10 ** 6)
@@ -323,8 +323,8 @@ their elements -- just by applying two or more @expand decorators:
 ...     )
 ...
 ...     # let's combine them (-> 14 param rows)
-...     @expand(input_values_and_results)
-...     @expand(input_types)
+...     @foreach(input_values_and_results)
+...     @foreach(input_types)
 ...     def test_is_even(self, input_type, n, expected):
 ...         n = input_type(n)
 ...         actual = is_even(n)
@@ -359,7 +359,7 @@ And what about fixtures?  Sometimes the standard setUp()/tearDown()
 Then you can use:
 
 * either the context() method of `param` objects,
-* or @expand as a test case *class* decorator.
+* or @foreach as a test case *class* decorator.
 
 Let's start with the former possibility.  You can specify a context
 manager factory and its arguments, with the context() method of `param`
@@ -368,7 +368,8 @@ arguments) to create a context manager before each test method call
 (each call will be enclosed in a dedicated context manager instance).
 
 >>> from tempfile import NamedTemporaryFile
->>> @parametrize
+>>>
+>>> @expand
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     data_with_contexts = [
@@ -376,7 +377,7 @@ arguments) to create a context manager before each test method call
 ...         param(save='abc', load='abc').context(NamedTemporaryFile, 'w+t'),
 ...     ]
 ...
-...     @expand(data_with_contexts)
+...     @foreach(data_with_contexts)
 ...     def test_save_load(self, save, load, context_targets):
 ...         file = context_targets[0]
 ...         file.write(save)
@@ -406,7 +407,7 @@ It is a list because there can be more than one context per param, e.g.:
 ...
 >>> memo = []
 >>>
->>> @parametrize
+>>> @expand
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     params_with_contexts = [
@@ -422,7 +423,7 @@ It is a list because there can be more than one context per param, e.g.:
 ...         ),
 ...     ]
 ...
-...     @expand(params_with_contexts)
+...     @foreach(params_with_contexts)
 ...     def test_save_load(self, save, load, expected_tag, context_targets):
 ...         file, tag = context_targets
 ...         assert tag == expected_tag
@@ -503,7 +504,7 @@ __exit__ are properly called...) also when errors occur:
 ...                .context(err_memo_cm, tag='inner')
 ...     ),
 ... ]
->>> @parametrize
+>>> @expand
 ... class SillyTest(unittest.TestCase):
 ...
 ...     def setUp(self):
@@ -512,7 +513,7 @@ __exit__ are properly called...) also when errors occur:
 ...     def tearDown(self):
 ...         memo.append('tearDown')
 ...
-...     @expand(err_params)
+...     @foreach(err_params)
 ...     def test(self, label):
 ...         if label == 'test_fail':
 ...             memo.append('FAIL-test')
@@ -597,7 +598,7 @@ FAILED (failures=1, errors=5)
 True
 
 (Note: contexts attached to test *method* params [in contrast to those
-attached to test *class* params -- see below: applying @expand to test
+attached to test *class* params -- see below: applying @foreach to test
 case classes...] are dispatched *directly* before and after a given test
 method (__enter__/__exit__), that is, *after* setUp() and *before*
 tearDown() -- so setUp() and tearDown() are unaffected by any errors
@@ -609,7 +610,7 @@ If all context properties within a paramseq are the same you can,
 as a shortcut, use the paramseq.context() method -- to apply the
 given context properties to all params:
 
->>> @parametrize
+>>> @expand
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     params_with_contexts = paramseq([
@@ -617,7 +618,7 @@ given context properties to all params:
 ...         param(save='abc', load='abc'),
 ...     ]).context(NamedTemporaryFile, 'w+t')
 ...
-...     @expand(params_with_contexts)
+...     @foreach(params_with_contexts)
 ...     def test_save_load(self, save, load, context_targets):
 ...         file = context_targets[0]
 ...         file.write(save)
@@ -654,24 +655,24 @@ True
 True
 
 
-Fixtures -- part II: @expand as a class decorator
-=================================================
+Fixtures -- part II: @foreach as a class decorator
+==================================================
 
-Now, what about using @expand as a class decorator? It's similar to
-using @expand as a method decorator, except that you must remeber to
-place the @parametrize decorator as the topmost (the outer) decorator
-(above all @expand decorators).
+Now, what about using @foreach as a class decorator? It's similar to
+using @foreach as a method decorator, except that you must remeber to
+place the @expand decorator as the topmost (the outer) decorator (above
+all @foreach decorators).
 
-Also, when using @expand as a class decorator, you can -- or should,
+Also, when using @foreach as a class decorator, you can -- or should,
 if you want to prevent the library from hackish interpreter stack
 introspection (which may not work with some Python implementations) --
-pass the 'into' keyword argument into the @parametrize decorator.
-The argument specifies when the generated subclasses of the test case
-class should be placed; the attribute value should be either a mapping
-or a (non-read-only) module, or a name of such a module.
+pass the 'into' keyword argument into the @expand decorator. The
+argument specifies when the generated subclasses of the test case class
+should be placed; the attribute value should be either a mapping or
+a (non-read-only) module, or a name of such a module.
 
-For example, let's use a dict as the 'into' argument for the
-@parametrize decorator:
+For example, let's use a dict as the 'into' argument for the @expand
+decorator:
 
 >>> into_dict = {}
 >>>
@@ -684,9 +685,9 @@ For example, let's use a dict as the 'into' argument for the
 ...     param('foo', b=42),
 ...     param('foo', b=433)]
 >>>
->>> @parametrize(into=into_dict)
-... @expand(params_with_contexts)
-... @expand(useless_data)
+>>> @expand(into=into_dict)
+... @foreach(params_with_contexts)
+... @foreach(useless_data)
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     def setUp(self):
@@ -699,7 +700,7 @@ For example, let's use a dict as the 'into' argument for the
 ...         # (note: on Python 2.7+ we could resign from using contexts
 ...         # and just use unittest.TestCase.addCleanup() here...)
 ...
-...     @expand([param(suffix=' '), param(suffix='XX')])
+...     @foreach([param(suffix=' '), param(suffix='XX')])
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
 ...         self.file.seek(0)
@@ -728,7 +729,7 @@ test_save_load__<suffix='XX'> (..._<'foo',b=433, load='abc',save='abc'>) ... ok
 Ran 8 tests...
 OK
 
-(As you see, you can combine @expand as class decorator(s) with @expand
+(As you see, you can combine @foreach as class decorator(s) with @foreach
 as method decorator(s) -- you will obtain tests parametrized with the
 cartesian product of the involved parameter collections.)
 
@@ -748,8 +749,8 @@ Contexts are, obviously, properly dispatched also when errors occur:
 ...                .context(err_memo_cm, tag='inner')
 ...     ),
 ... ])
->>> @parametrize(into=into_dict)
-... @expand(err_params)
+>>> @expand(into=into_dict)
+... @foreach(err_params)
 ... class SillyTest(unittest.TestCase):
 ...
 ...     def setUp(self):
@@ -882,8 +883,8 @@ affected by errors related to those contexts.  On the other hand,
 context finalization (__exit__) is *not* affected by any exceptions
 from actual test methods.)
 
-One could ask: "What the @parametrize decorator does with the original
-objects (classes or methods) decorated with @expand?".  They cannot be
+One could ask: "What the @expand decorator does with the original
+objects (classes or methods) decorated with @foreach?".  They cannot be
 left where they are because, without parametrization, they are not valid
 tests (but rather kind of test templates).
 
@@ -908,14 +909,14 @@ True
 (As you see, such a substitute object is kind of a non-callable proxy to
 the actual class/method).
 
-Below -- another example of using @expand as a class decorator: with
-@parametrize's 'into' being set to a module object:
+Below -- another example of using @foreach as a class decorator: with
+@expand's 'into' being set to a module object:
 
 >>> import types
 >>> module = types.ModuleType('_my_weird_module')
 >>>
->>> @parametrize(into=module)
-... @expand(params_with_contexts)
+>>> @expand(into=module)
+... @foreach(params_with_contexts)
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     def setUp(self):
@@ -949,8 +950,8 @@ OK
 >>> module = types.ModuleType('_my_weird_module')
 >>> sys.modules['_my_weird_module'] = module
 >>>
->>> @parametrize(into='_my_weird_module')
-... @expand(params_with_contexts)
+>>> @expand(into='_my_weird_module')
+... @foreach(params_with_contexts)
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     def setUp(self):
@@ -988,8 +989,8 @@ Python implementations that do not support stack frame introspection):
 >>> sys.modules['_my_weird_module'] = this
 >>> __name__ = this.__name__
 >>>
->>> @parametrize
-... @expand(params_with_contexts)
+>>> @expand
+... @foreach(params_with_contexts)
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     def setUp(self):
@@ -1025,7 +1026,7 @@ Custom method/class name formatting
 One more thing: if you don't like how parametrized method names or class
 names are formatted -- you can customize it globally by:
 
-* setting parametrize.name_pattern to a '{field}'-formattable pattern
+* setting expand.name_pattern to a '{field}'-formattable pattern
   containing one or more of the fields: 'base_name' (name of the
   original test method or class), 'label' (parameter representation
   or specified label), 'count' (consecutive number of generated
@@ -1033,24 +1034,24 @@ names are formatted -- you can customize it globally by:
 
 and/or
 
-* setting parametrize.name_formatter to any object whose format() method
+* setting expand.name_formatter to any object whose format() method
   signature complies with the signature of string.Formatter.format().
 
 For example:
 
->>> parametrize.name_pattern = '{base_name}__parametrized_{count}'
+>>> expand.name_pattern = '{base_name}__parametrized_{count}'
 >>>
 >>> into_dict = {}
 >>>
->>> @parametrize(into=into_dict)
-... @expand(params_with_contexts)
-... @expand(useless_data)
+>>> @expand(into=into_dict)
+... @foreach(params_with_contexts)
+... @foreach(useless_data)
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     def setUp(self):
 ...         self.file = self.context_targets[0]
 ...
-...     @expand([param(suffix=' '), param(suffix='XX')])
+...     @foreach([param(suffix=' '), param(suffix='XX')])
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
 ...         self.file.seek(0)
@@ -1091,19 +1092,19 @@ OK
 ...             return super(SillyFormatter,
 ...                          self).format(format_string, *args, **kwargs)
 ...
->>> parametrize.name_formatter = SillyFormatter()
+>>> expand.name_formatter = SillyFormatter()
 >>>
 >>> into_dict = {}
 >>>
->>> @parametrize(into=into_dict)
-... @expand(params_with_contexts)
-... @expand(useless_data)
+>>> @expand(into=into_dict)
+... @foreach(params_with_contexts)
+... @foreach(useless_data)
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     def setUp(self):
 ...         self.file = self.context_targets[0]
 ...
-...     @expand([param(suffix=' '), param(suffix='XX')])
+...     @foreach([param(suffix=' '), param(suffix='XX')])
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
 ...         self.file.seek(0)
@@ -1135,8 +1136,8 @@ OK
 You can reset these two options to defaults by setting that attributes
 to None:
 
->>> parametrize.name_pattern = None
->>> parametrize.name_formatter = None
+>>> expand.name_pattern = None
+>>> expand.name_formatter = None
 
 
 Name clashes avoided automatically
@@ -1160,12 +1161,12 @@ e.g.:
 ...     'test_even__<4>': 'something',
 ...     'test_even__<4>__2': None,
 ... }
->>> @parametrize(into=into_dict)
-... @expand(useless_data)
+>>> @expand(into=into_dict)
+... @foreach(useless_data)
 ... @setting_attrs(extra_attrs)
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @expand([
+...     @foreach([
 ...         0,
 ...         4,
 ...         0,   # <- repeated parameter value
@@ -1204,10 +1205,10 @@ Ran 12 tests...
 OK
 """
 
-from unittest_parametrize._internal import (
+from unittest_expander._internal import (
     Substitute,
     expand,
-    parametrize,
+    foreach,
     param,
     paramseq,
 )
@@ -1215,7 +1216,7 @@ from unittest_parametrize._internal import (
 __all__ = (
     'Substitute',
     'expand',
-    'parametrize',
+    'foreach',
     'param',
     'paramseq',
 )
@@ -1223,6 +1224,6 @@ __all__ = (
 
 Substitute.__module__ = __name__
 expand.__module__ = __name__
-parametrize.__module__ = __name__
+foreach.__module__ = __name__
 param.__module__ = __name__
 paramseq.__module__ = __name__

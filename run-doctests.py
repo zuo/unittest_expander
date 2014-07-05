@@ -2,7 +2,7 @@
 
 import doctest
 
-import unittest_parametrize
+import unittest_expander
 
 if __name__ == '__main__':
-    doctest.testmod(unittest_parametrize)
+    doctest.testmod(unittest_expander)

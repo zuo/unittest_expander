@@ -242,7 +242,7 @@ class paramseq(object):
 
 
 # test case *method* or *class* decorator...
-def expand(param_src):
+def foreach(param_src):
     def decorator(func_or_cls):
         stored_param_sources = getattr(func_or_cls, _PARAM_SOURCES_ATTR, None)
         if stored_param_sources is None:
@@ -255,20 +255,20 @@ def expand(param_src):
 
 
 # test case *class* decorator...
-def parametrize(test_cls=None, **kwargs):
+def expand(test_cls=None, **kwargs):
     into = kwargs.pop('into', None)
     if kwargs:
         raise TypeError(
             ## XXX: test
-            'parametrize() got unexpected keyword arguments: ' +
+            'expand() got unexpected keyword arguments: ' +
             ', '.join(sorted(map(repr, kwargs))))
     if test_cls is None:
-        return functools.partial(parametrize, into=into)
-    _parametrize_test_methods(test_cls)
-    return _parametrize_test_cls(test_cls, into)
+        return functools.partial(expand, into=into)
+    _expand_test_methods(test_cls)
+    return _expand_test_cls(test_cls, into)
 
 
-def _parametrize_test_methods(test_cls):
+def _expand_test_methods(test_cls):
     attr_names = dir(test_cls)
     seen_names = set(attr_names)
     attrs_to_substitute = dict()
@@ -306,7 +306,7 @@ def _parametrize_test_methods(test_cls):
         setattr(test_cls, name, obj)
 
 
-def _parametrize_test_cls(base_test_cls, into):
+def _expand_test_cls(base_test_cls, into):
     param_sources = getattr(base_test_cls, _PARAM_SOURCES_ATTR, None)
     if param_sources is None:
         return base_test_cls
@@ -478,10 +478,10 @@ def _format_name_for_parametrized(base_name, label, count, seen_names):
 
 
 def _get_name_pattern_and_formatter():
-    pattern = getattr(parametrize, 'name_pattern', None)
+    pattern = getattr(expand, 'name_pattern', None)
     if pattern is None:
         pattern = _DEFAULT_PARAMETRIZED_NAME_PATTERN
-    formatter = getattr(parametrize, 'name_formatter', None)
+    formatter = getattr(expand, 'name_formatter', None)
     if formatter is None:
         formatter = _DEFAULT_PARAMETRIZED_NAME_FORMATTER
     return pattern, formatter
