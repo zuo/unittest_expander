@@ -65,12 +65,12 @@ class param(object):
             self._context_list + [context],
             self._label_list)
 
-    def label(self, label):
+    def label(self, text):
         return self._from_components(
             self._args,
             self._kwargs,
             self._context_list,
-            self._label_list + [label])
+            self._label_list + [text])
 
     @classmethod
     def _from_param_item(cls, param_item):
@@ -141,7 +141,6 @@ class param(object):
 
     @staticmethod
     def _short_repr(obj, max_len=16):
-        ## XXX: test
         r = repr(obj)
         if len(r) > max_len:
             r = '<{0}...>'.format(r.lstrip('<')[:max_len-5])
@@ -158,15 +157,13 @@ class paramseq(object):
                 [self] = posargs
             except ValueError:
                 raise TypeError(
-                    ## XXX: test
                     '__init__() takes 1 or 2 positional arguments '
                     '({0} given)'.format(len(posargs)))
             self._init_with_param_sources(some_param_source_dict)
         else:
             if some_param_source_dict:
-                ## XXX: test
                 raise TypeError(
-                    '__init__() can take eitner positional '
+                    '__init__() can take either positional '
                     'arguments or keyword arguments, not both')
             else:
                 self._init_with_param_sources(some_param_source)
@@ -174,11 +171,15 @@ class paramseq(object):
     def __add__(self, other):
         if self._is_instance_of_legal_param_source_class(other):
             return self._from_param_sources(self, other)
-        ## XXX: test?
         return NotImplemented
 
-    def context(self, *context_args, **context_kwargs):
-        context = _Context(*context_args, **context_kwargs)
+    def __radd__(self, other):
+        if self._is_instance_of_legal_param_source_class(other):
+            return self._from_param_sources(other, self)
+        return NotImplemented
+
+    def context(self, context_manager_factory, *args, **kwargs):
+        context = _Context(context_manager_factory, *args, **kwargs)
         new = self._from_param_sources(self)
         new._context_list.append(context)
         return new
@@ -194,7 +195,6 @@ class paramseq(object):
         for param_src in param_sources:
             if not self._is_instance_of_legal_param_source_class(param_src):
                 raise TypeError(
-                    ## XXX: test
                     'class {0.__class__!r} (of {0!r}) is not a '
                     'legal parameter source class'.format(param_src))
         self._param_sources = param_sources
@@ -259,7 +259,6 @@ def expand(test_cls=None, **kwargs):
     into = kwargs.pop('into', None)
     if kwargs:
         raise TypeError(
-            ## XXX: test
             'expand() got unexpected keyword arguments: ' +
             ', '.join(sorted(map(repr, kwargs))))
     if test_cls is None:
@@ -280,17 +279,14 @@ def _expand_test_methods(test_cls):
             if _PY3:
                 # no unbound methods in Python 3
                 if not isinstance(obj, types.FunctionType):
-                    ## XXX: test
                     raise TypeError('{0!r} is not a function'.format(obj))
                 base_func = obj
             else:
                 if not isinstance(obj, types.MethodType):
-                    ## XXX: test
                     raise TypeError('{0!r} is not a method'.format(obj))
                 base_func = obj.__func__
             arg_spec = inspect.getargspec(base_func)
             accepted_generic_kwargs = set(
-                ## XXX: test
                 _GENERIC_KWARGS if arg_spec.keywords is not None
                 else (kw for kw in _GENERIC_KWARGS
                       if kw in arg_spec.args))
@@ -312,7 +308,6 @@ def _expand_test_cls(base_test_cls, into):
         return base_test_cls
     else:
         if not isinstance(base_test_cls, _CLASS_TYPES):
-            ## XXX: test
             raise TypeError('{0!r} is not a class'.format(base_test_cls))
         into = _resolve_the_into_arg(into, globals_frame_depth=3)
         seen_names = set(list(into.keys()) + [base_test_cls.__name__])
@@ -331,10 +326,9 @@ def _resolve_the_into_arg(into, globals_frame_depth):
     if inspect.ismodule(into):
         into = vars(into)
     if not isinstance(into, collections.MutableMapping):
-        ## XXX: test
         raise TypeError(
             "resolved 'into' argument is not a mutable mapping "
-            "({!r} given, resolved to {!r})".format(orig_into, into))
+            "({0!r} given, resolved to {1!r})".format(orig_into, into))
     return into
 
 
@@ -392,7 +386,7 @@ def _make_parametrized_func(base_name, base_func, count, param_inst,
                     kwargs.setdefault('label', label)
                 return base_func(*args, **kwargs)
     generated_func.__name__ = _format_name_for_parametrized(
-        base_name, label, count, seen_names)
+        base_name, base_func, label, count, seen_names)
     _set_qualname(base_func, generated_func)
     return generated_func
 
@@ -456,16 +450,18 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
 
     generated_test_cls.__module__ = base_test_cls.__module__
     generated_test_cls.__name__ = _format_name_for_parametrized(
-        base_test_cls.__name__, label, count, seen_names)
+        base_test_cls.__name__, base_test_cls, label, count, seen_names)
     _set_qualname(base_test_cls, generated_test_cls)
     return generated_test_cls
 
 
-def _format_name_for_parametrized(base_name, label, count, seen_names):
+def _format_name_for_parametrized(base_name, base_obj,
+                                  label, count, seen_names):
     pattern, formatter = _get_name_pattern_and_formatter()
     name = stem_name = formatter.format(
         pattern,
         base_name=base_name,
+        base_obj=base_obj,
         label=label,
         count=count)
     uniq_tag = 2
@@ -478,10 +474,10 @@ def _format_name_for_parametrized(base_name, label, count, seen_names):
 
 
 def _get_name_pattern_and_formatter():
-    pattern = getattr(expand, 'name_pattern', None)
+    pattern = getattr(expand, 'global_name_pattern', None)
     if pattern is None:
         pattern = _DEFAULT_PARAMETRIZED_NAME_PATTERN
-    formatter = getattr(expand, 'name_formatter', None)
+    formatter = getattr(expand, 'global_name_formatter', None)
     if formatter is None:
         formatter = _DEFAULT_PARAMETRIZED_NAME_FORMATTER
     return pattern, formatter
@@ -491,10 +487,10 @@ def _set_qualname(base_obj, target_obj):
     # relevant to Python 3.3+
     base_qualname = getattr(base_obj, '__qualname__', None)
     if base_qualname is not None:
-        ## XXX: test
         base_name = base_obj.__name__
         qualname_prefix = (
             base_qualname[:(len(base_qualname) - len(base_name))]
-            if base_qualname.endswith(base_name)
+            if (base_qualname == base_name or
+                base_qualname.endswith('.' + base_name))
             else '<...>.')
         target_obj.__qualname__ = qualname_prefix + target_obj.__name__
