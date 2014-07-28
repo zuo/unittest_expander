@@ -1,5 +1,5 @@
-Narrative Library Documentation
-===============================
+Narrative Module Documentation
+==============================
 
 .. automodule:: unittest_expander
    :noindex:

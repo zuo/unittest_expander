@@ -9,6 +9,8 @@
 .. toctree::
    :maxdepth: 2
 
+   ../README
+
    narrative_documentation
 
    reference

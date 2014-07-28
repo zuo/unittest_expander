@@ -16,16 +16,16 @@ Let's see how to use them...
 Basic use of :func:`expand` and :func:`foreach`
 ===============================================
 
-Let's assume we have a (somewhat trivial, in fact) function that checks
+Assume we have a (somewhat trivial, in fact) function that checks
 whether the given number is even or not:
 
 >>> def is_even(n):
 ...     return n % 2 == 0
 
-Of course, in the real world code units we write are usually more
-interesting... Anyway, most often we want to test how do they work for
+Of course, in the real world the code we write is usually more
+interesting...  Anyway, most often we want to test how does it work for
 different parameters.  And usually it is not the best idea to test many
-cases in a loop within one test method -- because of losing of test
+cases in a loop within one test method -- because of lack of test
 isolation, less information on failures, harder debugging etc.  So let's
 write our tests in a smarter way:
 
