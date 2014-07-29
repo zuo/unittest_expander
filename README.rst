@@ -3,7 +3,7 @@ Quick Start
 
 *unittest_expander* is a library that provides flexible and
 easy-to-use tools to parameterize your unit tests, especially those
-based on :class:`unittest.TestCase` from the Python standard library.
+based on *unittest.TestCase* from the Python standard library.
 
 :Author: Jan Kaliszewski (zuo)
 :License: MIT License
