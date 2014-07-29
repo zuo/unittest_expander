@@ -34,7 +34,9 @@ executing it *not* in a *virtualenv*).
 Usage example
 -------------
 
-Consider the following **ugly** test::
+Consider the following **ugly** test:
+
+.. code:: python
 
     import unittest
 
@@ -50,7 +52,9 @@ Consider the following **ugly** test::
             ]:
                 self.assertEqual(sum(iterable), expected)
 
-Is it cool?  **Not at all!**  So let's improve it::
+Is it cool?  **Not at all!**  So let's improve it:
+
+.. code:: python
 
     import unittest
     from unittest_expander import expand, foreach
@@ -73,7 +77,9 @@ always *reported as separate test cases*) which, however, share the
 same test method source.
 
 You may want to do the same in a bit more verbose and descriptive
-way::
+way:
+
+.. code:: python
 
     import unittest
     from unittest_expander import expand, foreach, param
