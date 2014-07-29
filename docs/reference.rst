@@ -24,24 +24,24 @@ The :class:`param` class
 
 .. class:: param(*args, **kwargs)
 
-   The class provides the following operations:
+   The class has the following methods:
 
-   .. method:: context(context_manager_factory, *its_args, **its_kwargs)
+   .. method:: context(context_manager_factory, *its_args, **its_kwargs) -> new param instance
 
-   .. method:: label(text)
+   .. method:: label(text) -> new param instance
 
 The :class:`paramseq` class
 ---------------------------
 
 .. class:: paramseq(param_collection | **kwargs)
 
-   The class provides the following operations:
+   The class has the following methods:
 
-   .. method:: __add__(other)
+   .. method:: __add__(other) -> new paramseq instance
 
-   .. method:: __radd__(other)
+   .. method:: __radd__(other) -> new paramseq instance
 
-   .. method:: context(context_manager_factory, *its_args, **its_kwargs)
+   .. method:: context(context_manager_factory, *its_args, **its_kwargs) -> new paramseq instance
 
 The :class:`Substitute` class
 -----------------------------
