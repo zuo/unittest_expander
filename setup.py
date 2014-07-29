@@ -15,7 +15,6 @@ setup(
     author_email='zuo@kaliszewski.net',
     description='Easy and flexible unittest parameterization.',
     long_description=long_description,
-    license='MIT',
     keywords='unittest testing parameterization parametrization',
     url='https://github.com/zuo/unittest_expander',
     classifiers=[
