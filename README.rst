@@ -73,7 +73,7 @@ Is it cool?  **Not at all!**  So let's improve it:
         def test_sum(self, iterable, expected):
             self.assertEqual(sum(iterable), expected)
 
-Now you have **7 distinct tests** (properly *isolated* and being
+Now you have **6 distinct tests** (properly *isolated* and being
 always *reported as separate test cases*) which, however, share the
 same test method source.
 
