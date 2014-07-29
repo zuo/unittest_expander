@@ -2,10 +2,9 @@
 # Licensed under MIT License (see the LICENSE.txt file for details).
 
 """
-*unittest_expander* is a library that provides flexible and easy-to-use
-tools to parameterize (i.e. multiply applying the specified parameters)
-your unit tests, especially those based on :class:`unittest.TestCase`
-from the Python standard library.
+*unittest_expander* is a Python library that provides flexible and
+easy-to-use tools to parameterize your unit tests, especially those
+based on :class:`unittest.TestCase` from the Python standard library.
 
 The :mod:`unittest_expander` module provides the following tools:
 
