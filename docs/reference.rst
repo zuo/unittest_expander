@@ -1,5 +1,5 @@
-Module Reference
-================
+Module Contents
+===============
 
 .. module:: unittest_expander
 
@@ -24,6 +24,8 @@ The :class:`param` class
 
 .. class:: param(*args, **kwargs)
 
+   The class provides the following operations:
+
    .. method:: context(context_manager_factory, *its_args, **its_kwargs)
 
    .. method:: label(text)
@@ -33,7 +35,11 @@ The :class:`paramseq` class
 
 .. class:: paramseq(param_collection | **kwargs)
 
+   The class provides the following operations:
+
    .. method:: __add__(other)
+
+   .. method:: __radd__(other)
 
    .. method:: context(context_manager_factory, *its_args, **its_kwargs)
 

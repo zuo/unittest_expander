@@ -3,6 +3,9 @@ use_setuptools()
 
 from setuptools import setup, find_packages
 
+with open('README.rst') as f:
+    long_description = f.read()
+
 setup(
     name='unittest_expander',
     version='0.1.0',
@@ -11,10 +14,7 @@ setup(
     author='Jan Kaliszewski',
     author_email='zuo@kaliszewski.net',
     description='Easy and flexible unittest parameterization.',
-    long_description=(
-        'A library that provides flexible and easy-to-use tools to '
-        'parameterize (i.e. multiply applying the specified parameters) '
-        'your unit tests, especially those based on `unittest.TestCase`.'),
+    long_description=long_description,
     license='MIT',
     keywords='unittest testing parameterization parametrization',
     url='https://github.com/zuo/unittest_expander',

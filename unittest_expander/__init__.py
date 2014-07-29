@@ -1,3 +1,6 @@
+# Copyright (c) 2014 Jan Kaliszewski (zuo). All rights reserved.
+# Licensed under MIT License (see the LICENSE.txt file for details).
+
 """
 *unittest_expander* is a library that provides flexible and easy-to-use
 tools to parameterize (i.e. multiply applying the specified parameters)
@@ -12,6 +15,8 @@ The :mod:`unittest_expander` module provides the following tools:
 
 Let's see how to use them...
 
+
+.. _expand-and-foreach-basics:
 
 Basic use of :func:`expand` and :func:`foreach`
 ===============================================
@@ -106,6 +111,9 @@ OK
 As you see, you can use a tuple to specify several parameter values for
 a test call.
 
+
+.. _param-basics:
+
 More flexibility: :class:`param`
 ================================
 
@@ -189,6 +197,8 @@ appropriate label (either auto-generated from parameter values or
 explicitly specified, e.g. with :meth:`param.label`) will be passed in
 as that argument.
 
+
+.. _paramseq-basics:
 
 Smart parameter collection: :class:`paramseq`
 =============================================
@@ -314,6 +324,8 @@ The callable object can accept no arguments or one positional argument
 -- in the latter case the test case class is passed in.
 
 
+.. _foreach-cartesian:
+
 Combining several :func:`foreach` to get Cartesian product
 ==========================================================
 
@@ -382,8 +394,8 @@ When dealing with resources managed with `context managers`_, you can
 specify a *context manager factory* and its arguments using the
 :meth:`~param.context` method of a :class:`param` object -- then each
 call of the resultant parameterized test will be enclosed in a dedicated
-*context manager* instance created by calling the *context manager
-factory*.
+*context manager* instance (created by calling the *context manager
+factory* with the given arguments).
 
 .. _context managers: https://docs.python.org/reference/
    datamodel.html#with-statement-context-managers
@@ -648,6 +660,8 @@ FAILED (errors=7)
 True
 
 
+.. _paramseq-context:
+
 Convenience shortcut: :meth:`paramseq.context`
 ==============================================
 
@@ -716,9 +730,9 @@ test case *classes*.
 
 That allows you to share each specified parameter/context/label across
 all test methods.  Parameters (and labels, and context targets) are
-accessible from any test method (as well as from the :meth:`setUp` and
-:meth:`tearDown` methods) as instance attributes (*not* as method
-arguments).
+accessible as instance attributes (*not* as method arguments) from any
+test method, as well as from the :meth:`setUp` and :meth:`tearDown`
+methods.
 
 >>> params_with_contexts = paramseq([                         # 2 param items
 ...     param(save='', load=''),
@@ -1070,6 +1084,8 @@ called with ``None, None, None`` arguments unless :meth:`tearDown` or an
 enclosed context manager's :meth:`__exit__` raises an exception).
 
 
+.. _about-substitute:
+
 :class:`Substitute` objects
 ===========================
 
@@ -1122,6 +1138,8 @@ non-callable proxy to the original class or method (preventing it from
 being included by test loaders but still keeping it available, e.g. for
 introspection).
 
+
+.. _custom-name-formatting:
 
 Custom method/class name formatting
 ===================================
@@ -1251,6 +1269,8 @@ Set those attributes to :obj:`None` to restore the default behaviour:
 >>> expand.global_name_pattern = None
 >>> expand.global_name_formatter = None
 
+
+.. _avoiding-name-clashes:
 
 Name clashes avoided automatically
 ==================================

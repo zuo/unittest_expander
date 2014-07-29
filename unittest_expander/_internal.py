@@ -1,3 +1,6 @@
+# Copyright (c) 2014 Jan Kaliszewski (zuo). All rights reserved.
+# Licensed under MIT License (see the LICENSE.txt file for details).
+
 import collections
 import functools
 import inspect

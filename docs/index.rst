@@ -9,11 +9,15 @@
 .. toctree::
    :maxdepth: 2
 
-   ../README
+   quick_start
 
    narrative_documentation
 
    reference
+
+   changes
+
+   other_info
 
 
 Indices and tables
