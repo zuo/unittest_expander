@@ -23,13 +23,13 @@ The easiest way to install the library is to execute (possibly in a
 (if you do not have the *pip* tool installed -- see:
 https://pip.pypa.io/en/latest/installing.html).
 
-Alternatively, you can download the library source tarball, unpack it,
+Alternatively, you can download the library source archive, unpack it,
 ``cd`` to the unpacked directory and execute the following command::
 
     python setup.py install
 
-(you may need to have administrator privileges, especially if you are
-executing it *not* in a *virtualenv*).
+(you may need to have administrator privileges and/or network access,
+especially if you are executing it *not* in a *virtualenv*).
 
 
 Usage example
