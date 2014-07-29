@@ -8,10 +8,10 @@ with open('README.rst') as f:
 
 setup(
     name='unittest_expander',
-    version='0.1.0',
+    version='0.1.1',
     packages = find_packages(),
 
-    author='Jan Kaliszewski',
+    author='Jan Kaliszewski (zuo)',
     author_email='zuo@kaliszewski.net',
     description='Easy and flexible unittest parameterization.',
     long_description=long_description,

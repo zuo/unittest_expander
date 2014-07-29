@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
 import doctest
+import sys
 
 import unittest_expander
 
 if __name__ == '__main__':
     failed, attempted = doctest.testmod(unittest_expander)
-    if not failed:
-        print('{0} tests passed and {1} failed.'.format(attempted, failed))
+    msg = 'Test summary: {1}/{0} passed and {2}/{0} failed.'.format(
+            attempted, attempted - failed, failed)
+    if failed:
+        sys.exit(msg)
+    else:
+        print(msg)
+
