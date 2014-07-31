@@ -9,7 +9,7 @@
 .. toctree::
    :maxdepth: 2
 
-   quick_start
+   getting_started
 
    narrative_documentation
 

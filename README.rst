@@ -2,6 +2,10 @@
 easy-to-use tools to parameterize your unit tests, especially those
 based on *unittest.TestCase* from the Python standard library.
 
+The library is compatibile with Python 2.6, 2.7, 3.2, 3.3 and 3.4, and
+does not depend on external packages (uses only the Python standard
+library).
+
 :Author: Jan Kaliszewski (zuo)
 :License: MIT License
 :Homepage: https://github.com/zuo/unittest_expander
@@ -17,7 +21,8 @@ The easiest way to install the library is to execute (possibly in a
 
 .. _virtualenv: https://virtualenv.pypa.io/en/latest/virtualenv.html
 
-(if you do not have the *pip* tool installed -- see:
+(note that you need network access to do it this way; if you do not
+have the *pip* tool installed -- see:
 https://pip.pypa.io/en/latest/installing.html).
 
 Alternatively, you can `download`_ the library source archive, unpack
@@ -74,8 +79,8 @@ Is it cool?  **Not at all!**  So let's improve it:
             self.assertEqual(sum(iterable), expected)
 
 Now you have **6 distinct tests** (properly *isolated* and being
-always *reported as separate test cases*) which, however, share the
-same test method source.
+always *reported as separate tests*), although they share the same
+test method source.
 
 You may want to do the same in a bit more verbose and descriptive
 way:

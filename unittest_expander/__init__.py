@@ -272,7 +272,7 @@ example, import them from a separate module.  Obviously, it makes code
 reuse and refactorization easier.
 
 A :class:`paramseq` instance can also be created from a callable object
-that returns a sequence or other iterable (e.g. a generator).
+that returns a sequence or another iterable (e.g. a generator).
 
 >>> from random import randint
 >>> 
@@ -637,7 +637,7 @@ test method call, that is, *after* :meth:`setUp` and *before*
 unaffected by any errors related to those contexts.
 
 On the other hand, an error in :meth:`setUp` prevents a test from being
-called -- then contexts are not dispatched as well:
+called -- then contexts are not dispatched at all:
 
 >>> def setUp(self):
 ...     memo.append('setUp')
