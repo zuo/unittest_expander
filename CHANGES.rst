@@ -4,7 +4,8 @@ Changes
 0.1.2 (2014-08-01)
 ------------------
 
-Unified signatures of **@foreach** and **paramseq()**.
+The signature of the **foreach** decorator unified with the signature
+of the **paramseq** constructor.
 
 Testing/documentation-related updates and improvements.
 
