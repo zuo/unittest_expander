@@ -170,7 +170,38 @@ test_is_even__<sys.maxsize> ... ok
 ...Ran 2 tests...
 OK
 
-...or just pass a dictionary:
+*If* a test method accepts the `label` keyword argument, the appropriate
+label (either auto-generated from parameter values or explicitly
+specified, e.g. with :meth:`param.label`) will be passed in as that
+argument:
+
+>>> @expand
+... class Test_is_even(unittest.TestCase):
+...
+...     @foreach([
+...         param(sys.maxsize, expected=False).label('sys.maxsize'),
+...         param(-sys.maxsize, expected=False).label('-sys.maxsize'),
+...     ])
+...     def test_is_even(self, n, expected, label):
+...         actual = is_even(n)
+...         self.assertTrue(isinstance(actual, bool))
+...         self.assertEqual(actual, expected)
+...         assert label in ('sys.maxsize', '-sys.maxsize')
+...
+>>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
+test_is_even__<-sys.maxsize> ... ok
+test_is_even__<sys.maxsize> ... ok
+...Ran 2 tests...
+OK
+
+
+.. _other-ways-to-label:
+
+Other ways to label your tests explicitly
+=========================================
+
+You can also label particular tests by passing a dictionary directly
+into :func:`foreach`:
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -191,10 +222,26 @@ test_is_even__<noninteger> ... ok
 ...Ran 2 tests...
 OK
 
-Note: *if* a test method accepts the `label` keyword argument, the
-appropriate label (either auto-generated from parameter values or
-explicitly specified, e.g. with :meth:`param.label`) will be passed in
-as that argument.
+...or just using keyword arguments:
+
+>>> @expand
+... class Test_is_even(unittest.TestCase):
+...
+...     @foreach(
+...         noninteger=(1.2345, False),
+...         horribleabuse=('%s', False),
+...     )
+...     def test_is_even(self, n, expected, label):
+...         actual = is_even(n)
+...         self.assertTrue(isinstance(actual, bool))
+...         self.assertEqual(actual, expected)
+...         assert label in ('noninteger', 'horribleabuse')
+...
+>>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
+test_is_even__<horribleabuse> ... ok
+test_is_even__<noninteger> ... ok
+...Ran 2 tests...
+OK
 
 
 .. _paramseq-basics:
@@ -1362,7 +1409,7 @@ OK
 
     >>> paramseq([1, 2], a=3, b=4)   # doctest: +ELLIPSIS
     Traceback (most recent call last):
-    TypeError: ...either positional...or keyword...not both...
+    TypeError: ...either one positional...or some keyword...not both...
 
     >>> paramseq([1, 2]) + 3         # doctest: +ELLIPSIS
     Traceback (most recent call last):
