@@ -1,10 +1,10 @@
 *unittest_expander* is a Python library that provides flexible and
 easy-to-use tools to parameterize your unit tests, especially those
-based on *unittest.TestCase* from the Python standard library.
+based on *unittest.TestCase*.
 
-The library is compatibile with Python 2.6, 2.7, 3.2, 3.3 and 3.4, and
-does not depend on external packages (uses only the Python standard
-library).
+*unittest_expander* is compatibile with Python 2.6, 2.7, 3.2, 3.3 and
+3.4, and does not depend on external packages (uses only the Python
+standard library).
 
 :Author: Jan Kaliszewski (zuo)
 :License: MIT License
