@@ -8,7 +8,7 @@ with open('README.rst') as f:
 
 setup(
     name='unittest_expander',
-    version='0.1.1',
+    version='0.1.2',
     packages = find_packages(),
 
     author='Jan Kaliszewski (zuo)',
