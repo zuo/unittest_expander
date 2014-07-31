@@ -14,7 +14,7 @@ _PY3 = sys.version_info[0] >= 3
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
 _STRING_TYPES = (str,) if _PY3 else (str, unicode)
 
-_PARAM_SOURCES_ATTR = '__param_item_sources'
+_PARAMSEQ_OBJS_ATTR = '__attached_paramseq_objs'
 
 _GENERIC_KWARGS = 'context_targets', 'label'
 
@@ -166,8 +166,8 @@ class paramseq(object):
         else:
             if some_param_source_dict:
                 raise TypeError(
-                    '__init__() can take either positional '
-                    'arguments or keyword arguments, not both')
+                    'paramseq constructor can take either one positional '
+                    'argument or some keyword arguments, not both')
             else:
                 self._init_with_param_sources(some_param_source)
 
@@ -245,14 +245,15 @@ class paramseq(object):
 
 
 # test case *method* or *class* decorator...
-def foreach(param_src):
+def foreach(*posargs, **some_param_source_dict):
+    ps = paramseq(*posargs, **some_param_source_dict)
     def decorator(func_or_cls):
-        stored_param_sources = getattr(func_or_cls, _PARAM_SOURCES_ATTR, None)
-        if stored_param_sources is None:
-            stored_param_sources = []
-            setattr(func_or_cls, _PARAM_SOURCES_ATTR, stored_param_sources)
-        assert isinstance(stored_param_sources, list)
-        stored_param_sources.append(param_src)
+        stored_paramseq_objs = getattr(func_or_cls, _PARAMSEQ_OBJS_ATTR, None)
+        if stored_paramseq_objs is None:
+            stored_paramseq_objs = []
+            setattr(func_or_cls, _PARAMSEQ_OBJS_ATTR, stored_paramseq_objs)
+        assert isinstance(stored_paramseq_objs, list)
+        stored_paramseq_objs.append(ps)
         return func_or_cls
     return decorator
 
@@ -277,8 +278,8 @@ def _expand_test_methods(test_cls):
     attrs_to_add = dict()
     for base_name in attr_names:
         obj = getattr(test_cls, base_name, None)
-        param_sources = getattr(obj, _PARAM_SOURCES_ATTR, None)
-        if param_sources is not None:
+        paramseq_objs = getattr(obj, _PARAMSEQ_OBJS_ATTR, None)
+        if paramseq_objs is not None:
             if _PY3:
                 # no unbound methods in Python 3
                 if not isinstance(obj, types.FunctionType):
@@ -294,7 +295,7 @@ def _expand_test_methods(test_cls):
                 else (kw for kw in _GENERIC_KWARGS
                       if kw in arg_spec.args))
             for func in _generate_parametrized_functions(
-                    test_cls, param_sources,
+                    test_cls, paramseq_objs,
                     base_name, base_func, seen_names,
                     accepted_generic_kwargs):
                 attrs_to_add[func.__name__] = func
@@ -306,8 +307,8 @@ def _expand_test_methods(test_cls):
 
 
 def _expand_test_cls(base_test_cls, into):
-    param_sources = getattr(base_test_cls, _PARAM_SOURCES_ATTR, None)
-    if param_sources is None:
+    paramseq_objs = getattr(base_test_cls, _PARAMSEQ_OBJS_ATTR, None)
+    if paramseq_objs is None:
         return base_test_cls
     else:
         if not isinstance(base_test_cls, _CLASS_TYPES):
@@ -315,7 +316,7 @@ def _expand_test_cls(base_test_cls, into):
         into = _resolve_the_into_arg(into, globals_frame_depth=3)
         seen_names = set(list(into.keys()) + [base_test_cls.__name__])
         for cls in _generate_parametrized_classes(
-                base_test_cls, param_sources, seen_names):
+                base_test_cls, paramseq_objs, seen_names):
             into[cls.__name__] = cls
         return Substitute(base_test_cls)
 
@@ -335,28 +336,28 @@ def _resolve_the_into_arg(into, globals_frame_depth):
     return into
 
 
-def _generate_parametrized_functions(test_cls, param_sources,
+def _generate_parametrized_functions(test_cls, paramseq_objs,
                                      base_name, base_func, seen_names,
                                      accepted_generic_kwargs):
     for count, param_inst in enumerate(
-            _generate_params_from_sources(param_sources, test_cls),
+            _generate_params_from_sources(paramseq_objs, test_cls),
             start=1):
         yield _make_parametrized_func(base_name, base_func, count, param_inst,
                                       seen_names, accepted_generic_kwargs)
 
 
-def _generate_parametrized_classes(base_test_cls, param_sources, seen_names):
+def _generate_parametrized_classes(base_test_cls, paramseq_objs, seen_names):
     for count, param_inst in enumerate(
-            _generate_params_from_sources(param_sources, base_test_cls),
+            _generate_params_from_sources(paramseq_objs, base_test_cls),
             start=1):
         yield _make_parametrized_cls(base_test_cls, count,
                                      param_inst, seen_names)
 
 
-def _generate_params_from_sources(param_sources, test_cls):
+def _generate_params_from_sources(paramseq_objs, test_cls):
     src_params_iterables = [
-        paramseq(param_src)._generate_params(test_cls)
-        for param_src in param_sources]
+        ps._generate_params(test_cls)
+        for ps in paramseq_objs]
     for params_row in itertools.product(*src_params_iterables):
         yield param._combine_instances(params_row)
 
