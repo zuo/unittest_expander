@@ -36,6 +36,16 @@ def get_long_description():
         return f.read().decode('utf-8')
 
 
+# get rid of the legacy unittest_expander package directory
+import errno, shutil
+try:
+    shutil.move('unittest_expander', 'NOT-USED-ANYMORE--unittest_expander')
+except EnvironmentError as exc:
+    if exc.errno != errno.ENOENT:
+        import traceback
+        traceback.print_exc()
+
+
 setup(
     name='unittest_expander',
     version=get_version(),
