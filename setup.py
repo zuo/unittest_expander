@@ -1,20 +1,50 @@
+import re
+
 from ez_setup import use_setuptools
 use_setuptools()
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as f:
-    long_description = f.read()
+
+VERSION_REGEX = re.compile(b'''
+    ^
+    release
+    \s*
+    =
+    \s*
+    ['"]
+    (?P<version>
+        [^'"]+
+    )
+    ['"]
+    \s*
+    $
+''', re.VERBOSE)
+
+
+def get_version():
+    with open('docs/conf.py', 'rb') as f:
+        for line in f:
+            match = VERSION_REGEX.search(line)
+            if match:
+                return match.group('version').decode('utf-8')
+    raise AssertionError('version not specified')
+
+
+def get_long_description():
+    with open('README.rst', 'rb') as f:
+        return f.read().decode('utf-8')
+
 
 setup(
     name='unittest_expander',
-    version='0.1.2',
-    packages = find_packages(),
+    version=get_version(),
+    packages=find_packages(),
 
     author='Jan Kaliszewski (zuo)',
     author_email='zuo@kaliszewski.net',
     description='Easy and flexible unittest parameterization.',
-    long_description=long_description,
+    long_description=get_long_description(),
     keywords='unittest testing parameterization parametrization',
     url='https://github.com/zuo/unittest_expander',
     classifiers=[
