@@ -1,11 +1,21 @@
 Changes
 =======
 
+0.2.0 (2014-08-11)
+------------------
+
+Now **unittest_expander** is a one-file module, not a directory-based
+package.
+
+Some documentation improvements and updates.
+
+Some setup improvements and refactorings.
+
 0.1.2 (2014-08-01)
 ------------------
 
-The signature of the **foreach** decorator unified with the signature
-of the **paramseq** constructor.
+The signatures of the **foreach** decorator and the **paramseq**
+constructor have been unified.
 
 Testing/documentation-related updates and improvements.
 
