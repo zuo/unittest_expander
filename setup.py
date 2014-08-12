@@ -3,7 +3,7 @@ import re
 from ez_setup import use_setuptools
 use_setuptools()
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 VERSION_REGEX = re.compile(b'''
@@ -36,20 +36,10 @@ def get_long_description():
         return f.read().decode('utf-8')
 
 
-# get rid of the legacy unittest_expander package directory
-import errno, shutil
-try:
-    shutil.move('unittest_expander', 'NOT-USED-ANYMORE--unittest_expander')
-except EnvironmentError as exc:
-    if exc.errno != errno.ENOENT:
-        import traceback
-        traceback.print_exc()
-
-
 setup(
     name='unittest_expander',
     version=get_version(),
-    packages=find_packages(),
+    py_modules=['unittest_expander'],
 
     author='Jan Kaliszewski (zuo)',
     author_email='zuo@kaliszewski.net',
