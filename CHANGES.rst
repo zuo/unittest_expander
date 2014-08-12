@@ -1,15 +1,26 @@
 Changes
 =======
 
+0.2.1 (2014-08-12)
+------------------
+
+Important internal fixes (of 0.2.0-related regressions) and cleanups:
+
+* a setup-breaking bug in *setup.py* has been fixed and some
+  setup-related cleanups have been made as well;
+* the configuration of Sphinx (package docs generator tool) has been
+  fixed.
+
 0.2.0 (2014-08-11)
 ------------------
 
 Now **unittest_expander** is a one-file module, not a directory-based
 package.
 
-Some documentation improvements and updates.
+Internal changes:
 
-Some setup improvements and refactorings.
+* some documentation improvements and updates;
+* some library setup improvements and refactorings.
 
 0.1.2 (2014-08-01)
 ------------------
