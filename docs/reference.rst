@@ -17,7 +17,7 @@ The :func:`expand` class decorator
 The :func:`foreach` method/class decorator
 ------------------------------------------
 
-.. decorator:: foreach(param_collection)
+.. decorator:: foreach(param_collection | **param_collection_items)
 
 The :class:`param` class
 ------------------------
@@ -33,7 +33,7 @@ The :class:`param` class
 The :class:`paramseq` class
 ---------------------------
 
-.. class:: paramseq(param_collection | **kwargs)
+.. class:: paramseq(param_collection | **param_collection_items)
 
    The class has the following methods:
 
