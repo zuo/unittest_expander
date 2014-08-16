@@ -1,5 +1,7 @@
 # Copyright (c) 2014 Jan Kaliszewski (zuo). All rights reserved.
 #
+# Licensed under the MIT License:
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -57,11 +59,11 @@ write our tests in a smarter way:
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @foreach([0, 2, -14])
+...     @foreach(0, 2, -14)        # call variant #1: several parameters
 ...     def test_even(self, n):
 ...         self.assertTrue(is_even(n))
 ...
-...     @foreach([-1, 17])
+...     @foreach([-1, 17])         # call variant #2: one parameter collection
 ...     def test_odd(self, n):
 ...         self.assertFalse(is_even(n))
 
@@ -104,13 +106,13 @@ arguments:
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @foreach([
+...     @foreach(
 ...         (-14, True),
 ...         (-1, False),
 ...         (0, True),
 ...         (2, True),
 ...         (17, False),
-...     ])
+...     )
 ...     def test_is_even(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
@@ -143,13 +145,13 @@ instead of tuples:
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @foreach([
+...     @foreach(
 ...         param(-14, expected=True),
 ...         param(-1, expected=False),
 ...         param(0, expected=True),
 ...         param(2, expected=True),
 ...         param(17, expected=False),
-...     ])
+...     )
 ...     def test_is_even(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
@@ -173,10 +175,10 @@ We can use the :meth:`~param.label` method of :class:`param` objects:
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @foreach([
+...     @foreach(
 ...         param(sys.maxsize, expected=False).label('sys.maxsize'),
 ...         param(-sys.maxsize, expected=False).label('-sys.maxsize'),
-...     ])
+...     )
 ...     def test_is_even(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
@@ -196,10 +198,10 @@ argument:
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @foreach([
+...     @foreach(
 ...         param(sys.maxsize, expected=False).label('sys.maxsize'),
 ...         param(-sys.maxsize, expected=False).label('-sys.maxsize'),
-...     ])
+...     )
 ...     def test_is_even(self, n, expected, label):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
@@ -277,21 +279,26 @@ instances -- and then add one to another:
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     basic_params = paramseq([
+...     basic_params1 = paramseq(   # init variant #1: several parameters
 ...         param(-14, expected=True),
 ...         param(-1, expected=False),
+...     )
+...     basic_params2 = paramseq([  # init variant #2: one parameter collection
 ...         param(0, expected=True).label('just zero, because why not?'),
 ...         param(2, expected=True),
 ...         param(17, expected=False),
 ...     ])
+...     basic_params = basic_params1 + basic_params2
 ...
-...     huge_params = paramseq({
+...     huge_params = paramseq({  # explicit labelling by passing a dict
 ...         'sys.maxsize': param(sys.maxsize, expected=False),
 ...         '-sys.maxsize': param(-sys.maxsize, expected=False),
 ...     })
 ...
-...     strange_params = paramseq(
-...         # using keyword arguments: the same as passing a dict
+...     other_params = paramseq(
+...         (-15, False),
+...         param(15, expected=False),
+...         # explicit labelling with keyword arguments:
 ...         noninteger=param(1.2345, expected=False),
 ...         horribleabuse=param('%s', expected=False),
 ...     )
@@ -306,7 +313,7 @@ instances -- and then add one to another:
 ...     ]
 ...
 ...     # just add them one to another (producing a new paramseq)
-...     all_params = basic_params + huge_params + strange_params + spam + ham
+...     all_params = basic_params + huge_params + other_params + spam + ham
 ...
 ...     @foreach(all_params)
 ...     def test_is_even(self, n, expected):
@@ -317,7 +324,9 @@ instances -- and then add one to another:
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
 test_is_even__<-1,expected=False> ... ok
 test_is_even__<-14,expected=True> ... ok
+test_is_even__<-15,False> ... ok
 test_is_even__<-sys.maxsize> ... ok
+test_is_even__<15,expected=False> ... ok
 test_is_even__<17,expected=False> ... ok
 test_is_even__<18->True> ... ok
 test_is_even__<2,expected=True> ... ok
@@ -327,7 +336,7 @@ test_is_even__<horribleabuse> ... ok
 test_is_even__<just zero, because why not?> ... ok
 test_is_even__<noninteger> ... ok
 test_is_even__<sys.maxsize> ... ok
-...Ran 12 tests...
+...Ran 14 tests...
 OK
 
 Note that the parameter collections
@@ -335,6 +344,13 @@ Note that the parameter collections
 created or bound within the test case class body; you could, for
 example, import them from a separate module.  Obviously, it makes code
 reuse and refactorization easier.
+
+Also, note that the signatures of the :func:`foreach` decorator and
+the :class:`paramseq` constructor are identical: you pass in either
+exactly one positional argument which is a parameter collection (a
+sequence/mapping/set or a :class:`paramseq` instance), or any number
+of positional and/or keyword arguments being singular parameter
+values, tuples of parameter values or :class:`param` instances.
 
 A :class:`paramseq` instance can also be created from a callable object
 that returns a sequence or another iterable (e.g. a generator).
@@ -736,10 +752,10 @@ instance aggregates:
 >>> @expand
 ... class TestSaveLoad(unittest.TestCase):
 ...
-...     params_with_contexts = paramseq([
+...     params_with_contexts = paramseq(
 ...         param(save='', load=''),
 ...         param(save='abc', load='abc'),
-...     ]).context(NamedTemporaryFile, 'w+t')
+...     ).context(NamedTemporaryFile, 'w+t')
 ...
 ...     @foreach(params_with_contexts)
 ...     def test_save_load(self, save, load, context_targets):
@@ -760,7 +776,7 @@ Note: :meth:`paramseq.context` as well as :meth:`param.context` and
 :class:`paramseq` or :class:`param` instances), without modifying
 the existing ones.
 
->>> pseq1 = paramseq([1, 2, 3])
+>>> pseq1 = paramseq(1, 2, 3)
 >>> pseq2 = pseq1.context(open, '/etc/hostname', 'rb')
 >>> isinstance(pseq1, paramseq) and isinstance(pseq2, paramseq)
 True
@@ -798,10 +814,10 @@ accessible as instance attributes (*not* as method arguments) from any
 test method, as well as from the :meth:`setUp` and :meth:`tearDown`
 methods.
 
->>> params_with_contexts = paramseq([                         # 2 param items
+>>> params_with_contexts = paramseq(                          # 2 param items
 ...     param(save='', load=''),
 ...     param(save='abc', load='abc'),
-... ]).context(NamedTemporaryFile, 'w+t')
+... ).context(NamedTemporaryFile, 'w+t')
 >>> useless_data = [                                          # 2 param items
 ...     param('foo', b=42),
 ...     param('foo', b=433)]
@@ -820,7 +836,7 @@ methods.
 ...         # (note: on Python 2.7+ we could resign from using contexts
 ...         # and just use unittest.TestCase.addCleanup() here...)
 ...
-...     @foreach([param(suffix=' '), param(suffix='XX')])     # 2 param items
+...     @foreach(param(suffix=' '), param(suffix='XX'))       # 2 param items
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
 ...         self.file.seek(0)
@@ -1160,7 +1176,7 @@ objects (classes or methods) decorated with :func:`foreach`?"
 ... @foreach(useless_data)
 ... class DummyTest(unittest.TestCase):
 ...
-...     @foreach([1, 2])
+...     @foreach(1, 2)
 ...     def test_it(self, x):
 ...         pass
 ...
@@ -1245,7 +1261,7 @@ For example:
 ...     def setUp(self):
 ...         self.file = self.context_targets[0]
 ...
-...     @foreach([param(suffix=' '), param(suffix='XX')])
+...     @foreach(param(suffix=' '), param(suffix='XX'))
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
 ...         self.file.seek(0)
@@ -1294,7 +1310,7 @@ OK
 >>> 
 >>> @expand(into=into_dict)
 ... @foreach(params_with_contexts)
-... @foreach(useless_data)
+... @foreach(*useless_data)
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     def setUp(self):
@@ -1362,14 +1378,14 @@ adds a suffix to a newly formatted name, e.g.:
 ... @setting_attrs(extra_attrs)
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @foreach([
+...     @foreach(
 ...         0,
 ...         4,
 ...         0,   # <- repeated parameter value
 ...         0,   # <- repeated parameter value
 ...         -16,
 ...         0,   # <- repeated parameter value
-...     ])
+...     )
 ...     def test_even(self, n):
 ...         self.assertTrue(is_even(n))
 ...
@@ -1410,6 +1426,12 @@ OK
 
     >>> isinstance(paramseq(), paramseq)
     True
+    >>> isinstance(paramseq(1, 2), paramseq)
+    True
+    >>> isinstance(paramseq(1, two=2), paramseq)
+    True
+    >>> isinstance(paramseq([1, 2]), paramseq)
+    True
     >>> isinstance(paramseq(set([1, 2])), paramseq)
     True
     >>> isinstance(paramseq(a=3, b=4), paramseq)
@@ -1420,14 +1442,6 @@ OK
     True
     >>> isinstance(set([3, 4]) + paramseq([1, 2]) + (5, 6), paramseq)
     True
-
-    >>> paramseq([1, 2], [3, 4])     # doctest: +ELLIPSIS
-    Traceback (most recent call last):
-    TypeError: ...takes 1 or 2 positional arguments...
-
-    >>> paramseq([1, 2], a=3, b=4)   # doctest: +ELLIPSIS
-    Traceback (most recent call last):
-    TypeError: ...either one positional...or some keyword...not both...
 
     >>> paramseq([1, 2]) + 3         # doctest: +ELLIPSIS
     Traceback (most recent call last):
@@ -1445,8 +1459,17 @@ OK
     Traceback (most recent call last):
     TypeError: ...unexpected keyword arguments...
 
+    >>> @expand
+    ... class Test(unittest.TestCase):
+    ...     @foreach(42)   # <- single arg that is not a proper param source
+    ...     def test(self):
+    ...         pass                 # doctest: +ELLIPSIS
+    ...
+    Traceback (most recent call last):
+    TypeError: ...not a legal parameter source class...
+
     >>> @expand(into=['badtype'])    # doctest: +ELLIPSIS
-    ... @foreach([1, 2])
+    ... @foreach(1, 2)
     ... class Test(unittest.TestCase):
     ...     pass
     ...
@@ -1503,6 +1526,14 @@ OK
     ...
     >>> no_qn or into_dict['Test__<42>'].__qualname__ == 'Test__<42>'
     True
+
+    >>> @expand(into=into_dict)
+    ... @foreach(42)   # <- single arg that is not a proper param source
+    ... class Test(unittest.TestCase):
+    ...     pass       # doctest: +ELLIPSIS
+    ...
+    Traceback (most recent call last):
+    TypeError: ...not a legal parameter source class...
 
     >>> memo = []
     >>> @expand
@@ -1649,7 +1680,7 @@ class param(object):
                 # we need to combine several context managers (from the
                 # contexts) but Python 2 does not have contextlib.ExitStack
                 # and contextlib.nested() is deprecated (for good reasons)
-                # -- so we will generate, compile and exec the code:
+                # -- so we will just generate, compile and exec the code:
                 src_code = (
                     'import contextlib\n'
                     '@contextlib.contextmanager\n'
@@ -1690,24 +1721,19 @@ class param(object):
 
 class paramseq(object):
 
-    def __init__(*posargs, **some_param_source_dict):
-        try:
-            self, some_param_source = posargs
-        except ValueError:
-            try:
-                [self] = posargs
-            except ValueError:
-                raise TypeError(
-                    '__init__() takes 1 or 2 positional arguments '
-                    '({0} given)'.format(len(posargs)))
-            self._init_with_param_sources(some_param_source_dict)
+    def __init__(*self_and_args, **kwargs):
+        self = self_and_args[0]
+        args = self_and_args[1:]
+        if len(args) == 1 and not kwargs:
+            # the sole positional argument is a parameter source
+            # (being a collection of: parameter values, tuples of such
+            # values, or `param` instances)
+            self._init_with_param_sources(args[0])
         else:
-            if some_param_source_dict:
-                raise TypeError(
-                    'paramseq constructor can take either one positional '
-                    'argument or some keyword arguments, not both')
-            else:
-                self._init_with_param_sources(some_param_source)
+            # each argument is a parameter value, or a tuple of such
+            # values, or a `param` instance -- explicitly labeled if
+            # the given argument is a keyword one
+            self._init_with_param_sources(args, kwargs)
 
     def __add__(self, other):
         if self._is_instance_of_legal_param_source_class(other):
@@ -1783,8 +1809,8 @@ class paramseq(object):
 
 
 # test case *method* or *class* decorator...
-def foreach(*posargs, **some_param_source_dict):
-    ps = paramseq(*posargs, **some_param_source_dict)
+def foreach(*args, **kwargs):
+    ps = paramseq(*args, **kwargs)
     def decorator(func_or_cls):
         stored_paramseq_objs = getattr(func_or_cls, _PARAMSEQ_OBJS_ATTR, None)
         if stored_paramseq_objs is None:

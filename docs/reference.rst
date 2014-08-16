@@ -8,7 +8,7 @@ The module :mod:`unittest_expander` contains the following functions and classes
 The :func:`expand` class decorator
 ----------------------------------
 
-.. decorator:: expand(*[, into=globals()])
+.. decorator:: expand(*, into=globals())
 
 .. attribute:: expand.global_name_pattern
 
@@ -17,7 +17,28 @@ The :func:`expand` class decorator
 The :func:`foreach` method/class decorator
 ------------------------------------------
 
-.. decorator:: foreach(param_collection | **param_collection_items)
+.. decorator:: foreach(param_collection)
+
+*or:*
+
+.. decorator:: foreach(*param_collection_items, **param_collection_labeled_items)
+
+The :class:`paramseq` class
+---------------------------
+
+.. class:: paramseq(param_collection)
+
+*or:*
+
+.. class:: paramseq(*param_collection_items, **param_collection_labeled_items)
+
+   The class has the following methods:
+
+   .. method:: __add__(other) -> new paramseq instance
+
+   .. method:: __radd__(other) -> new paramseq instance
+
+   .. method:: context(context_manager_factory, *its_args, **its_kwargs) -> new paramseq instance
 
 The :class:`param` class
 ------------------------
@@ -29,19 +50,6 @@ The :class:`param` class
    .. method:: context(context_manager_factory, *its_args, **its_kwargs) -> new param instance
 
    .. method:: label(text) -> new param instance
-
-The :class:`paramseq` class
----------------------------
-
-.. class:: paramseq(param_collection | **param_collection_items)
-
-   The class has the following methods:
-
-   .. method:: __add__(other) -> new paramseq instance
-
-   .. method:: __radd__(other) -> new paramseq instance
-
-   .. method:: context(context_manager_factory, *its_args, **its_kwargs) -> new paramseq instance
 
 The :class:`Substitute` class
 -----------------------------
