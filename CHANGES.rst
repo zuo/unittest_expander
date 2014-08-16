@@ -10,8 +10,8 @@ argument which is a test parameter collection (as previously: a
 sequence/mapping/set or a **paramseq** instance, or a callable
 returning an iterable...), or *any number of positional and/or keyword
 arguments being test parameters* (singular parameter values, tuples of
-parameter values or **param** instances...); for example,
-``@foreach([1, 2, 3])`` can also be spelled as: ``@foreach(1, 2, 3)``.
+parameter values or **param** instances...).  For example:
+``@foreach([1, 42])`` can now also be spelled as: ``@foreach(1, 42)``.
 
 Several testing/documentation-related updates, fixes and improvements.
 
