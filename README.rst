@@ -36,9 +36,9 @@ command::
 (you may need to have administrator privileges and/or network access,
 especially if you are executing it *not* in a *virtualenv*).
 
-It is also possible to use the library not installing it at all: as
-its code is contained in a single file: ``unittest_expander.py``, you
-can just copy it into your project.
+It is also possible to use the library without installing it: as its
+code is contained in a single file: ``unittest_expander.py``, you can
+just copy it into your project.
 
 
 Usage example
