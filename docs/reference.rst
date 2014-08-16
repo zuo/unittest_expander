@@ -3,7 +3,12 @@ Module Contents
 
 .. module:: unittest_expander
 
-The module :mod:`unittest_expander` contains the following functions and classes:
+The module :mod:`unittest_expander` contains the following functions
+and classes.
+
+(See: :doc:`narrative_documentation` for descriptions and examples of
+their usage...)
+
 
 The :func:`expand` class decorator
 ----------------------------------
@@ -19,7 +24,7 @@ The :func:`foreach` method/class decorator
 
 .. decorator:: foreach(param_collection)
 
-*or:*
+*or*
 
 .. decorator:: foreach(*param_collection_items, **param_collection_labeled_items)
 
@@ -28,17 +33,27 @@ The :class:`paramseq` class
 
 .. class:: paramseq(param_collection)
 
-*or:*
+*or*
 
 .. class:: paramseq(*param_collection_items, **param_collection_labeled_items)
 
    The class has the following methods:
 
-   .. method:: __add__(other) -> new paramseq instance
+   .. method:: __add__(other)
 
-   .. method:: __radd__(other) -> new paramseq instance
+       Returns a new :class:`paramseq` instance (concatenates the
+       current instance with *other*).
 
-   .. method:: context(context_manager_factory, *its_args, **its_kwargs) -> new paramseq instance
+   .. method:: __radd__(other)
+
+       Returns a new :class:`paramseq` instance (concatenates *other*
+       with the current instance).
+
+   .. method:: context(context_manager_factory, *its_args, **its_kwargs)
+
+       Returns a new :class:`paramseq` instance contaning the same
+       items as the current instance -- but each item with the
+       specified context factory attached.
 
 The :class:`param` class
 ------------------------
@@ -47,9 +62,15 @@ The :class:`param` class
 
    The class has the following methods:
 
-   .. method:: context(context_manager_factory, *its_args, **its_kwargs) -> new param instance
+   .. method:: context(context_manager_factory, *its_args, **its_kwargs)
 
-   .. method:: label(text) -> new param instance
+       Returns a new :class:`param` instance being a clone of the
+       current instance, with the specified context factory attached.
+
+   .. method:: label(text)
+
+       Returns a new :class:`param` instance being a clone of the
+       current instance, with the specified label text attached.
 
 The :class:`Substitute` class
 -----------------------------
