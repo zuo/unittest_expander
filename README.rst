@@ -36,6 +36,10 @@ command::
 (you may need to have administrator privileges and/or network access,
 especially if you are executing it *not* in a *virtualenv*).
 
+It is also possible to use the library not installing it at all: as
+its code is contained in a single file: ``unittest_expander.py``, you
+can just copy it into your project.
+
 
 Usage example
 -------------
@@ -67,14 +71,14 @@ Is it cool?  **Not at all!**  So let's improve it:
 
     @expand
     class Test(unittest.TestCase):
-        @foreach([
+        @foreach(
             ([], 0),
             ([0], 0),
             ([3], 3),
             ([1, 3, 1], 5),
             (set([1, 3]), 4),
             ({1:'a', 3:'b'}, 4),
-        ])
+        )
         def test_sum(self, iterable, expected):
             self.assertEqual(sum(iterable), expected)
 

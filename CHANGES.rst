@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.3.0 (2014-08-XX)
+0.3.0 (2014-08-17)
 ------------------
 
 Improved signatures of the **foreach()** decorator and the
