@@ -1,6 +1,20 @@
 Changes
 =======
 
+0.3.0 (2014-08-XX)
+------------------
+
+Improved signatures of the **foreach()** decorator and the
+**paramseq** constructor: they take either exactly one positional
+argument which is a test parameter collection (as previously: a
+sequence/mapping/set or a **paramseq** instance, or a callable
+returning an iterable...), or *any number of positional and/or keyword
+arguments being test parameters* (singular parameter values, tuples of
+parameter values or **param** instances...); for example,
+``@foreach([1, 2, 3])`` can also be spelled as: ``@foreach(1, 2, 3)``.
+
+Several testing/documentation-related updates, fixes and improvements.
+
 0.2.1 (2014-08-12)
 ------------------
 
@@ -25,7 +39,7 @@ Internal changes:
 0.1.2 (2014-08-01)
 ------------------
 
-The signatures of the **foreach** decorator and the **paramseq**
+The signatures of the **foreach()** decorator and the **paramseq**
 constructor have been unified.
 
 Testing/documentation-related updates and improvements.
