@@ -8,7 +8,7 @@ library).
 
 :Author: Jan Kaliszewski (zuo)
 :License: MIT License
-:Homepage: https://github.com/zuo/unittest_expander
+:Home Page: https://github.com/zuo/unittest_expander
 :Documentation: http://unittest-expander.readthedocs.org/
 
 Installing
