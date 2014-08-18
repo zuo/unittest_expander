@@ -1518,6 +1518,18 @@ OK
     >>> no_qn or getattr(Test, 'test__<>').__qualname__ == 'Test.test__<>'
     True
 
+    >>> @expand
+    ... class Test(unittest.TestCase):
+    ...     @foreach([
+    ...         param(),
+    ...     ])
+    ...     def test(self):
+    ...         pass
+    ...     test.__qualname__ = 'Test.test_foo'
+    ...
+    >>> no_qn or getattr(Test, 'test__<>').__qualname__ == '<...>.test__<>'
+    True
+
     >>> into_dict = {}
     >>> @expand(into=into_dict)
     ... @foreach([42])
