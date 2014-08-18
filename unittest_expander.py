@@ -100,7 +100,7 @@ OK
 To test our *is_even()* function we created two test case methods --
 each accepting one parameter value.
 
-Another approach could be to define one method that accepts a couple of
+Another approach could be to define a method that accepts a couple of
 arguments:
 
 >>> @expand
