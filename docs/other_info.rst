@@ -9,7 +9,7 @@ Copyright and License
 Credits
 -------
 
-Up to now, I am the only author of the library design and code -- although, of course, there were some inspirations; see the following section to learn about some of them.
+Up to now, I (Jan) am the only author of the library design and code -- although, of course, there were some inspirations; see the following section to learn about some of them.
 
 Related links
 -------------
