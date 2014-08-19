@@ -13,7 +13,7 @@ Changes
   parameter values or **param** instances...).  For example,
   ``@foreach([1, 42])`` can now also be spelled as ``@foreach(1, 42)``.
 
-* Several testing/documentation-related updates, fixes and improvements.
+* Several tests/documentation-related updates, fixes and improvements.
 
 
 0.2.1 (2014-08-12)
@@ -33,7 +33,9 @@ Changes
 
 * Now **unittest_expander** is a one-file module, not a directory-based
   package.
+
 * Some documentation improvements and updates.
+
 * Some library setup improvements and refactorings.
 
 
@@ -43,13 +45,13 @@ Changes
 * The signatures of the **foreach()** decorator and the **paramseq**
   constructor have been unified.
 
-* Testing/documentation-related updates and improvements.
+* Tests/documentation-related updates and improvements.
 
 
 0.1.1 (2014-07-29)
 ------------------
 
-* Minor testing/documentation-related improvements.
+* Minor tests/documentation-related improvements.
 
 
 0.1.0 (2014-07-29)
