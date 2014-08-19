@@ -47,11 +47,16 @@ whether the given number is even or not:
 ...     return n % 2 == 0
 
 Of course, in the real world the code we write is usually more
-interesting...  Anyway, most often we want to test how does it work for
-different parameters.  And usually it is not the best idea to test many
-cases in a loop within one test method -- because of lack of test
-isolation, less information on failures, harder debugging etc.  So let's
-write our tests in a smarter way:
+interesting...  Anyway, most often we want to test how it works for
+different parameters.  At the same time, it is not the best idea to
+test many cases in a loop within one test method -- especially,
+because of lack of test isolation (tests depend on other ones -- they
+may inherit some state which can affect their results), less
+information on failures (a test failure prevents subsequent tests from
+being run), less clear result messages (you don't see at first glance
+which case is the actual culprit)...
+
+So let's write our tests in a smarter way:
 
 >>> import unittest
 >>> from unittest_expander import expand, foreach
@@ -59,13 +64,17 @@ write our tests in a smarter way:
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     @foreach(0, 2, -14)        # call variant #1: several parameters
-...     def test_even(self, n):
+...     @foreach(0, 2, -14)        # call variant #1: parameter collection
+...     def test_even(self, n):    # specified using multiple arguments
 ...         self.assertTrue(is_even(n))
 ...
-...     @foreach([-1, 17])         # call variant #2: one parameter collection
-...     def test_odd(self, n):
+...     @foreach([-1, 17])         # call variant #2: parameter collection
+...     def test_odd(self, n):     # specified using one container
 ...         self.assertFalse(is_even(n))
+...
+...     # just to demonstrate that test cases are really isolated
+...     def setUp(self):
+...         sys.stdout.write(' [DEBUG: separate test setUp] ')
 
 As you see, it's fairly simple: you attach parameter collections to your
 test methods with the :func:`foreach` decorator and decorate the whole
@@ -75,8 +84,8 @@ parameterized versions of the methods.
 
 Let's run this stuff...
 
->>> # a helper function to run tests in our examples
->>> # -- of course, normally YOU DON'T NEED IT
+>>> # a helper function that will run tests in our examples
+>>> # -- NORMALLY YOU DON'T NEED IT, of course!
 >>> import sys
 >>> def run_tests(*test_case_classes):
 ...     suite = unittest.TestSuite(
@@ -84,16 +93,12 @@ Let's run this stuff...
 ...         for cls in test_case_classes)
 ...     unittest.TextTestRunner(stream=sys.stdout, verbosity=2).run(suite)
 ...
->>> # adding it just to demonstrate that particular tests are really isolated
->>> Test_is_even.setUp = lambda s: sys.stdout.write(' *** new test setUp *** ')
->>> 
->>> # get on with it! (oh, anyway, on to scene twenty-four...)
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_even__<-14> ... *** new test setUp *** ok
-test_even__<0> ... *** new test setUp *** ok
-test_even__<2> ... *** new test setUp *** ok
-test_odd__<-1> ... *** new test setUp *** ok
-test_odd__<17> ... *** new test setUp *** ok
+test_even__<-14> ... [DEBUG: separate test setUp] ok
+test_even__<0> ... [DEBUG: separate test setUp] ok
+test_even__<2> ... [DEBUG: separate test setUp] ok
+test_odd__<-1> ... [DEBUG: separate test setUp] ok
+test_odd__<17> ... [DEBUG: separate test setUp] ok
 ...Ran 5 tests...
 OK
 
@@ -190,9 +195,9 @@ test_is_even__<sys.maxsize> ... ok
 ...Ran 2 tests...
 OK
 
-*If* a test method accepts the `label` keyword argument, the appropriate
+If a test method accepts the `label` keyword argument, the appropriate
 label (either auto-generated from parameter values or explicitly
-specified, e.g. with :meth:`param.label`) will be passed in as that
+specified with :meth:`param.label`) will be passed in as that
 argument:
 
 >>> @expand
@@ -271,8 +276,8 @@ Smart parameter collection: :class:`paramseq`
 
 How to concatenate some separately created parameter collections?
 
-Just transform them (or at least the first one) into :class:`paramseq`
-instances -- and then add one to another:
+Just transform them (or at least the first of them) into
+:class:`paramseq` instances -- and then add one to another:
 
 >>> from unittest_expander import paramseq
 >>> 
@@ -288,14 +293,14 @@ instances -- and then add one to another:
 ...         param(2, expected=True),
 ...         param(17, expected=False),
 ...     ])
-...     basic_params = basic_params1 + basic_params2
+...     basic = basic_params1 + basic_params2
 ...
-...     huge_params = paramseq({  # explicit labelling by passing a dict
+...     huge = paramseq({  # explicit labelling by passing a dict
 ...         'sys.maxsize': param(sys.maxsize, expected=False),
 ...         '-sys.maxsize': param(-sys.maxsize, expected=False),
 ...     })
 ...
-...     other_params = paramseq(
+...     other = paramseq(
 ...         (-15, False),
 ...         param(15, expected=False),
 ...         # explicit labelling with keyword arguments:
@@ -303,17 +308,17 @@ instances -- and then add one to another:
 ...         horribleabuse=param('%s', expected=False),
 ...     )
 ...
-...     spam = {
+...     just_dict = {
 ...         '18->True': (18, True),
 ...     }
 ...
-...     ham = [
+...     just_list = [
 ...         param(12399999999999999, False),
 ...         param(n=12399999999999998, expected=True),
 ...     ]
 ...
 ...     # just add them one to another (producing a new paramseq)
-...     all_params = basic_params + huge_params + other_params + spam + ham
+...     all_params = basic + huge + other + just_dict + just_list
 ...
 ...     @foreach(all_params)
 ...     def test_is_even(self, n, expected):
@@ -350,26 +355,81 @@ the :class:`paramseq` constructor are identical: you pass in either
 exactly one positional argument which is a parameter collection (a
 sequence/mapping/set or a :class:`paramseq` instance), or any number
 of positional and/or keyword arguments being singular parameter
-values, tuples of parameter values or :class:`param` instances.
+values or tuples of parameter values, or :class:`param` instances.
 
 A :class:`paramseq` instance can also be created from a callable object
-that returns a sequence or another iterable (e.g. a generator).
+that returns a sequence or another iterable (e.g. a generator):
 
 >>> from random import randint
 >>> 
 >>> @paramseq   # <- yes, used as a decorator
 ... def randomized(test_case_cls):
-...     yield param(randint(test_case_cls.FROM, test_case_cls.TO) * 2,
+...     LO, HI = test_case_cls.LO, test_case_cls.HI
+...     print('DEBUG: LO = {0}; HI = {1}'.format(LO, HI))
+...     print('----')
+...     yield param(randint(LO, HI) * 2,
 ...                 expected=True).label('random even')
-...     yield param(randint(test_case_cls.FROM, test_case_cls.TO) * 2 + 1,
+...     yield param(randint(LO, HI) * 2 + 1,
 ...                 expected=False).label('random odd')
 ...
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
 ...
-...     FROM = -(10 ** 6)
-...     TO = 10 ** 6
+...     LO = -100
+...     HI = 100
 ...
+...     @foreach(randomized)
+...     def test_is_even(self, n, expected):
+...         actual = is_even(n)
+...         self.assertTrue(isinstance(actual, bool))
+...         self.assertEqual(actual, expected)
+...
+...     # reusing the same instance of paramseq to show that the underlying
+...     # callable is called separately for each use of @foreach:
+...     @foreach(randomized)
+...     def test_is_even_negated_when_incremented(self, n, expected):
+...         actual = (not is_even(n + 1))
+...         self.assertTrue(isinstance(actual, bool))
+...         self.assertEqual(actual, expected)
+...
+DEBUG: LO = -100; HI = 100
+----
+DEBUG: LO = -100; HI = 100
+----
+>>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
+test_is_even__<random even> ... ok
+test_is_even__<random odd> ... ok
+test_is_even_negated_when_incremented__<random even> ... ok
+test_is_even_negated_when_incremented__<random odd> ... ok
+...Ran 4 tests...
+OK
+
+The callable object (such as the generator function in the above
+example) that is passed into the :class:`paramseq` constructor can
+accept no arguments or one positional argument -- in the latter case
+the test case class is passed in.
+
+Note: the callable object is called, and its iterable result is
+iterated over --
+
+* when the :func:`expand` decorator is being executed -- *before*
+  generating parameterized test methods;
+* separately for each use of :func:`foreach` with the
+  :class:`paramseq` instance as the argument (or with another
+  :class:`paramseq` instance that includes *the* instance -- see the
+  following code snippet in which the ``input_values_and_results``
+  instance includes the previously created ``randomized``
+  instance...).
+
+>>> @expand
+... class Test_is_even(unittest.TestCase):
+...
+...     LO = -999999
+...     HI = 999999
+...
+...     # reusing the same, previously created, instance of paramseq
+...     # (`randomized`) to show that the underlying callable will
+...     # still be called separately for each use of @foreach...
 ...     input_values_and_results = randomized + [
 ...         param(-14, expected=True),
 ...         param(-1, expected=False),
@@ -384,6 +444,16 @@ that returns a sequence or another iterable (e.g. a generator).
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
 ...
+...     @foreach(input_values_and_results)
+...     def test_is_even_negated_when_incremented(self, n, expected):
+...         actual = (not is_even(n + 1))
+...         self.assertTrue(isinstance(actual, bool))
+...         self.assertEqual(actual, expected)
+...
+DEBUG: LO = -999999; HI = 999999
+----
+DEBUG: LO = -999999; HI = 999999
+----
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
 test_is_even__<-1,expected=False> ... ok
 test_is_even__<-14,expected=True> ... ok
@@ -392,16 +462,15 @@ test_is_even__<17,expected=False> ... ok
 test_is_even__<2,expected=True> ... ok
 test_is_even__<random even> ... ok
 test_is_even__<random odd> ... ok
-...Ran 7 tests...
+test_is_even_negated_when_incremented__<-1,expected=False> ... ok
+test_is_even_negated_when_incremented__<-14,expected=True> ... ok
+test_is_even_negated_when_incremented__<0,expected=True> ... ok
+test_is_even_negated_when_incremented__<17,expected=False> ... ok
+test_is_even_negated_when_incremented__<2,expected=True> ... ok
+test_is_even_negated_when_incremented__<random even> ... ok
+test_is_even_negated_when_incremented__<random odd> ... ok
+...Ran 14 tests...
 OK
-
-Note: the callable object that was passed into the :class:`paramseq`
-constructor (in this case a generator function) is called (and its
-iterable result is iterated over) when the :func:`expand` decorator
-is being executed, *before* generating parameterized test methods.
-
-The callable object can accept no arguments or one positional argument
--- in the latter case the test case class is passed in.
 
 
 .. _foreach-cartesian:
@@ -434,7 +503,7 @@ product of them:
 ...     # another param collection (2 items)
 ...     input_types = dict(
 ...         integer=int,
-...         float=float,
+...         floating=float,
 ...     )
 ...
 ...     # let's combine them (7 * 2 -> 14 parameterized tests)
@@ -447,13 +516,13 @@ product of them:
 ...         self.assertEqual(actual, expected)
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<float, -1,expected=False> ... ok
-test_is_even__<float, -14,expected=True> ... ok
-test_is_even__<float, 0,expected=True> ... ok
-test_is_even__<float, 17,expected=False> ... ok
-test_is_even__<float, 2,expected=True> ... ok
-test_is_even__<float, random even> ... ok
-test_is_even__<float, random odd> ... ok
+test_is_even__<floating, -1,expected=False> ... ok
+test_is_even__<floating, -14,expected=True> ... ok
+test_is_even__<floating, 0,expected=True> ... ok
+test_is_even__<floating, 17,expected=False> ... ok
+test_is_even__<floating, 2,expected=True> ... ok
+test_is_even__<floating, random even> ... ok
+test_is_even__<floating, random odd> ... ok
 test_is_even__<integer, -1,expected=False> ... ok
 test_is_even__<integer, -14,expected=True> ... ok
 test_is_even__<integer, 0,expected=True> ... ok
@@ -498,10 +567,32 @@ factory* with the given arguments).
 ...         load_actually = file.read()
 ...         self.assertEqual(load_actually, load)
 ...
+...     # reusing the same params to show that a *new* context manager
+...     # instance is created for each test call:
+...     @foreach(data_with_contexts)
+...     def test_save_load_with_spaces(self, save, load, context_targets):
+...         file = context_targets[0]
+...         file.write(' ' + save + ' ')
+...         file.seek(0)
+...         load_actually = file.read()
+...         self.assertEqual(load_actually, ' ' + load + ' ')
+...
 >>> run_tests(TestSaveLoad)  # doctest: +ELLIPSIS
 test_save_load__<load='',save=''> ... ok
 test_save_load__<load='abc',save='abc'> ... ok
-...Ran 2 tests...
+test_save_load_with_spaces__<load='',save=''> ... ok
+test_save_load_with_spaces__<load='abc',save='abc'> ... ok
+...Ran 4 tests...
+OK
+
+>>> # repeating the tests to show that, really, a *new* context manager
+... # instance is created for *each* test call:
+... run_tests(TestSaveLoad)  # doctest: +ELLIPSIS
+test_save_load__<load='',save=''> ... ok
+test_save_load__<load='abc',save='abc'> ... ok
+test_save_load_with_spaces__<load='',save=''> ... ok
+test_save_load_with_spaces__<load='abc',save='abc'> ... ok
+...Ran 4 tests...
 OK
 
 Note: *if* a test method accepts the `context_targets` keyword argument,
@@ -513,12 +604,12 @@ collection's item, e.g.:
 
 >>> import contextlib
 >>> @contextlib.contextmanager
-... def memo_cm(tag):
-...     memo.append('enter:' + tag)
+... def debug_cm(tag=None):
+...     debug.append('enter' + (':{0}'.format(tag) if tag else ''))
 ...     yield tag
-...     memo.append('exit:' + tag)
+...     debug.append('exit' + (':{0}'.format(tag) if tag else ''))
 ...
->>> memo = []
+>>> debug = []
 >>> 
 >>> @expand
 ... class TestSaveLoad(unittest.TestCase):
@@ -527,12 +618,12 @@ collection's item, e.g.:
 ...         (
 ...             param(save='', load='', expected_tag='FOO')
 ...               .context(NamedTemporaryFile, 'w+t')  # (outer one)
-...               .context(memo_cm, tag='FOO')         # (inner one)
+...               .context(debug_cm, tag='FOO')        # (inner one)
 ...         ),
 ...         (
 ...             param(save='abc', load='abc', expected_tag='BAR')
 ...               .context(NamedTemporaryFile, 'w+t')
-...               .context(memo_cm, tag='BAR')
+...               .context(debug_cm, tag='BAR')
 ...         ),
 ...     ]
 ...
@@ -544,76 +635,76 @@ collection's item, e.g.:
 ...         file.seek(0)
 ...         load_actually = file.read()
 ...         self.assertEqual(load_actually, load)
-...         memo.append('test')
+...         debug.append('test')
 ...
->>> memo == []
+>>> debug == []
 True
 >>> run_tests(TestSaveLoad)  # doctest: +ELLIPSIS
 test_save_load__<expected_tag='BAR',load='abc',save='abc'> ... ok
 test_save_load__<expected_tag='FOO',load='',save=''> ... ok
 ...Ran 2 tests...
 OK
->>> memo == [
+>>> debug == [
 ...     'enter:BAR', 'test', 'exit:BAR',
 ...     'enter:FOO', 'test', 'exit:FOO',
 ... ]
 True
 
-Contexts are properly dispatched (context managers' :meth:`__enter__`
-and :meth:`__exit__` are properly called...) -- also when errors occur:
+Contexts are properly handled (context managers' :meth:`__enter__` and
+:meth:`__exit__` are properly called...) -- also when errors occur:
 
 >>> @contextlib.contextmanager
-... def err_memo_cm(tag):
+... def err_debug_cm(tag):
 ...     if tag.endswith('context-enter-error'):
-...         memo.append('ERR-enter:' + tag)
+...         debug.append('ERR-enter:' + tag)
 ...         raise RuntimeError('error in __enter__')
-...     memo.append('enter:' + tag)
+...     debug.append('enter:' + tag)
 ...     try:
 ...         yield tag
 ...         if tag.endswith('context-exit-error'):
 ...             raise RuntimeError('error in __exit__')
 ...     except:
-...         memo.append('ERR-exit:' + tag)
+...         debug.append('ERR-exit:' + tag)
 ...         raise
 ...     else:
-...         memo.append('exit:' + tag)
+...         debug.append('exit:' + tag)
 ...
->>> memo = []
+>>> debug = []
 >>> err_params = [
 ...     (
 ...         param().label('no_error')
-...                .context(err_memo_cm, tag='outer')
-...                .context(err_memo_cm, tag='inner')
+...                .context(err_debug_cm, tag='outer')
+...                .context(err_debug_cm, tag='inner')
 ...     ),
 ...     (
 ...         param().label('test_fail')
-...                .context(err_memo_cm, tag='outer')
-...                .context(err_memo_cm, tag='inner')
+...                .context(err_debug_cm, tag='outer')
+...                .context(err_debug_cm, tag='inner')
 ...     ),
 ...     (
 ...         param().label('test_error')
-...                .context(err_memo_cm, tag='outer')
-...                .context(err_memo_cm, tag='inner')
+...                .context(err_debug_cm, tag='outer')
+...                .context(err_debug_cm, tag='inner')
 ...     ),
 ...     (
 ...         param().label('inner_context_enter_error')
-...                .context(err_memo_cm, tag='outer')
-...                .context(err_memo_cm, tag='inner-context-enter-error')
+...                .context(err_debug_cm, tag='outer')
+...                .context(err_debug_cm, tag='inner-context-enter-error')
 ...     ),
 ...     (
 ...         param().label('inner_context_exit_error')
-...                .context(err_memo_cm, tag='outer')
-...                .context(err_memo_cm, tag='inner-context-exit-error')
+...                .context(err_debug_cm, tag='outer')
+...                .context(err_debug_cm, tag='inner-context-exit-error')
 ...     ),
 ...     (
 ...         param().label('outer_context_enter_error')
-...                .context(err_memo_cm, tag='outer-context-enter-error')
-...                .context(err_memo_cm, tag='inner')
+...                .context(err_debug_cm, tag='outer-context-enter-error')
+...                .context(err_debug_cm, tag='inner')
 ...     ),
 ...     (
 ...         param().label('outer_context_exit_error')
-...                .context(err_memo_cm, tag='outer-context-exit-error')
-...                .context(err_memo_cm, tag='inner')
+...                .context(err_debug_cm, tag='outer-context-exit-error')
+...                .context(err_debug_cm, tag='inner')
 ...     ),
 ... ]
 >>> 
@@ -621,21 +712,21 @@ and :meth:`__exit__` are properly called...) -- also when errors occur:
 ... class SillyTest(unittest.TestCase):
 ...
 ...     def setUp(self):
-...         memo.append('setUp')
+...         debug.append('setUp')
 ...
 ...     def tearDown(self):
-...         memo.append('tearDown')
+...         debug.append('tearDown')
 ...
 ...     @foreach(err_params)
 ...     def test(self, label):
 ...         if label == 'test_fail':
-...             memo.append('FAIL-test')
+...             debug.append('FAIL-test')
 ...             self.fail()
 ...         elif label == 'test_error':
-...             memo.append('ERROR-test')
+...             debug.append('ERROR-test')
 ...             raise RuntimeError
 ...         else:
-...             memo.append('test')
+...             debug.append('test')
 ...
 >>> run_tests(SillyTest)  # doctest: +ELLIPSIS
 test__<inner_context_enter_error> ... ERROR
@@ -647,7 +738,7 @@ test__<test_error> ... ERROR
 test__<test_fail> ... FAIL
 ...Ran 7 tests...
 FAILED (failures=1, errors=5)
->>> memo == [
+>>> debug == [
 ...     # inner_context_enter_error
 ...     'setUp',
 ...     'enter:outer',
@@ -709,21 +800,22 @@ True
 
 Note: contexts attached to test *method* params (in contrast to those
 attached to test *class* params -- see below:
-:ref:`foreach-as-class-decorator`) are dispatched *directly* before
-(:meth:`__enter__`) and after (:meth:`__exit__`) a given parameterized
-test method call, that is, *after* :meth:`setUp` and *before*
-:meth:`tearDown` calls -- so :meth:`setUp` and :meth:`tearDown` are
-unaffected by any errors related to those contexts.
+:ref:`foreach-as-class-decorator`) are handled *directly* before (by
+running :meth:`__enter__`) and after (by running :meth:`__exit__`) a
+given parameterized test method call, that is, *after* :meth:`setUp`
+and *before* :meth:`tearDown` calls -- so :meth:`setUp` and
+:meth:`tearDown` are unaffected by any errors related to those
+contexts.
 
-On the other hand, an error in :meth:`setUp` prevents a test from being
-called -- then contexts are not dispatched at all:
+On the other hand, an error in :meth:`setUp` prevents a test from
+being called -- then contexts are not touched at all:
 
 >>> def setUp(self):
-...     memo.append('setUp')
+...     debug.append('setUp')
 ...     raise ValueError
 ...
 >>> SillyTest.setUp = setUp
->>> memo = []
+>>> debug = []
 >>> run_tests(SillyTest)  # doctest: +ELLIPSIS
 test__<inner_context_enter_error> ... ERROR
 test__<inner_context_exit_error> ... ERROR
@@ -734,7 +826,7 @@ test__<test_error> ... ERROR
 test__<test_fail> ... ERROR
 ...Ran 7 tests...
 FAILED (errors=7)
->>> memo == ['setUp', 'setUp', 'setUp', 'setUp', 'setUp', 'setUp', 'setUp']
+>>> debug == ['setUp', 'setUp', 'setUp', 'setUp', 'setUp', 'setUp', 'setUp']
 True
 
 
@@ -747,17 +839,22 @@ You can use the method :meth:`paramseq.context` to apply the given
 context properties to *all* parameter items the :class:`paramseq`
 instance aggregates:
 
+>>> @contextlib.contextmanager
+... def silly_cm():
+...     yield 42
+...
 >>> @expand
 ... class TestSaveLoad(unittest.TestCase):
 ...
 ...     params_with_contexts = paramseq(
 ...         param(save='', load=''),
 ...         param(save='abc', load='abc'),
-...     ).context(NamedTemporaryFile, 'w+t')
+...     ).context(NamedTemporaryFile, 'w+t').context(silly_cm)
 ...
 ...     @foreach(params_with_contexts)
 ...     def test_save_load(self, save, load, context_targets):
-...         file = context_targets[0]
+...         file, silly_cm_target = context_targets
+...         assert silly_cm_target == 42
 ...         file.write(save)
 ...         file.seek(0)
 ...         load_actually = file.read()
@@ -801,6 +898,12 @@ should be considered immutable.
 
 Fixtures -- part II: :func:`foreach` as a class decorator
 =========================================================
+
+.. warning::
+
+    The parts of *unittest_expander* related to applying :func:`foreach`
+    **to classes** are broken by design and will be revamped (in a
+    backwards incompatible way) in future versions of the library.
 
 :func:`foreach` can be used not only as a test case *method* decorator
 but also as a test case *class* decorator -- to generate parameterized
@@ -1008,22 +1111,22 @@ test_save_load (...TestSaveLoadIt__<load='abc',save='abc'>) ... ok
 ...Ran 2 tests...
 OK
 
-Contexts are, obviously, properly dispatched -- also when errors occur:
+Contexts are, obviously, properly handled -- also when errors occur:
 
->>> memo = []              # see earlier definition of err_memo_cm()...
+>>> debug = []             # see earlier definition of err_debug_cm()...
 >>> err_params.extend([    # see earlier initialization of err_params...
 ...     (
 ...         param().label('setUp_error')
-...                .context(err_memo_cm, tag='outer')
-...                .context(err_memo_cm, tag='inner')
+...                .context(err_debug_cm, tag='outer')
+...                .context(err_debug_cm, tag='inner')
 ...     ),
 ...     (
 ...         param().label('tearDown_error')
-...                .context(err_memo_cm, tag='outer')
-...                .context(err_memo_cm, tag='inner')
+...                .context(err_debug_cm, tag='outer')
+...                .context(err_debug_cm, tag='inner')
 ...     ),
 ... ])
->>> into_dict = {}  # this time we'll pass another mapping than globals()...
+>>> into_dict = {}  # this time we'll pass another mapping (not globals())
 >>> 
 >>> @expand(into=into_dict)
 ... @foreach(err_params)
@@ -1031,27 +1134,27 @@ Contexts are, obviously, properly dispatched -- also when errors occur:
 ...
 ...     def setUp(self):
 ...         if self.label == 'setUp_error':
-...             memo.append('ERR-setUp')
+...             debug.append('ERR-setUp')
 ...             raise RuntimeError
-...         memo.append('setUp')
+...         debug.append('setUp')
 ...
 ...     def tearDown(self):
 ...         if self.label == 'tearDown_error':
-...             memo.append('ERR-tearDown')
+...             debug.append('ERR-tearDown')
 ...             raise RuntimeError
-...         memo.append('tearDown')
+...         debug.append('tearDown')
 ...
 ...     def test(self):
 ...         if self.label == 'test_fail':
-...             memo.append('FAIL-test')
+...             debug.append('FAIL-test')
 ...             self.fail()
 ...         elif self.label == 'test_error':
-...             memo.append('ERROR-test')
+...             debug.append('ERROR-test')
 ...             raise RuntimeError
 ...         else:
-...             memo.append('test')
+...             debug.append('test')
 ...
->>> for name in sorted(into_dict):  # doctest: +ELLIPSIS
+>>> for name in sorted(into_dict):
 ...     name
 ...
 'SillyTest__<inner_context_enter_error>'
@@ -1077,7 +1180,7 @@ test (...SillyTest__<test_error>) ... ERROR
 test (...SillyTest__<test_fail>) ... FAIL
 ...Ran 9 tests...
 FAILED (failures=1, errors=7)
->>> memo == [
+>>> debug == [
 ...     # inner_context_enter_error
 ...     'enter:outer',
 ...     'ERR-enter:inner-context-enter-error',
@@ -1151,13 +1254,90 @@ True
 
 Note: contexts attached to test *class* params (in contrast to those
 attached to test *method* params -- see: :ref:`context-basics`) are
-automatically dispatched within :meth:`setUp` and (if applicable)
-:meth:`tearDown` -- so :meth:`setUp` and :meth:`tearDown` *are* affected
-by errors related to those contexts.  On the other hand, context
-finalization is *not* affected by any exceptions from actual test
-methods (i.e.  context managers' :meth:`__exit__` methods are always
-called with ``None, None, None`` arguments unless :meth:`tearDown` or an
-enclosed context manager's :meth:`__exit__` raises an exception).
+automatically handled within :meth:`setUp` and (if applicable)
+:meth:`tearDown` -- so :meth:`setUp` and :meth:`tearDown` *are*
+affected by errors related to those contexts.  On the other hand,
+context finalization is *not* affected by any exceptions from actual
+test methods (i.e. context managers' :meth:`__exit__` methods are
+called with ``None, None, None`` arguments anyway -- unless
+:meth:`setUp`/:meth:`tearDown` or an enclosed context manager's
+:meth:`__enter__`/:meth:`__exit__` raises an exception).
+
+
+Additional note about extending :meth:`setUp` and :meth:`tearDown`
+------------------------------------------------------------------
+
+As you can see in the above examples, you can, without any problem,
+implement your own :meth:`setUp` and/or :meth:`tearDown` methods in
+test classes decorated with :func:`foreach` and :func:`expand`; the
+*unittest_expander* machinery, which provides its own version of these
+methods, will incorporate your implementations automatically -- by
+obtaining them with func:`super` and calling (*within* the scope of
+any contexts that have been attached to your parameters with
+:meth:`param.context` or :meth:`paramseq`.context).
+
+However, if you need to create a subclass of one of the test classes
+generated by :func:`expand` applied to a class decorated with
+:func:`foreach` -- you need to obey the following rules:
+
+* you shall not apply :func:`foreach` to that subclass or any class
+  that inherits from it (though you can still apply :func:`foreach` to
+  methods of the subclass);
+
+* when extending :meth:`setUp` and/or :meth:`tearDown` methods:
+
+  * in :meth:`setUp`, calling :meth:`setUp` of superclass should be the
+    first action;
+  * in :meth:`tearDown`, calling :meth:`tearDown` of superclass should
+    be the last action -- and you shall ensure (by using a ``finally``
+    clause) that this action is *always* executed.
+
+For example:
+
+>>> # the SillyTest__<no_error> class from the previous code snippet
+>>> base = into_dict['SillyTest__<no_error>']
+>>> 
+>>> class SillyTestSubclass(base):
+...
+...     def setUp(self):
+...         debug.append('*** before everything ***')
+...         # <- at this point no contexts are active (and there are
+...         # no self.params, self.label, self.context_targets etc.)
+...         super(SillyTestSubclass, self).setUp()
+...         # *HERE* is the place for your extension's implementation
+...         debug.append('*** SillyTestSubclass.setUp ***')
+...         assert hasattr(self, 'params')
+...         assert hasattr(self, 'label')
+...         assert hasattr(self, 'context_targets')
+...
+...     def tearDown(self):
+...         try:
+...             # *HERE* is the place for your extension's implementation
+...             debug.append('*** SillyTestSubclass.tearDown ***')
+...         finally:
+...             super(SillyTestSubclass, self).tearDown()
+...             # <- at this point no contexts are active
+...         debug.append('*** after everything ***')
+...
+>>> debug = []
+>>> run_tests(SillyTestSubclass)  # doctest: +ELLIPSIS
+test (...SillyTestSubclass) ... ok
+...Ran 1 test...
+OK
+>>> debug == [
+...     '*** before everything ***',
+...     'enter:outer',
+...     'enter:inner',
+...     'setUp',
+...     '*** SillyTestSubclass.setUp ***',
+...     'test',
+...     '*** SillyTestSubclass.tearDown ***',
+...     'tearDown',
+...     'exit:inner',
+...     'exit:outer',
+...     '*** after everything ***',
+... ]
+True
 
 
 .. _about-substitute:
@@ -1165,8 +1345,8 @@ enclosed context manager's :meth:`__exit__` raises an exception).
 :class:`Substitute` objects
 ===========================
 
-One could ask: "What the :func:`expand` decorator does with the original
-objects (classes or methods) decorated with :func:`foreach`?"
+One could ask: "What does the :func:`expand` decorator do with the
+original objects (classes or methods) decorated with :func:`foreach`?"
 
 >>> @expand
 ... @foreach(useless_data)
@@ -1229,8 +1409,8 @@ you can customize that globally by:
 
   * ``{base_name}`` -- the name of the original test method or class,
   * ``{base_obj}`` -- the original test method or class,
-  * ``{label}`` -- generated representation of parameter values or an
-    explicitly specified label,
+  * ``{label}`` -- the test label (automatically generated or
+    explicitly specified with :meth:`param.label`),
   * ``{count}`` -- consecutive number of a generated parameterized
     method or class;
 
@@ -1411,13 +1591,230 @@ test_even__<4>__3 (...Test_is_even__<'foo',b=433>) ... ok
 ...Ran 12 tests...
 OK
 
+
+Questions and answers about various details...
+==============================================
+
+"Can I ommit :func:`expand` and then apply it to subclasses?"
+-------------------------------------------------------------
+
+Yes, you can.  Please consider the following example:
+
+>>> debug = []
+>>> into_dict = {}
+>>> 
+>>> # see earlier definition of debug_cm()...
+>>> class_params = paramseq(1, 2, 3).context(debug_cm, tag='C')
+>>> method_params = paramseq(7, 8, 9).context(debug_cm, tag='M')
+>>> 
+>>> @foreach(class_params)
+... class MyTestMixIn(object):
+...
+...     @foreach(method_params)
+...     def test(self, y):
+...         [x] = self.params
+...         debug.append((x, y, self.z))
+...
+>>> @expand(into=into_dict)
+... class TestActual(MyTestMixIn, unittest.TestCase):
+...     z = 42
+...
+>>> for name in sorted(into_dict):
+...     name
+...
+'TestActual__<1>'
+'TestActual__<2>'
+'TestActual__<3>'
+>>> 
+>>> test_classes = [into_dict[name] for name in sorted(into_dict)]
+>>> run_tests(*test_classes)  # doctest: +ELLIPSIS
+test__<7> (...TestActual__<1>) ... ok
+test__<8> (...TestActual__<1>) ... ok
+test__<9> (...TestActual__<1>) ... ok
+test__<7> (...TestActual__<2>) ... ok
+test__<8> (...TestActual__<2>) ... ok
+test__<9> (...TestActual__<2>) ... ok
+test__<7> (...TestActual__<3>) ... ok
+test__<8> (...TestActual__<3>) ... ok
+test__<9> (...TestActual__<3>) ... ok
+...Ran 9 tests...
+OK
+>>> type(MyTestMixIn) is type  # MyTestMixIn not touched by @expand
+True
+>>> type(TestActual) is Substitute
+True
+>>> debug == [
+...     'enter:C', 'enter:M', (1, 7, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (1, 8, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (1, 9, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (2, 7, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (2, 8, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (2, 9, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (3, 7, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (3, 8, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (3, 9, 42), 'exit:M', 'exit:C',
+... ]
+True
+
+Note, however, that you probably should name such mix-in or "test
+template" base classes in a way that will prevent the test loader you
+use from including them; for the same reason, most often, it is
+probably better not to make them subclasses of
+:class:`unittest.TestCase`.
+
+
+"Do my test classes need to inherit from :class:`unittest.TestCase`?"
+---------------------------------------------------------------------
+
+No, it doesn't matter from the point of view of the
+*unittest_expander* machinery.
+
+>>> debug = []
+>>> into_dict = {}
+>>> parameters = paramseq(
+...     1, 2, 3,
+... ).context(debug_cm)  # see earlier definition of debug_cm()...
+>>> 
+>>> @expand
+... class Test(object):  # not a unittest.TestCase subclass
+...
+...     @foreach(parameters)
+...     def test(self, n):
+...         debug.append(n)
+...
+>>> # confirming that unittest_expander machinery acted properly:
+>>> instance = Test()
+>>> type(instance.test) is Substitute
+True
+>>> t1 = getattr(instance, 'test__<1>')
+>>> t2 = getattr(instance, 'test__<2>')
+>>> t3 = getattr(instance, 'test__<3>')
+>>> t1()
+>>> t2()
+>>> t3()
+>>> debug == [
+...     'enter', 1, 'exit',
+...     'enter', 2, 'exit',
+...     'enter', 3, 'exit',
+... ]
+True
+
+However, note that if you decorate your test class (and not only its
+methods) with :func:`foreach` the test running tools you use are
+expected to call :meth:`setUp` and :meth:`tearDown` methods
+appropriately -- as *unittest*'s test running machinery does (though
+your test class does not need to implement these methods by itself).
+
+>>> debug = []
+>>> into_dict = {}
+>>> 
+>>> @expand(into=into_dict)
+... @foreach(parameters)
+... class Test(object):  # not a unittest.TestCase subclass
+...
+...     def test(self):
+...         assert len(self.params) == 1
+...         n = self.params[0]
+...         debug.append(n)
+...
+>>> # confirming that unittest_expander machinery acted properly:
+>>> type(Test) is Substitute
+True
+>>> orig_cls = Test.actual_object
+>>> type(orig_cls) is type
+True
+>>> orig_cls.__bases__ == (object,)
+True
+>>> orig_cls.__name__ == 'Test'
+True
+>>> not hasattr(orig_cls, 'setUp') and not hasattr(orig_cls, 'tearDown')
+True
+>>> cls1 = into_dict['Test__<1>']
+>>> cls2 = into_dict['Test__<2>']
+>>> cls3 = into_dict['Test__<3>']
+>>> issubclass(cls1, orig_cls)
+True
+>>> issubclass(cls2, orig_cls)
+True
+>>> issubclass(cls3, orig_cls)
+True
+>>> hasattr(cls1, 'setUp') and hasattr(cls1, 'tearDown')
+True
+>>> hasattr(cls2, 'setUp') and hasattr(cls2, 'tearDown')
+True
+>>> hasattr(cls3, 'setUp') and hasattr(cls3, 'tearDown')
+True
+>>> instance1 = cls1()
+>>> instance2 = cls2()
+>>> instance3 = cls3()
+>>> for inst in [instance1, instance2, instance3]:
+...     # doing what any reasonable test runner should do
+...     inst.setUp()
+...     try: inst.test()
+...     finally: inst.tearDown()
+...
+>>> debug == [
+...     'enter', 1, 'exit',
+...     'enter', 2, 'exit',
+...     'enter', 3, 'exit',
+... ]
+True
+
+
+"What happens if I apply :func:`expand` when there's no :func:`foreach`?"
+-------------------------------------------------------------------------
+
+Just nothing -- the test works as if :func:`expand` was not applied at
+all:
+
+>>> @expand
+... class TestIt(unittest.TestCase):
+...
+...     def test(self):
+...         sys.stdout.write(' [DEBUG: OK] ')
+...
+>>> run_tests(TestIt)  # doctest: +ELLIPSIS
+test ... [DEBUG: OK] ok
+...Ran 1 test...
+OK
+
+>>> into_dict = {}
+>>> @expand(into=into_dict)
+... class TestIt2(unittest.TestCase):
+...
+...     def test(self):
+...         sys.stdout.write(' [DEBUG: OK] ')
+...
+>>> run_tests(TestIt2)  # doctest: +ELLIPSIS
+test ... [DEBUG: OK] ok
+...Ran 1 test...
+OK
+>>> into_dict
+{}
+
+
+"To what objects can :func:`foreach` be applied?"
+-------------------------------------------------
+
+The :func:`foreach` decorator is designed to be applied *only* to:
+
+* functions being members of test (or test mix-in) classes (that is,
+  functions that define regular test case instance methods);
+* test (or test mix-in) classes themselves.
+
+You should *not* apply it to anything else (especially, not to static
+or class methods).  If you do, the effect is undefined: an error may
+occur (immediately or, for example, when applying :func:`expand`) or
+the whole thing may be just ignored.
+
+
 .. doctest::
     :hide:
 
-    Some less typical usage cases
-    =============================
+    Other checks
+    ============
 
-    For completeness, let's also check some less typical usage cases and
+    For completeness, let's also check some other usage cases and
     error conditions...
 
     >>> isinstance(paramseq(), paramseq)
@@ -1488,7 +1885,7 @@ OK
     Traceback (most recent call last):
     TypeError: ...is not a class...
 
-    >>> memo = []
+    >>> debug = []
     >>> @expand
     ... class Test(unittest.TestCase):
     ...     @foreach([
@@ -1496,13 +1893,13 @@ OK
     ...     ])
     ...     def test(self, **kwargs):
     ...         # **kwargs means accepting `label` and `context_targets`
-    ...         memo.append(sorted(kwargs.keys()))
+    ...         debug.append(sorted(kwargs.keys()))
     ...
     >>> run_tests(Test)              # doctest: +ELLIPSIS
     test__<> ... ok
     ...Ran 1 test...
     OK
-    >>> memo == [
+    >>> debug == [
     ...     ['context_targets', 'label'],
     ... ]
     True
@@ -1542,31 +1939,6 @@ OK
     ...
     Traceback (most recent call last):
     TypeError: ...not a legal parameter source class...
-
-    >>> memo = []
-    >>> @expand
-    ... class Test(object):  # not a unittest.TestCase subclass
-    ...     @foreach([1, 2, 3, 4])
-    ...     def test(self, n):
-    ...         memo.append(n)
-    ...
-    >>> t = Test()
-    >>> type(t.test) is Substitute
-    True
-    >>> memo == []
-    True
-    >>> getattr(t, 'test__<1>')()
-    >>> memo == [1]
-    True
-    >>> getattr(t, 'test__<2>')()
-    >>> memo == [1, 2]
-    True
-    >>> getattr(t, 'test__<3>')()
-    >>> memo == [1, 2, 3]
-    True
-    >>> getattr(t, 'test__<4>')()
-    >>> memo == [1, 2, 3, 4]
-    True
 """
 
 

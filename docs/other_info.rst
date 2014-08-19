@@ -11,7 +11,7 @@ Credits
 
 Up to now, I (Jan) am the only author of the library design and code -- although, of course, there were some inspirations; see the following section to learn about some of them.
 
-Related links
+Related Links
 -------------
 
 Before creating this library I checked out several other projects and resources related to unit test parameterization in Python.  Some of them are mature and actively maintained projects, others are just minor drafts; some depend (contrary to this library) on external libraries or testing frameworks, others not; some are nice and user-friendly, others not so much (though that's a matter of taste, of course)...  Anyway, here are the links:
@@ -25,11 +25,17 @@ Before creating this library I checked out several other projects and resources 
 * https://launchpad.net/testscenarios
 * http://eli.thegreenplace.net/2011/08/02/python-unit-testing-parametrized-test-cases/
 * https://gist.github.com/mfazekas/1710455
-* plus some brillant features of *py.test* -- see:
+* plus some brillant features of *py.test*:
 
   * http://pytest.org/latest/parametrize.html
   * http://pytest.org/latest/fixture.html
   * http://pytest.org/latest/funcargs.html
+
+* ...as well as some interesting *nose2* plugins:
+
+  * https://nose2.readthedocs.org/en/latest/plugins/generators.html
+  * https://nose2.readthedocs.org/en/latest/params.html#nose2.tools.params
+
 
 See also:
 

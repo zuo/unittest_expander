@@ -3,10 +3,10 @@ Module Contents
 
 .. module:: unittest_expander
 
-The module :mod:`unittest_expander` contains the following functions
-and classes.
+The module :mod:`unittest_expander` contains the following functions and
+classes.
 
-(See: :doc:`narrative_documentation` for descriptions and examples of
+(See: :doc:`narrative_documentation` -- for descriptions and examples of
 their usage...)
 
 
@@ -15,9 +15,11 @@ The :func:`expand` class decorator
 
 .. decorator:: expand(*, into=globals())
 
-.. attribute:: expand.global_name_pattern
+   The public interface includes also the following attributes:
 
-.. attribute:: expand.global_name_formatter
+   .. attribute:: expand.global_name_pattern
+
+   .. attribute:: expand.global_name_formatter
 
 The :func:`foreach` method/class decorator
 ------------------------------------------
@@ -37,30 +39,34 @@ The :class:`paramseq` class
 
 .. class:: paramseq(*param_collection_items, **param_collection_labeled_items)
 
-   The class has the following methods:
+   The public interface of instances of the class includes the following
+   methods:
 
    .. method:: __add__(other)
 
-       Returns a new :class:`paramseq` instance (concatenates the
-       current instance with *other*).
+       Returns a new :class:`paramseq` instance (being a result of
+       concatenation of the current :class:`paramseq` instance and the
+       *other* parameter collection).
 
    .. method:: __radd__(other)
 
-       Returns a new :class:`paramseq` instance (concatenates *other*
-       with the current instance).
+       Returns a new :class:`paramseq` instance (being a result of
+       concatenation of the *other* parameter collection and the current
+       :class:`paramseq` instance).
 
    .. method:: context(context_manager_factory, *its_args, **its_kwargs)
 
-       Returns a new :class:`paramseq` instance contaning the same
-       items as the current instance -- but each item with the
-       specified context factory attached.
+       Returns a new :class:`paramseq` instance contaning the same items
+       as the current instance -- but each item with the specified
+       context factory attached.
 
 The :class:`param` class
 ------------------------
 
 .. class:: param(*args, **kwargs)
 
-   The class has the following methods:
+   The public interface of instances of the class includes the following
+   methods:
 
    .. method:: context(context_manager_factory, *its_args, **its_kwargs)
 
@@ -76,5 +82,9 @@ The :class:`Substitute` class
 -----------------------------
 
 .. class:: Substitute(actual_object)
+
+   The public interface of instances of the class includes the following
+   attribute (besides all attributes of the proxied object -- see:
+   :ref:`about-substitute`):
 
    .. attribute:: actual_object
