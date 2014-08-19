@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.3.1 (2014-08-19)
+------------------
+
+* Several tests/documentation-related fixes and improvements.
+
+
 0.3.0 (2014-08-17)
 ------------------
 
