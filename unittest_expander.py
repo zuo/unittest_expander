@@ -564,14 +564,14 @@ and :meth:`__exit__` are properly called...) -- also when errors occur:
 
 >>> @contextlib.contextmanager
 ... def err_memo_cm(tag):
+...     if tag.endswith('context-enter-error'):
+...         memo.append('ERR-enter:' + tag)
+...         raise RuntimeError('error in __enter__')
 ...     memo.append('enter:' + tag)
 ...     try:
-...         if tag.endswith('context-enter-error'):
-...             raise RuntimeError('error in __enter__')
-...         else:
-...             yield tag
-...             if tag.endswith('context-exit-error'):
-...                 raise RuntimeError('error in __exit__')
+...         yield tag
+...         if tag.endswith('context-exit-error'):
+...             raise RuntimeError('error in __exit__')
 ...     except:
 ...         memo.append('ERR-exit:' + tag)
 ...         raise
@@ -651,8 +651,7 @@ FAILED (failures=1, errors=5)
 ...     # inner_context_enter_error
 ...     'setUp',
 ...     'enter:outer',
-...     'enter:inner-context-enter-error',
-...     'ERR-exit:inner-context-enter-error',
+...     'ERR-enter:inner-context-enter-error',
 ...     'ERR-exit:outer',
 ...     'tearDown',
 ...
@@ -676,8 +675,7 @@ FAILED (failures=1, errors=5)
 ...
 ...     # outer_context_enter_error
 ...     'setUp',
-...     'enter:outer-context-enter-error',
-...     'ERR-exit:outer-context-enter-error',
+...     'ERR-enter:outer-context-enter-error',
 ...     'tearDown',
 ...
 ...     # outer_context_exit_error
@@ -1082,8 +1080,7 @@ FAILED (failures=1, errors=7)
 >>> memo == [
 ...     # inner_context_enter_error
 ...     'enter:outer',
-...     'enter:inner-context-enter-error',
-...     'ERR-exit:inner-context-enter-error',
+...     'ERR-enter:inner-context-enter-error',
 ...     'ERR-exit:outer',
 ...
 ...     # inner_context_exit_error
@@ -1105,8 +1102,7 @@ FAILED (failures=1, errors=7)
 ...     'exit:outer',
 ...
 ...     # outer_context_enter_error
-...     'enter:outer-context-enter-error',
-...     'ERR-exit:outer-context-enter-error',
+...     'ERR-enter:outer-context-enter-error',
 ...
 ...     # outer_context_exit_error
 ...     'enter:outer-context-exit-error',
@@ -1627,8 +1623,7 @@ class Substitute(object):
     def __dir__(self):
         names = ['actual_object']
         names.extend(
-            name
-            for name in dir(self.actual_object)
+            name for name in dir(self.actual_object)
             if name not in ('actual_object', '__call__'))
         return names
 
