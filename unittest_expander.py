@@ -1894,6 +1894,56 @@ probably better not to make them subclasses of
 :class:`unittest.TestCase`.
 
 
+"Can I :func:`expand` a subclass of an already :func:`expand`-ed class?"
+------------------------------------------------------------------------
+
+As long as you do *not* apply :func:`foreach` to test classes (but
+only to test methods) -- *yes, you can* (in past *unittest_expander*
+versions it was broken but now it works perfectly):
+
+>>> debug = []
+>>> into_dict = {}
+>>> parameters = paramseq(
+...     1, 2, 3,
+... ).context(debug_cm)  # see earlier definition of debug_cm()...
+>>> 
+>>> @expand
+... class Test(unittest.TestCase):
+...
+...     @foreach(parameters)
+...     def test(self, n):
+...         debug.append(n)
+...
+>>> @expand
+... class TestSubclass(Test):
+...
+...     @foreach(parameters)
+...     def test_another(self, n):
+...         debug.append(n)
+...
+>>> run_tests(TestSubclass)  # doctest: +ELLIPSIS
+test__<1> (...TestSubclass) ... ok
+test__<2> (...TestSubclass) ... ok
+test__<3> (...TestSubclass) ... ok
+test_another__<1> (...TestSubclass) ... ok
+test_another__<2> (...TestSubclass) ... ok
+test_another__<3> (...TestSubclass) ... ok
+...Ran 6 tests...
+OK
+>>> type(TestSubclass.test) is Substitute
+True
+>>> type(TestSubclass.test_another) is Substitute
+True
+
+But things complicate when you apply :func:`foreach` to classes.  For
+such cases -- for now -- the answer is: *do not try this at home*.
+
+As it was said earlier, the parts of *unittest_expander* related to
+applying :func:`foreach` to classes are broken by design and will be
+revamped (in a backwards incompatible way) in future versions of
+*unittest_expander*.
+
+
 "Do my test classes need to inherit from :class:`unittest.TestCase`?"
 ---------------------------------------------------------------------
 
@@ -2170,6 +2220,32 @@ the whole thing may be just ignored.
     ...
     Traceback (most recent call last):
     TypeError: ...not a legal parameter source class...
+
+    >>> @expand
+    ... class Test(unittest.TestCase):
+    ...     @foreach([123])
+    ...     class TestNested(unittest.TestCase):
+    ...         pass
+    ...
+    >>> issubclass(Test.TestNested, unittest.TestCase)
+    True
+    >>> sorted(k for k in vars(Test).keys() if not k.startswith('__'))
+    ['TestNested']
+
+    >>> @expand
+    ... class Test(unittest.TestCase):
+    ...     into_dict = {}
+    ...     @expand(into=into_dict)
+    ...     @foreach([123])
+    ...     class TestNested(unittest.TestCase):
+    ...         pass
+    ...
+    >>> type(Test.TestNested) is Substitute
+    True
+    >>> sorted(k for k in vars(Test).keys() if not k.startswith('__'))
+    ['TestNested', 'into_dict']
+    >>> sorted(Test.into_dict.keys())
+    ['TestNested__<123>']
 """
 
 
@@ -2499,7 +2575,8 @@ def _expand_test_methods(test_cls):
     for base_name in attr_names:
         obj = getattr(test_cls, base_name, None)
         paramseq_objs = getattr(obj, _PARAMSEQ_OBJS_ATTR, None)
-        if paramseq_objs is not None:
+        if (paramseq_objs is not None and
+              not isinstance(obj, (Substitute, type))):
             if _PY3:
                 # no unbound methods in Python 3
                 if not isinstance(obj, types.FunctionType):
@@ -2609,6 +2686,7 @@ def _make_parametrized_func(base_name, base_func, count, param_inst,
                 if 'label' in accepted_generic_kwargs:
                     kwargs.setdefault('label', label)
                 return base_func(*args, **kwargs)
+    delattr(generated_func, _PARAMSEQ_OBJS_ATTR)
     generated_func.__name__ = _format_name_for_parametrized(
         base_name, base_func, label, count, seen_names)
     _set_qualname(base_func, generated_func)
