@@ -533,6 +533,24 @@ test_is_even__<integer, random odd> ... ok
 ...Ran 14 tests...
 OK
 
+If parameters combined this way specify some conflicting keyword
+arguments it is detected and reported as an error:
+
+>>> params1 = [param(a=1, b=2, c=3)]
+>>> params2 = [param(b=4, c=3, d=2)]
+>>> 
+>>> @expand   # doctest: +ELLIPSIS
+... class TestSomething(unittest.TestCase):
+...
+...     @foreach(params2)
+...     @foreach(params1)
+...     def test(self, **kw):
+...         "something"
+...
+Traceback (most recent call last):
+  ...
+ValueError: conflicting keyword arguments: 'b', 'c'
+
 
 .. _context-basics:
 
@@ -2394,6 +2412,11 @@ class param(object):
         if args:
             new._args += tuple(args)
         if kwargs:
+            conflicting = frozenset(new._kwargs).intersection(kwargs)
+            if conflicting:
+                raise ValueError(
+                    'conflicting keyword arguments: ' +
+                    ', '.join(sorted(map(repr, conflicting))))
             new._kwargs.update(kwargs)
         if context_list:
             new._context_list.extend(context_list)
