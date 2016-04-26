@@ -49,12 +49,12 @@ whether the given number is even or not:
 Of course, in the real world the code we write is usually more
 interesting...  Anyway, most often we want to test how it works for
 different parameters.  At the same time, it is not the best idea to
-test many cases in a loop within one test method -- especially,
-because of lack of test isolation (tests depend on other ones -- they
-may inherit some state which can affect their results), less
-information on failures (a test failure prevents subsequent tests from
-being run), less clear result messages (you don't see at first glance
-which case is the actual culprit)...
+test many cases in a loop within one test method -- because of lack
+of test isolation (tests depend on other ones -- they may inherit some
+state which can affect their results), less information on failures (a
+test failure prevents subsequent tests from being run), less clear
+result messages (you don't see at first glance which case is the
+actual culprit) etc.
 
 So let's write our tests in a smarter way:
 
@@ -68,8 +68,8 @@ So let's write our tests in a smarter way:
 ...     def test_even(self, n):    # specified using multiple arguments
 ...         self.assertTrue(is_even(n))
 ...
-...     @foreach([-1, 17])         # call variant #2: parameter collection
-...     def test_odd(self, n):     # specified using one container
+...     @foreach([-1, 17])         # call variant #2: parameter collection as
+...     def test_odd(self, n):     # one argument being a container (e.g. list)
 ...         self.assertFalse(is_even(n))
 ...
 ...     # just to demonstrate that test cases are really isolated
@@ -344,18 +344,18 @@ test_is_even__<sys.maxsize> ... ok
 ...Ran 14 tests...
 OK
 
-Note that the parameter collections
-(sequences/mappings/sets/:class:`paramseq` instances) do not need to be
-created or bound within the test case class body; you could, for
-example, import them from a separate module.  Obviously, it makes code
-reuse and refactorization easier.
+Note that the parameter collections (such as sequences, mappings, sets
+or :class:`paramseq` instances) do not need to be created or bound
+within the test case class body; you could, for example, import them
+from a separate module.  Obviously, it makes code reuse and
+refactorization easier.
 
 Also, note that the signatures of the :func:`foreach` decorator and
 the :class:`paramseq` constructor are identical: you pass in either
-exactly one positional argument which is a parameter collection (a
-sequence/mapping/set or a :class:`paramseq` instance), or any number
-of positional and/or keyword arguments being singular parameter
-values or tuples of parameter values, or :class:`param` instances.
+exactly one positional argument which is a parameter collection or
+several (more than one) positional and/or keyword arguments being
+singular parameter values or tuples of parameter values, or
+:class:`param` instances.
 
 A :class:`paramseq` instance can also be created from a callable object
 that returns a sequence or another iterable (e.g. a generator):
@@ -414,7 +414,7 @@ iterated over --
 
 * when the :func:`expand` decorator is being executed -- *before*
   generating parameterized test methods;
-* separately for each use of :func:`foreach` with the
+* separately for each :func:`foreach` that was called with the
   :class:`paramseq` instance as the argument (or with another
   :class:`paramseq` instance that includes *the* instance -- see the
   following code snippet in which the ``input_values_and_results``
@@ -479,8 +479,8 @@ Combining several :func:`foreach` to get Cartesian product
 ==========================================================
 
 You can apply two or more :func:`foreach` decorators to the same test
-method -- to combine several parameter collections to obtain Cartesian
-product of them:
+method -- to combine several parameter collections, obtaining
+Cartesian product of them:
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -602,7 +602,7 @@ test_save_load_with_spaces__<load='',save=''> ... ok
 test_save_load_with_spaces__<load='abc',save='abc'> ... ok
 ...Ran 4 tests...
 OK
-
+>>> 
 >>> # repeating the tests to show that, really, a *new* context manager
 ... # instance is created for *each* test call:
 ... run_tests(TestSaveLoad)  # doctest: +ELLIPSIS
@@ -2145,7 +2145,7 @@ the whole thing may be just ignored.
 
     >>> paramseq('123')              # doctest: +ELLIPSIS
     Traceback (most recent call last):
-    TypeError: ...not a legal parameter source class...
+    TypeError: ...not a legal parameter collection...
 
     >>> expand(illegal_arg='spam')   # doctest: +ELLIPSIS
     Traceback (most recent call last):
@@ -2153,12 +2153,12 @@ the whole thing may be just ignored.
 
     >>> @expand
     ... class Test(unittest.TestCase):
-    ...     @foreach(42)   # <- single arg that is not a proper param source
+    ...     @foreach(42)   # <- single arg that is not a proper param collection
     ...     def test(self):
     ...         pass                 # doctest: +ELLIPSIS
     ...
     Traceback (most recent call last):
-    TypeError: ...not a legal parameter source class...
+    TypeError: ...not a legal parameter collection...
 
     >>> @expand(into=['badtype'])    # doctest: +ELLIPSIS
     ... @foreach(1, 2)
@@ -2232,12 +2232,12 @@ the whole thing may be just ignored.
     True
 
     >>> @expand(into=into_dict)
-    ... @foreach(42)   # <- single arg that is not a proper param source
+    ... @foreach(42)   # <- single arg that is not a proper param collection
     ... class Test(unittest.TestCase):
     ...     pass       # doctest: +ELLIPSIS
     ...
     Traceback (most recent call last):
-    TypeError: ...not a legal parameter source class...
+    TypeError: ...not a legal parameter collection...
 
     >>> @expand
     ... class Test(unittest.TestCase):
@@ -2432,7 +2432,7 @@ class param(object):
                 # we need to combine several context managers (from the
                 # contexts) but Python 2 does not have contextlib.ExitStack,
                 # and contextlib.nested() is deprecated (for good reasons)
-                # -- so we will just generate, compile and exec the code:
+                # -- so we will just generate and execute the code:
                 src_code = (
                     'import contextlib\n'
                     '@contextlib.contextmanager\n'
@@ -2477,57 +2477,58 @@ class paramseq(object):
         self = self_and_args[0]
         args = self_and_args[1:]
         if len(args) == 1 and not kwargs:
-            # the sole positional argument is a parameter source
+            # the sole positional argument is a parameter collection
             # (being a collection of: parameter values, tuples of such
             # values, or `param` instances)
-            self._init_with_param_sources(args[0])
+            self._init_with_param_collections(args[0])
         else:
             # each argument is a parameter value, or a tuple of such
             # values, or a `param` instance -- explicitly labeled if
             # the given argument is a keyword one
-            self._init_with_param_sources(args, kwargs)
+            self._init_with_param_collections(args, kwargs)
 
     def __add__(self, other):
-        if self._is_instance_of_legal_param_source_class(other):
-            return self._from_param_sources(self, other)
+        if self._is_legal_param_collection(other):
+            return self._from_param_collections(self, other)
         return NotImplemented
 
     def __radd__(self, other):
-        if self._is_instance_of_legal_param_source_class(other):
-            return self._from_param_sources(other, self)
+        if self._is_legal_param_collection(other):
+            return self._from_param_collections(other, self)
         return NotImplemented
 
     def context(self, context_manager_factory, *args, **kwargs):
         context = _Context(context_manager_factory, *args, **kwargs)
-        new = self._from_param_sources(self)
+        new = self._from_param_collections(self)
         new._context_list.append(context)
         return new
 
     @classmethod
-    def _from_param_sources(cls, *param_sources):
+    def _from_param_collections(cls, *param_collections):
         self = cls.__new__(cls)
-        self._init_with_param_sources(*param_sources)
+        self._init_with_param_collections(*param_collections)
         return self
 
-    def _init_with_param_sources(self, *param_sources):
-        param_sources = tuple(param_sources)
-        for param_src in param_sources:
-            if not self._is_instance_of_legal_param_source_class(param_src):
+    def _init_with_param_collections(self, *param_collections):
+        for param_col in param_collections:
+            if not self._is_legal_param_collection(param_col):
                 raise TypeError(
-                    'class {0.__class__!r} (of {0!r}) is not a '
-                    'legal parameter source class'.format(param_src))
-        self._param_sources = param_sources
+                    '{0!r} is not a legal parameter '
+                    'collection'.format(param_col))
+        self._param_collections = param_collections
         self._context_list = []
 
     @staticmethod
-    def _is_instance_of_legal_param_source_class(obj):
-        return isinstance(obj, (
-            paramseq,
-            collections.Sequence,
-            collections.Set,
-            collections.Mapping,
-            collections.Callable)
-        ) and not isinstance(obj, _STRING_TYPES)
+    def _is_legal_param_collection(obj):
+        return (
+            isinstance(obj, (
+                paramseq,
+                collections.Sequence,
+                collections.Set,
+                collections.Mapping)
+            ) and
+            not isinstance(obj, _STRING_TYPES)
+        ) or callable(obj)
 
     def _generate_params(self, test_cls):
         for param_inst in self._generate_raw_params(test_cls):
@@ -2537,30 +2538,30 @@ class paramseq(object):
             yield param_inst
 
     def _generate_raw_params(self, test_cls):
-        for param_src in self._param_sources:
-            if isinstance(param_src, paramseq):
-                for param_inst in param_src._generate_params(test_cls):
+        for param_col in self._param_collections:
+            if isinstance(param_col, paramseq):
+                for param_inst in param_col._generate_params(test_cls):
                     yield param_inst
-            elif isinstance(param_src, collections.Mapping):
-                for label, param_item in param_src.items():
+            elif isinstance(param_col, collections.Mapping):
+                for label, param_item in param_col.items():
                     yield param._from_param_item(param_item).label(label)
             else:
-                if isinstance(param_src, collections.Callable):
-                    param_src = self._param_src_callable_to_iterable(
-                        param_src,
+                if callable(param_col):
+                    param_col = self._param_collection_callable_to_iterable(
+                        param_col,
                         test_cls)
                 else:
-                    assert isinstance(param_src, (collections.Sequence,
+                    assert isinstance(param_col, (collections.Sequence,
                                                   collections.Set))
-                for param_item in param_src:
+                for param_item in param_col:
                     yield param._from_param_item(param_item)
 
     @staticmethod
-    def _param_src_callable_to_iterable(param_src, test_cls):
+    def _param_collection_callable_to_iterable(param_col, test_cls):
         try:
-            return param_src(test_cls)
+            return param_col(test_cls)
         except TypeError:
-            return param_src()
+            return param_col()
 
 
 # test case *method* or *class* decorator...
