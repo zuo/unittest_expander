@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Jan Kaliszewski (zuo). All rights reserved.
+# Copyright (c) 2014-2015 Jan Kaliszewski (zuo). All rights reserved.
 #
 # Licensed under the MIT License:
 #
@@ -1638,18 +1638,10 @@ class param(object):
 
     def context(self, context_manager_factory, *args, **kwargs):
         context = _Context(context_manager_factory, *args, **kwargs)
-        return self._from_components(
-            self._args,
-            self._kwargs,
-            self._context_list + [context],
-            self._label_list)
+        return self._clone_adding(context_list=[context])
 
     def label(self, text):
-        return self._from_components(
-            self._args,
-            self._kwargs,
-            self._context_list,
-            self._label_list + [text])
+        return self._clone_adding(label_list=[text])
 
     @classmethod
     def _from_param_item(cls, param_item):
@@ -1661,22 +1653,29 @@ class param(object):
 
     @classmethod
     def _combine_instances(cls, param_instances):
-        args = []
-        kwargs = {}
-        context_list = []
-        label_list = []
+        new = cls()
         for param_inst in param_instances:
-            args.extend(param_inst._args)
-            kwargs.update(param_inst._kwargs)
-            context_list.extend(param_inst._context_list)
-            label_list.append(param_inst._get_label())
-        return cls._from_components(args, kwargs, context_list, label_list)
+            new = new._clone_adding(
+                args=param_inst._args,
+                kwargs=param_inst._kwargs,
+                context_list=param_inst._context_list,
+                # note: calling _get_label() here
+                label_list=[param_inst._get_label()])
+        return new
 
-    @classmethod
-    def _from_components(cls, args, kwargs, context_list, label_list):
-        new = cls(*args, **kwargs)
-        new._context_list.extend(context_list)
-        new._label_list.extend(label_list)
+    def _clone_adding(self, args=None, kwargs=None,
+                      context_list=None, label_list=None):
+        new = self.__class__(*self._args, **self._kwargs)
+        new._context_list.extend(self._context_list)
+        new._label_list.extend(self._label_list)
+        if args:
+            new._args += tuple(args)
+        if kwargs:
+            new._kwargs.update(kwargs)
+        if context_list:
+            new._context_list.extend(context_list)
+        if label_list:
+            new._label_list.extend(label_list)
         return new
 
     def _get_context_manager_factory(self):
@@ -1685,7 +1684,7 @@ class param(object):
         except AttributeError:
             if self._context_list:
                 # we need to combine several context managers (from the
-                # contexts) but Python 2 does not have contextlib.ExitStack
+                # contexts) but Python 2 does not have contextlib.ExitStack,
                 # and contextlib.nested() is deprecated (for good reasons)
                 # -- so we will just generate, compile and exec the code:
                 src_code = (
@@ -1787,11 +1786,8 @@ class paramseq(object):
     def _generate_params(self, test_cls):
         for param_inst in self._generate_raw_params(test_cls):
             if self._context_list:
-                param_inst = param_inst._from_components(
-                    param_inst._args,
-                    param_inst._kwargs,
-                    param_inst._context_list + self._context_list,
-                    param_inst._label_list)
+                param_inst = param_inst._clone_adding(
+                    context_list=self._context_list)
             yield param_inst
 
     def _generate_raw_params(self, test_cls):
@@ -1804,15 +1800,21 @@ class paramseq(object):
                     yield param._from_param_item(param_item).label(label)
             else:
                 if isinstance(param_src, collections.Callable):
-                    try:
-                        param_src = param_src(test_cls)
-                    except TypeError:
-                        param_src = param_src()
+                    param_src = self._param_src_callable_to_iterable(
+                        param_src,
+                        test_cls)
                 else:
                     assert isinstance(param_src, (collections.Sequence,
                                                   collections.Set))
                 for param_item in param_src:
                     yield param._from_param_item(param_item)
+
+    @staticmethod
+    def _param_src_callable_to_iterable(param_src, test_cls):
+        try:
+            return param_src(test_cls)
+        except TypeError:
+            return param_src()
 
 
 # test case *method* or *class* decorator...
