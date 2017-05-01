@@ -1998,7 +1998,13 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                         def exit(*exc_info):
                             return cm_type_exit(cm, *exc_info)
                 self.__exit = exit
-                return super(generated_test_cls, self).setUp()
+                try:
+                    super_setUp = super(generated_test_cls, self).setUp
+                except AttributeError:
+                    r = None
+                else:
+                    r = super_setUp()
+                return r
             except:
                 if exit is not None:
                     exc_info = sys.exc_info()
@@ -2010,7 +2016,12 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
 
         def tearDown(self):
             try:
-                r = super(generated_test_cls, self).tearDown()
+                try:
+                    super_tearDown = super(generated_test_cls, self).tearDown
+                except AttributeError:
+                    r = None
+                else:
+                    r = super_tearDown()
             except:
                 exc_info = sys.exc_info()
                 exit = self.__exit
