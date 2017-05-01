@@ -54,7 +54,9 @@ The :class:`paramseq` class
        concatenation of the *other* parameter collection and the current
        :class:`paramseq` instance).
 
-   .. method:: context(context_manager_factory, *its_args, **its_kwargs)
+   .. method:: context(context_manager_factory, \
+                       *its_args, **its_kwargs, \
+                       __enable_exc_suppress__=False)
 
        Returns a new :class:`paramseq` instance contaning the same items
        as the current instance -- but each item with the specified
@@ -68,10 +70,18 @@ The :class:`param` class
    The public interface of instances of the class includes the following
    methods:
 
-   .. method:: context(context_manager_factory, *its_args, **its_kwargs)
+   .. method:: context(context_manager_factory, \
+                       *its_args, **its_kwargs, \
+                       __enable_exc_suppress__=False)
 
        Returns a new :class:`param` instance being a clone of the
        current instance, with the specified context factory attached.
+
+       By default, the possibility to suppress exceptions by returning a
+       true value from context manager's :meth:`__exit__` is disabled
+       (exceptions are propagated even if :meth:`__exit__` returns
+       :obj:`True`); to enable this possibility specify the
+       *__enable_exc_suppress__* keyword argument as :obj:`True`.
 
    .. method:: label(text)
 

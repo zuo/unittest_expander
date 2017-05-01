@@ -651,7 +651,9 @@ OK
 True
 
 Contexts are properly handled (context managers' :meth:`__enter__` and
-:meth:`__exit__` are properly called...) -- also when errors occur:
+:meth:`__exit__` are properly called...) -- also when errors occur
+(with some legitimate subtle reservations -- see:
+:ref:`contexts-cannot-suppress-exceptions`):
 
 >>> @contextlib.contextmanager
 ... def err_debug_cm(tag):
@@ -1111,7 +1113,9 @@ test_save_load (...TestSaveLoadIt__<load='abc',save='abc'>) ... ok
 ...Ran 2 tests...
 OK
 
-Contexts are, obviously, properly handled -- also when errors occur:
+Contexts are, obviously, properly handled -- also when errors occur
+(with some legitimate subtle reservations -- see:
+:ref:`contexts-cannot-suppress-exceptions`):
 
 >>> debug = []             # see earlier definition of err_debug_cm()...
 >>> err_params.extend([    # see earlier initialization of err_params...
@@ -1338,6 +1342,233 @@ OK
 ...     '*** after everything ***',
 ... ]
 True
+
+
+.. _contexts-cannot-suppress-exceptions:
+
+Contexts cannot suppress exceptions unless you enable that explicitly
+=====================================================================
+
+The Python *context manager* protocol provides a way to suppress an
+exception occuring in the code enclosed by a context: the exception is
+*suppresed* (*not* propagated) if the context manager's
+:meth:`__exit__` method returns a true value (such as :obj:`True`).
+
+It does **not** apply to context managers declared with
+:meth:`param.context` or :meth:`paramseq.context`: if :meth:`__exit__`
+of such a context manager returns a true value it is ignored and the
+exception (if any) is propagated anyway.  The rationale of this
+behaviour is that suppressing exceptions is generally not a good idea
+when dealing with testing (it could easily make your tests leaky and
+useless).
+
+However, if you **really** need to allow your context manager to
+suppress exceptions, pass the keyword argument
+``__enable_exc_suppress__=True`` to the :meth:`param.context` or
+:meth:`paramseq.context` method (and, of course, make the
+:meth:`__exit__` context manager's method return a true value).
+
+>>> class SillySuppressingCM(object):
+...     def __enter__(self): return self
+...     def __exit__(self, exc_type, exc_val, exc_tb):
+...         if exc_type is not None:
+...             debug.append('suppressing {0}'.format(exc_type.__name__))
+...         return True  # suppress any exception
+...
+>>> @expand
+... class SillyExcTest(unittest.TestCase):
+...
+...     @foreach(
+...         param(test_error=AssertionError)
+...             .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...         param(test_error=KeyError)
+...             .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...     )
+...     def test_it(self, test_error):
+...         debug.append('raising {0}'.format(test_error.__name__))
+...         raise test_error('ha!')
+...
+>>> debug = []
+>>> run_tests(SillyExcTest)  # doctest: +ELLIPSIS
+test_it__... ok
+test_it__... ok
+...Ran 2 tests...
+OK
+>>> debug == [
+...     'raising AssertionError',
+...     'suppressing AssertionError',
+...     'raising KeyError',
+...     'suppressing KeyError',
+... ]
+True
+
+Another example:
+
+>>> class ErrorCM(object):
+...     def __init__(self, error): self.error = error
+...     def __enter__(self): return self
+...     def __exit__(self, exc_type, exc_val, exc_tb):
+...         if exc_type is not None:
+...             debug.append('replacing {0} with {1}'.format(
+...                 exc_type.__name__, self.error.__name__))
+...         else:
+...             debug.append('raising {0}'.format(self.error.__name__))
+...         raise self.error('argh!')
+...
+>>> into_dict = {}
+>>> @expand(into=into_dict)
+... @foreach([
+...     param(setup_error=OSError)
+...         .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...     param(setup_error=OSError)
+...         .context(SillySuppressingCM, __enable_exc_suppress__=True)
+...         .context(ErrorCM, error=TypeError),
+...     param(setup_error=None),
+... ])
+... class AnotherSillyExcTest(unittest.TestCase):
+...
+...     def setUp(self):
+...         if self.setup_error is not None:
+...             debug.append('raising {0}'.format(self.setup_error.__name__))
+...             raise self.setup_error('ooops!')
+...
+...     @foreach([
+...         param(test_error=AssertionError)
+...             .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...         param(test_error=KeyError)
+...             .context(SillySuppressingCM, __enable_exc_suppress__=True)
+...             .context(ErrorCM, error=RuntimeError),
+...     ])
+...     def test_it(self, test_error):
+...         debug.append('raising {0}'.format(test_error.__name__))
+...         raise test_error('ha!')
+...
+>>> debug = []
+>>> test_classes = [into_dict[name] for name in sorted(into_dict)]
+>>> run_tests(*test_classes)  # doctest: +ELLIPSIS
+test_it__... ok
+test_it__... ok
+test_it__... ok
+test_it__... ok
+test_it__... ok
+test_it__... ok
+...Ran 6 tests...
+OK
+>>> debug == [
+...     'raising OSError',
+...     'suppressing OSError',
+...     'raising AssertionError',
+...     'suppressing AssertionError',
+... 
+...     'raising OSError',
+...     'suppressing OSError',
+...     'raising KeyError',
+...     'replacing KeyError with RuntimeError',
+...     'suppressing RuntimeError',
+... 
+...     'raising OSError',
+...     'replacing OSError with TypeError',
+...     'suppressing TypeError',
+...     'raising AssertionError',
+...     'suppressing AssertionError',
+... 
+...     'raising OSError',
+...     'replacing OSError with TypeError',
+...     'suppressing TypeError',
+...     'raising KeyError',
+...     'replacing KeyError with RuntimeError',
+...     'suppressing RuntimeError',
+... 
+...     'raising AssertionError',
+...     'suppressing AssertionError',
+... 
+...     'raising KeyError',
+...     'replacing KeyError with RuntimeError',
+...     'suppressing RuntimeError',
+... ]
+True
+
+Normally -- without ``__enable_exc_suppress__=True`` -- exceptions
+*are* propagated even when :meth:`__exit__` returns a true value:
+
+>>> into_dict = {}
+>>> @expand(into=into_dict)
+... @foreach([
+...     param(setup_error=OSError)
+...         .context(SillySuppressingCM),
+...     param(setup_error=OSError)
+...         .context(SillySuppressingCM)
+...         .context(ErrorCM, error=TypeError),
+...     param(setup_error=None),
+... ])
+... class AnotherSillyExcTest2(unittest.TestCase):
+...
+...     def setUp(self):
+...         if self.setup_error is not None:
+...             raise self.setup_error('ooops!')
+...
+...     @foreach([
+...         param(test_error=AssertionError)
+...             .context(SillySuppressingCM),
+...         param(test_error=KeyError)
+...             .context(SillySuppressingCM)
+...             .context(ErrorCM, error=RuntimeError),
+...     ])
+...     def test_it(self, test_error):
+...         raise test_error('ha!')
+...
+>>> test_classes = [into_dict[name] for name in sorted(into_dict)]
+>>> run_tests(*test_classes)  # doctest: +ELLIPSIS
+test_it__... ERROR
+test_it__... ERROR
+test_it__... ERROR
+test_it__... ERROR
+test_it__... FAIL
+test_it__... ERROR
+...Ran 6 tests...
+FAILED (failures=1, errors=5)
+
+It is worth emphasizing that ``__enable_exc_suppress__=True`` changes
+nothing when context manager's :meth:`__exit__` returns a false value:
+
+>>> into_dict = {}
+>>> @expand(into=into_dict)
+... @foreach([
+...     param(setup_error=OSError)
+...         .context(SillySuppressingCM),
+...     param(setup_error=OSError)
+...         .context(SillySuppressingCM)
+...         .context(ErrorCM, error=TypeError,
+...                  __enable_exc_suppress__=True),
+...     param(setup_error=None),
+... ])
+... class AnotherSillyExcTest3(unittest.TestCase):
+...
+...     def setUp(self):
+...         if self.setup_error is not None:
+...             raise self.setup_error('ooops!')
+...
+...     @foreach([
+...         param(test_error=AssertionError)
+...             .context(SillySuppressingCM),
+...         param(test_error=KeyError)
+...             .context(SillySuppressingCM)
+...             .context(ErrorCM, error=RuntimeError,
+...                      __enable_exc_suppress__=True),
+...     ])
+...     def test_it(self, test_error):
+...         raise test_error('ha!')
+...
+>>> test_classes = [into_dict[name] for name in sorted(into_dict)]
+>>> run_tests(*test_classes)  # doctest: +ELLIPSIS
+test_it__... ERROR
+test_it__... ERROR
+test_it__... ERROR
+test_it__... ERROR
+test_it__... FAIL
+test_it__... ERROR
+...Ran 6 tests...
+FAILED (failures=1, errors=5)
 
 
 .. _about-substitute:
@@ -1971,15 +2202,59 @@ _DEFAULT_PARAMETRIZED_NAME_PATTERN = '{base_name}__<{label}>'
 _DEFAULT_PARAMETRIZED_NAME_FORMATTER = string.Formatter()
 
 
+if _PY3:
+    def _get_context_manager_enter_and_exit(cm):
+        # for similarity with the `with` statement's behaviour:
+        # *first* get the __exit__ attribute, *then* the __enter__ attribute
+        # (get both from the class and bind to the instance)
+        cm_type = type(cm)
+        exit = types.MethodType(cm_type.__exit__, cm)
+        enter = types.MethodType(cm_type.__enter__, cm)
+        return enter, exit
+else:
+    def _get_context_manager_enter_and_exit(cm):
+        # for similarity with the `with` statement's behaviour,
+        # *first* get the __exit__ attribute, *then* the __enter__ attribute
+        cm_type = type(cm)
+        if cm_type is types.InstanceType:
+            # (old-style class -> get from the instance)
+            exit = cm.__exit__
+            enter = cm.__enter__
+        else:
+            # (new-style class -> get from the class and bind to the instance)
+            exit = types.MethodType(cm_type.__exit__.__func__, cm, cm_type)
+            enter = types.MethodType(cm_type.__enter__.__func__, cm, cm_type)
+        return enter, exit
+
+
+class _DisabledExcSuppressContextManagerWrapper(object):
+
+    def __init__(self, cm):
+        self._enter, self._exit = _get_context_manager_enter_and_exit(cm)
+
+    def __enter__(self):
+        return self._enter()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._exit(exc_type, exc_val, exc_tb)
+        return False  # exception is *never* suppressed
+
+
 class _Context(object):
 
     def __init__(self, context_manager_factory, *args, **kwargs):
         self._context_manager_factory = context_manager_factory
+        self._enable_exc_suppress = kwargs.pop(
+            '__enable_exc_suppress__', False)
         self._args = args
         self._kwargs = kwargs
 
     def _make_context_manager(self):
-        return self._context_manager_factory(*self._args, **self._kwargs)
+        cm = self._context_manager_factory(*self._args, **self._kwargs)
+        if self._enable_exc_suppress:
+            return cm
+        else:
+            return _DisabledExcSuppressContextManagerWrapper(cm)
 
 
 class Substitute(object):
@@ -2355,20 +2630,8 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
             try:
                 if cm_factory is not None:
                     cm = cm_factory()
-                    cm_type = type(cm)
-                    if not _PY3 and isinstance(cm_type, types.InstanceType):
-                        # old-style class (Python 2 only)
-                        cm_exit = cm.__exit__
-                        cm_enter = cm.__enter__
-                        self.context_targets = cm_enter()
-                        exit = cm_exit
-                    else:
-                        # new-style class
-                        cm_type_exit = cm_type.__exit__
-                        cm_type_enter = cm_type.__enter__
-                        self.context_targets = cm_type_enter(cm)
-                        def exit(*exc_info):
-                            return cm_type_exit(cm, *exc_info)
+                    enter, exit = _get_context_manager_enter_and_exit(cm)
+                    self.context_targets = enter()
                 self.__exit = exit
                 try:
                     super_setUp = super(generated_test_cls, self).setUp
@@ -2378,13 +2641,18 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                     r = super_setUp()
                 return r
             except:
+                suppress_exc = False
                 if exit is not None:
-                    exc_info = sys.exc_info()
                     try:
-                        exit(*exc_info)
+                        exc_info = sys.exc_info()
+                        try:
+                            suppress_exc = exit(*exc_info)
+                        finally:
+                            del exc_info  # breaking reference cycle
                     finally:
                         self.__exit = None
-                raise
+                if not suppress_exc:
+                    raise
 
         def tearDown(self):
             try:
@@ -2395,11 +2663,16 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                 else:
                     r = super_tearDown()
             except:
-                exc_info = sys.exc_info()
+                suppress_exc = False
                 exit = self.__exit
                 if exit is not None:
-                    exit(*exc_info)
-                raise
+                    exc_info = sys.exc_info()
+                    try:
+                        suppress_exc = exit(*exc_info)
+                    finally:
+                        del exc_info  # breaking reference cycle
+                if not suppress_exc:
+                    raise
             else:
                 exit = self.__exit
                 if exit is not None:
