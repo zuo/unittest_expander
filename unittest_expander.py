@@ -2267,7 +2267,10 @@ the whole thing may be just ignored.
 """
 
 
-import collections
+try:
+    import collections.abc as collections_abc
+except ImportError:
+    import collections as collections_abc
 import functools
 import inspect
 import itertools
@@ -2523,9 +2526,9 @@ class paramseq(object):
         return (
             isinstance(obj, (
                 paramseq,
-                collections.Sequence,
-                collections.Set,
-                collections.Mapping)
+                collections_abc.Sequence,
+                collections_abc.Set,
+                collections_abc.Mapping)
             ) and
             not isinstance(obj, _STRING_TYPES)
         ) or callable(obj)
@@ -2542,7 +2545,7 @@ class paramseq(object):
             if isinstance(param_col, paramseq):
                 for param_inst in param_col._generate_params(test_cls):
                     yield param_inst
-            elif isinstance(param_col, collections.Mapping):
+            elif isinstance(param_col, collections_abc.Mapping):
                 for label, param_item in param_col.items():
                     yield param._from_param_item(param_item).label(label)
             else:
@@ -2551,8 +2554,8 @@ class paramseq(object):
                         param_col,
                         test_cls)
                 else:
-                    assert isinstance(param_col, (collections.Sequence,
-                                                  collections.Set))
+                    assert isinstance(param_col, (collections_abc.Sequence,
+                                                  collections_abc.Set))
                 for param_item in param_col:
                     yield param._from_param_item(param_item)
 
@@ -2650,7 +2653,7 @@ def _resolve_the_into_arg(into, globals_frame_depth):
         into = __import__(into, globals(), locals(), ['*'], 0)
     if inspect.ismodule(into):
         into = vars(into)
-    if not isinstance(into, collections.MutableMapping):
+    if not isinstance(into, collections_abc.MutableMapping):
         raise TypeError(
             "resolved 'into' argument is not a mutable mapping "
             "({0!r} given, resolved to {1!r})".format(orig_into, into))
