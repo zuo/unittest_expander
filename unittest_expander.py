@@ -479,8 +479,8 @@ Combining several :func:`foreach` to get Cartesian product
 ==========================================================
 
 You can apply two or more :func:`foreach` decorators to the same test
-method -- to combine several parameter collections, obtaining
-Cartesian product of them:
+method -- to combine several parameter collections, obtaining their
+Cartesian product:
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -921,9 +921,12 @@ Fixtures -- part II: :func:`foreach` as a class decorator
 
 .. warning::
 
+    This is the description of a deprecated feature.
+
     The parts of *unittest_expander* related to applying :func:`foreach`
-    **to classes** are broken by design and will be revamped (in a
-    backwards incompatible way) in future versions of the library.
+    **to classes** are broken by design and will be, in future versions
+    of the library, either revamped (in a backwards incompatible way)
+    or even completely removed.
 
 :func:`foreach` can be used not only as a test case *method* decorator
 but also as a test case *class* decorator -- to generate parameterized
@@ -1288,6 +1291,10 @@ called with ``None, None, None`` arguments anyway -- unless
 
 Additional note about extending :meth:`setUp` and :meth:`tearDown`
 ------------------------------------------------------------------
+
+.. warning::
+
+    This is the description of a deprecated feature.
 
 As you can see in the above examples, you can, without any problem,
 implement your own :meth:`setUp` and/or :meth:`tearDown` methods in
@@ -1958,8 +1965,8 @@ such cases -- for now -- the answer is: *do not try this at home*.
 
 As it was said earlier, the parts of *unittest_expander* related to
 applying :func:`foreach` to classes are broken by design and will be
-revamped (in a backwards incompatible way) in future versions of
-*unittest_expander*.
+revamped (in a backwards incompatible way), or even completely
+removed, in future versions of *unittest_expander*.
 
 
 "Do my test classes need to inherit from :class:`unittest.TestCase`?"
@@ -2003,6 +2010,10 @@ methods) with :func:`foreach` the test running tools you use are
 expected to call :meth:`setUp` and :meth:`tearDown` methods
 appropriately -- as *unittest*'s test running machinery does (though
 your test class does not need to implement these methods by itself).
+
+.. warning::
+
+    This is the description of a deprecated feature.
 
 >>> debug = []
 >>> into_dict = {}
@@ -2099,7 +2110,9 @@ The :func:`foreach` decorator is designed to be applied *only* to:
 
 * functions being members of test (or test mix-in) classes (that is,
   functions that define regular test case instance methods);
-* test (or test mix-in) classes themselves.
+* test (or test mix-in) classes themselves
+
+(as noted above, the latter is a deprecated feature).
 
 You should *not* apply it to anything else (especially, not to static
 or class methods).  If you do, the effect is undefined: an error may
@@ -2769,11 +2782,7 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                 suppress_exc = False
                 if ready_exit is not None:
                     try:
-                        exc_info = sys.exc_info()
-                        try:
-                            suppress_exc = ready_exit(*exc_info)
-                        finally:
-                            del exc_info  # breaking reference cycle
+                        suppress_exc = ready_exit(*sys.exc_info())
                     finally:
                         self.__exit = None
                 if not suppress_exc:
@@ -2791,11 +2800,7 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                 suppress_exc = False
                 exit = self.__exit
                 if exit is not None:
-                    exc_info = sys.exc_info()
-                    try:
-                        suppress_exc = exit(*exc_info)
-                    finally:
-                        del exc_info  # breaking reference cycle
+                    suppress_exc = exit(*sys.exc_info())
                 if not suppress_exc:
                     raise
             else:
