@@ -2264,6 +2264,23 @@ the whole thing may be just ignored.
     ['TestNested', 'into_dict']
     >>> sorted(Test.into_dict.keys())
     ['TestNested__<123>']
+
+    >>> into_dict = {}
+    >>> @expand(into=into_dict)
+    ... @foreach([42])
+    ... class Test(unittest.TestCase):
+    ...     def setUp(self):
+    ...         sys.stdout.write(' | .context_targets={0!r} | '.format(
+    ...             self.context_targets))
+    ...     def test(self):
+    ...         pass
+    ...
+    >>> test_cls = into_dict.popitem()[1]
+    >>> run_tests(test_cls)              # doctest: +ELLIPSIS
+    test... | .context_targets=[] | ok
+    ...Ran 1 test...
+    OK
+
 """
 
 
@@ -2733,7 +2750,9 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                 setattr(self, name, obj)
             exit = None
             try:
-                if cm_factory is not None:
+                if cm_factory is None:
+                    self.context_targets = []
+                else:
                     cm = cm_factory()
                     enter, exit = _get_context_manager_enter_and_exit(cm)
                     self.context_targets = enter()
