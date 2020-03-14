@@ -2748,7 +2748,7 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
             self.params = param_inst._args
             for name, obj in param_inst._kwargs.items():
                 setattr(self, name, obj)
-            exit = None
+            ready_exit = None
             try:
                 if cm_factory is None:
                     self.context_targets = []
@@ -2756,7 +2756,8 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                     cm = cm_factory()
                     enter, exit = _get_context_manager_enter_and_exit(cm)
                     self.context_targets = enter()
-                self.__exit = exit
+                    ready_exit = exit
+                self.__exit = ready_exit
                 try:
                     super_setUp = super(generated_test_cls, self).setUp
                 except AttributeError:
@@ -2766,11 +2767,11 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                 return r
             except:
                 suppress_exc = False
-                if exit is not None:
+                if ready_exit is not None:
                     try:
                         exc_info = sys.exc_info()
                         try:
-                            suppress_exc = exit(*exc_info)
+                            suppress_exc = ready_exit(*exc_info)
                         finally:
                             del exc_info  # breaking reference cycle
                     finally:
