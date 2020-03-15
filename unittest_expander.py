@@ -2625,24 +2625,22 @@ def expand(test_cls=None, **kwargs):
 
 
 def _expand_test_methods(test_cls):
+    attrs_to_substitute, attrs_to_add = _get_attrs_to_substitute_and_add(test_cls)
+    for name, obj in attrs_to_substitute.items():
+        setattr(test_cls, name, Substitute(obj))
+    for name, obj in attrs_to_add.items():
+        setattr(test_cls, name, obj)
+
+def _get_attrs_to_substitute_and_add(test_cls):
     attr_names = dir(test_cls)
     seen_names = set(attr_names)
     attrs_to_substitute = dict()
     attrs_to_add = dict()
     for base_name in attr_names:
         obj = getattr(test_cls, base_name, None)
-        paramseq_objs = getattr(obj, _PARAMSEQ_OBJS_ATTR, None)
-        if (paramseq_objs is not None and
-              not isinstance(obj, (Substitute, type))):
-            if _PY3:
-                # no unbound methods in Python 3
-                if not isinstance(obj, types.FunctionType):
-                    raise TypeError('{0!r} is not a function'.format(obj))
-                base_func = obj
-            else:
-                if not isinstance(obj, types.MethodType):
-                    raise TypeError('{0!r} is not a method'.format(obj))
-                base_func = obj.__func__
+        base_func = _get_base_func(obj)
+        if base_func is not None:
+            paramseq_objs = _get_paramseq_objs(base_func)
             accepted_generic_kwargs = _get_accepted_generic_kwargs(base_func)
             for func in _generate_parametrized_functions(
                     test_cls, paramseq_objs,
@@ -2650,14 +2648,36 @@ def _expand_test_methods(test_cls):
                     accepted_generic_kwargs):
                 attrs_to_add[func.__name__] = func
             attrs_to_substitute[base_name] = obj
-    for name, obj in attrs_to_substitute.items():
-        setattr(test_cls, name, Substitute(obj))
-    for name, obj in attrs_to_add.items():
-        setattr(test_cls, name, obj)
+    return attrs_to_substitute, attrs_to_add
 
+def _get_base_func(obj):
+    if (getattr(obj, _PARAMSEQ_OBJS_ATTR, None) is None
+          or isinstance(obj, (Substitute, type))):
+        base_func = None
+    else:
+        base_func = _obtain_base_func_from(obj)
+        assert inspect.isfunction(base_func)
+    return base_func
+
+def _get_paramseq_objs(base_func):
+    paramseq_objs = getattr(base_func, _PARAMSEQ_OBJS_ATTR)
+    assert isinstance(paramseq_objs, list)
+    return paramseq_objs
+
+def _get_accepted_generic_kwargs(base_func):
+    accepted_generic_kwargs = _obtain_accepted_generic_kwargs_from(base_func)
+    # XXX: here additional stuff from `@takes_...()` decorators?
+    assert isinstance(accepted_generic_kwargs, set)
+    return accepted_generic_kwargs
 
 if _PY3:
-    def _get_accepted_generic_kwargs(base_func):
+    def _obtain_base_func_from(obj):
+        # no unbound methods in Python 3
+        if not isinstance(obj, types.FunctionType):
+            raise TypeError('{0!r} is not a function'.format(obj))
+        return obj
+
+    def _obtain_accepted_generic_kwargs_from(base_func):
         spec = inspect.getfullargspec(base_func)
         accepted_generic_kwargs = set(
             _GENERIC_KWARGS if spec.varkw is not None
@@ -2665,7 +2685,12 @@ if _PY3:
                   if kw in (spec.args + spec.kwonlyargs)))
         return accepted_generic_kwargs
 else:
-    def _get_accepted_generic_kwargs(base_func):
+    def _obtain_base_func_from(obj):
+        if not isinstance(obj, types.MethodType):
+            raise TypeError('{0!r} is not a method'.format(obj))
+        return obj.__func__
+
+    def _obtain_accepted_generic_kwargs_from(base_func):
         spec = inspect.getargspec(base_func)
         accepted_generic_kwargs = set(
             _GENERIC_KWARGS if spec.keywords is not None
@@ -2679,6 +2704,7 @@ def _expand_test_cls(base_test_cls, into):
     if paramseq_objs is None:
         return base_test_cls
     else:
+        assert isinstance(paramseq_objs, list)
         if not isinstance(base_test_cls, _CLASS_TYPES):
             raise TypeError('{0!r} is not a class'.format(base_test_cls))
         into = _resolve_the_into_arg(into, globals_frame_depth=3)
@@ -2687,7 +2713,6 @@ def _expand_test_cls(base_test_cls, into):
                 base_test_cls, paramseq_objs, seen_names):
             into[cls.__name__] = cls
         return Substitute(base_test_cls)
-
 
 def _resolve_the_into_arg(into, globals_frame_depth):
     orig_into = into
@@ -2848,7 +2873,6 @@ def _format_name_for_parametrized(base_name, base_obj,
         uniq_tag += 1
     seen_names.add(name)
     return name
-
 
 def _get_name_pattern_and_formatter():
     pattern = getattr(expand, 'global_name_pattern', None)
