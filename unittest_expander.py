@@ -2643,11 +2643,7 @@ def _expand_test_methods(test_cls):
                 if not isinstance(obj, types.MethodType):
                     raise TypeError('{0!r} is not a method'.format(obj))
                 base_func = obj.__func__
-            arg_spec = inspect.getargspec(base_func)
-            accepted_generic_kwargs = set(
-                _GENERIC_KWARGS if arg_spec.keywords is not None
-                else (kw for kw in _GENERIC_KWARGS
-                      if kw in arg_spec.args))
+            accepted_generic_kwargs = _get_accepted_generic_kwargs(base_func)
             for func in _generate_parametrized_functions(
                     test_cls, paramseq_objs,
                     base_name, base_func, seen_names,
@@ -2658,6 +2654,24 @@ def _expand_test_methods(test_cls):
         setattr(test_cls, name, Substitute(obj))
     for name, obj in attrs_to_add.items():
         setattr(test_cls, name, obj)
+
+
+if _PY3:
+    def _get_accepted_generic_kwargs(base_func):
+        spec = inspect.getfullargspec(base_func)
+        accepted_generic_kwargs = set(
+            _GENERIC_KWARGS if spec.varkw is not None
+            else (kw for kw in _GENERIC_KWARGS
+                  if kw in (spec.args + spec.kwonlyargs)))
+        return accepted_generic_kwargs
+else:
+    def _get_accepted_generic_kwargs(base_func):
+        spec = inspect.getargspec(base_func)
+        accepted_generic_kwargs = set(
+            _GENERIC_KWARGS if spec.keywords is not None
+            else (kw for kw in _GENERIC_KWARGS
+                  if kw in spec.args))
+        return accepted_generic_kwargs
 
 
 def _expand_test_cls(base_test_cls, into):
