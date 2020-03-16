@@ -1851,8 +1851,8 @@ OK
 Questions and answers about various details...
 ==============================================
 
-"Can I ommit :func:`expand` and then apply it to subclasses?"
--------------------------------------------------------------
+"Can I omit :func:`expand` and then apply it to subclasses?"
+------------------------------------------------------------
 
 Yes, you can.  Please consider the following example:
 
