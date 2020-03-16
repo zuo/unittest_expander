@@ -2,14 +2,14 @@
 easy-to-use tools to parameterize your unit tests, especially those
 based on *unittest.TestCase*.
 
-The library is compatibile with Python 2.6, 2.7, 3.2, 3.3, 3.4 and
-3.5, and does not depend on external packages (uses only the Python
-standard library).
+The library is compatible with Python 2.6, 2.7, 3.2, 3.3, 3.4, 3.5,
+3.6, 3.7 and 3.8, and does not depend on any external packages
+(i.e., uses only the Python standard library).
 
 :Author: Jan Kaliszewski (zuo)
 :License: MIT License
 :Home Page: https://github.com/zuo/unittest_expander
-:Documentation: http://unittest-expander.readthedocs.org/
+:Documentation: https://unittest-expander.readthedocs.io/
 
 Installing
 ----------
@@ -19,11 +19,11 @@ The easiest way to install the library is to execute (possibly in a
 
     pip install unittest_expander
 
-.. _virtualenv: https://virtualenv.pypa.io/en/latest/virtualenv.html
+.. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-and-using-virtual-environments
 
 (note that you need network access to do it this way; if you do not
 have the *pip* tool installed -- see:
-https://pip.pypa.io/en/latest/installing.html).
+https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/).
 
 Alternatively, you can `download`_ the library source archive, unpack
 it, ``cd`` to the unpacked directory and execute the following
@@ -31,7 +31,7 @@ command::
 
     python setup.py install
 
-.. _download: https://pypi.python.org/pypi/unittest_expander#downloads
+.. _download: https://pypi.org/project/unittest_expander/#files
 
 (you may need to have administrator privileges and/or network access,
 especially if you are executing it *not* in a *virtualenv*).
@@ -114,4 +114,4 @@ This is only a fraction of the possibilities *unittest_expander*
 offers to you.
 
 You can **learn more** from the actual `documentation of the module
-<http://unittest-expander.readthedocs.org/en/latest/narrative_documentation.html>`_.
+<https://unittest-expander.readthedocs.io/en/stable/narrative_documentation.html>`_.

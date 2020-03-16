@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015 Jan Kaliszewski (zuo). All rights reserved.
+# Copyright (c) 2014-2020 Jan Kaliszewski (zuo). All rights reserved.
 #
 # Licensed under the MIT License:
 #
@@ -2477,7 +2477,7 @@ class param(object):
                          'as context_targets[{0}]:\n{next_indent}'
                         ).format(i, next_indent=((8 + 4 * i) * ' '))
                         for i in range(len(self._context_list)))))
-                # Py2+Py3-compatibile substitute of exec in a given namespace
+                # Py2+Py3-compatible substitute of exec in a given namespace
                 code = compile(src_code, '<string>', 'exec')
                 namespace = {'context_list': self._context_list}
                 eval(code, namespace)
