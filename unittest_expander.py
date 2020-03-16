@@ -2885,7 +2885,7 @@ def _get_name_pattern_and_formatter():
 
 
 def _set_qualname(base_obj, target_obj):
-    # relevant to Python 3.3+
+    # relevant to Python 3
     base_qualname = getattr(base_obj, '__qualname__', None)
     if base_qualname is not None:
         base_name = base_obj.__name__

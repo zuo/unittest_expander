@@ -2,9 +2,9 @@
 easy-to-use tools to parameterize your unit tests, especially those
 based on *unittest.TestCase*.
 
-The library is compatible with Python 2.6, 2.7, 3.2, 3.3, 3.4, 3.5,
-3.6, 3.7 and 3.8, and does not depend on any external packages
-(i.e., uses only the Python standard library).
+The library is compatible with Python 2.7, 3.4, 3.5, 3.6, 3.7 and
+3.8, and does not depend on any external packages (i.e., uses only
+the Python standard library).
 
 :Author: Jan Kaliszewski (zuo)
 :License: MIT License
