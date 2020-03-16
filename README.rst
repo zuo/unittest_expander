@@ -9,7 +9,7 @@ the Python standard library).
 :Author: Jan Kaliszewski (zuo)
 :License: MIT License
 :Home Page: https://github.com/zuo/unittest_expander
-:Documentation: https://unittest-expander.readthedocs.io/
+:Documentation: https://unittest-expander.readthedocs.io/en/stable/
 
 Installing
 ----------
