@@ -1,8 +1,5 @@
 import re
 
-from ez_setup import use_setuptools
-use_setuptools()
-
 from setuptools import setup
 
 
@@ -30,36 +27,5 @@ def get_version():
                 return match.group('version').decode('utf-8')
     raise AssertionError('version not specified')
 
-
-def get_long_description():
-    with open('README.rst', 'rb') as f:
-        return f.read().decode('utf-8')
-
-
-setup(
-    name='unittest_expander',
-    version=get_version(),
-    py_modules=['unittest_expander'],
-
-    author='Jan Kaliszewski (zuo)',
-    author_email='zuo@kaliszewski.net',
-    description='Easy and flexible unittest parameterization.',
-    long_description=get_long_description(),
-    keywords='unittest testing parameterization parametrization',
-    url='https://github.com/zuo/unittest_expander',
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Topic :: Software Development :: Testing',
-    ],
-)
+if __name__ == "__main__":
+    setup(version=get_version())
