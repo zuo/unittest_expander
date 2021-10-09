@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2020 Jan Kaliszewski (zuo). All rights reserved.
+# Copyright (c) 2014-2021 Jan Kaliszewski (zuo). All rights reserved.
 #
 # Licensed under the MIT License:
 #
@@ -409,17 +409,17 @@ example) that is passed into the :class:`paramseq` constructor can
 accept no arguments or one positional argument -- in the latter case
 the test case class is passed in.
 
-Note: the callable object is called, and its iterable result is
-iterated over --
+*Note:* the callable object is called, and its iterable result is
+iterated over, *when* the :func:`expand` decorator is being executed,
+that is, *before* generating parameterized test methods.
 
-* when the :func:`expand` decorator is being executed -- *before*
-  generating parameterized test methods;
-* separately for each :func:`foreach` that was called with the
-  :class:`paramseq` instance as the argument (or with another
-  :class:`paramseq` instance that includes *the* instance -- see the
-  following code snippet in which the ``input_values_and_results``
-  instance includes the previously created ``randomized``
-  instance...).
+What *should also be emphasized* is that those operations (the
+aforementioned call plus iteration over its result) are performed
+*separately* for each use of :func:`foreach` with our :class:`paramseq`
+instance as its argument (or with another :class:`paramseq` instance
+that includes our instance; see the following code snippet in which the
+``input_values_and_results`` instance includes the previously created
+``randomized`` instance...).
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -613,7 +613,7 @@ test_save_load_with_spaces__<load='abc',save='abc'> ... ok
 ...Ran 4 tests...
 OK
 
-Note: *if* a test method accepts the `context_targets` keyword argument,
+*Note:* if a test method accepts the `context_targets` keyword argument,
 a list of context manager *as-targets* (i.e. objects returned by context
 managers' :meth:`__enter__`) will be passed in as that argument.
 
@@ -818,8 +818,8 @@ FAILED (failures=1, errors=5)
 ... ]
 True
 
-Note: contexts attached to test *method* params (in contrast to those
-attached to test *class* params -- see below:
+*Note:* contexts attached to test *method* params (in contrast to
+those attached to test *class* params -- see below:
 :ref:`foreach-as-class-decorator`) are handled *directly* before (by
 running :meth:`__enter__`) and after (by running :meth:`__exit__`) a
 given parameterized test method call, that is, *after* :meth:`setUp`
@@ -886,9 +886,9 @@ test_save_load__<load='abc',save='abc'> ... ok
 ...Ran 2 tests...
 OK
 
-Note: :meth:`paramseq.context` as well as :meth:`param.context` and
-:meth:`param.label` methods create new objects (respectively
-:class:`paramseq` or :class:`param` instances), without modifying
+*Note:* :meth:`paramseq.context` as well as :meth:`param.context`
+and :meth:`param.label` methods create new objects (respectively
+:class:`paramseq` or :class:`param` instances), *without* modifying
 the existing ones.
 
 >>> pseq1 = paramseq(1, 2, 3)
@@ -997,7 +997,7 @@ As you see, you can combine :func:`foreach` as *class* decorator(s) with
 parameterized with the Cartesian product of the involved parameter
 collections.
 
-Note: when using :func:`foreach` as a *class* decorator you must
+*Note:* when using :func:`foreach` as a *class* decorator you must
 remember to place :func:`expand` as the topmost (the outer) class
 decorator (above all :func:`foreach` decorators).
 
@@ -1277,9 +1277,9 @@ FAILED (failures=1, errors=7)
 ... ]
 True
 
-Note: contexts attached to test *class* params (in contrast to those
-attached to test *method* params -- see: :ref:`context-basics`) are
-automatically handled within :meth:`setUp` and (if applicable)
+*Note:* contexts attached to test *class* params (in contrast to
+those attached to test *method* params -- see: :ref:`context-basics`)
+are automatically handled within :meth:`setUp` and (if applicable)
 :meth:`tearDown` -- so :meth:`setUp` and :meth:`tearDown` *are*
 affected by errors related to those contexts.  On the other hand,
 context finalization is *not* affected by any exceptions from actual
