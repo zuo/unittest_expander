@@ -55,7 +55,7 @@ copyright = u'2014, Jan Kaliszewski (zuo)'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = '0.3.9.dev5'
+release = '0.3.9.dev6'
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
 
