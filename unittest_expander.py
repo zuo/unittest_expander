@@ -2307,6 +2307,7 @@ import itertools
 import string
 import sys
 import types
+import warnings
 
 __all__ = (
     'foreach',
@@ -2340,6 +2341,7 @@ if _PY3:
         return enter, exit
 else:
     def _get_context_manager_enter_and_exit(cm):
+        ### TODO: update this behavior to match modern Python versions...
         # for similarity with the `with` statement's behaviour,
         # *first* get the __exit__ attribute, *then* the __enter__ attribute
         cm_type = type(cm)
@@ -2607,6 +2609,11 @@ def foreach(*args, **kwargs):
             setattr(func_or_cls, _PARAMSEQ_OBJS_ATTR, stored_paramseq_objs)
         assert isinstance(stored_paramseq_objs, list)
         stored_paramseq_objs.append(ps)
+        if isinstance(func_or_cls, _CLASS_TYPES):
+            warnings.warn(
+                'decorating test *classes* with @foreach() will not be '
+                'supported in future versions of unittest_expander.',
+                DeprecationWarning)
         return func_or_cls
     return decorator
 
