@@ -37,13 +37,20 @@ setup(
     name='unittest_expander',
     version=get_version(),
     py_modules=['unittest_expander'],
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
 
     author='Jan Kaliszewski (zuo)',
     author_email='zuo@kaliszewski.net',
     description='Easy and flexible unittest parameterization.',
     long_description=get_long_description(),
+    long_description_content_type='text/x-rst',
     keywords='unittest testing parameterization parametrization',
     url='https://github.com/zuo/unittest_expander',
+    project_urls={
+        'Documentation': 'https://unittest-expander.readthedocs.io/en/stable/',
+        'Source': 'https://github.com/zuo/unittest_expander',
+        'Tracker': 'https://github.com/zuo/unittest_expander/issues',
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
