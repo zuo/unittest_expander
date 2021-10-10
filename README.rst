@@ -17,28 +17,28 @@ Installing
 The easiest way to install the library is to execute (possibly in a
 `virtualenv`_) the command::
 
-    pip install unittest_expander
+    python -m pip install unittest_expander
 
-.. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-and-using-virtual-environments
-
-(note that you need network access to do it this way; if you do not
+(note that you need network access to do it this way).  If you do not
 have the *pip* tool installed -- see:
-https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/).
+https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 
 Alternatively, you can `download`_ the library source archive, unpack
-it, ``cd`` to the unpacked directory and execute the following
-command::
+it, ``cd`` to the unpacked directory and execute (possibly in a
+`virtualenv`_) the following command::
 
-    python setup.py install
+    python -m pip install .
 
-.. _download: https://pypi.org/project/unittest_expander/#files
-
-(you may need to have administrator privileges and/or network access,
-especially if you are executing it *not* in a *virtualenv*).
+(you may need to have administrator privileges if you are executing it
+*not* in a *virtualenv*).
 
 It is also possible to use the library without installing it: as its
 code is contained in a single file (``unittest_expander.py``), you can
 just copy it into your project.
+
+.. _virtualenv: https://packaging.python.org/tutorials/installing-packages/#creating-and-using-virtual-environments
+
+.. _download: https://pypi.org/project/unittest_expander/#files
 
 
 Usage example
