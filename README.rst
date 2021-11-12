@@ -6,10 +6,15 @@ The library is compatible with Python 2.7, 3.4, 3.5, 3.6, 3.7, 3.8,
 3.9 and 3.10, and does not depend on any external packages (i.e.,
 uses only the Python standard library).
 
-:Author: Jan Kaliszewski (zuo)
-:License: MIT License
+:Authors: `Jan Kaliszewski (zuo)`_ and `others...`_
+:License: `MIT License`_
 :Home Page: https://github.com/zuo/unittest_expander
 :Documentation: https://unittest-expander.readthedocs.io/en/stable/
+
+.. _Jan Kaliszewski (zuo): https://github.com/zuo/
+.. _others...: https://github.com/zuo/unittest_expander/pulls?q=is%3Apr+is%3Amerged
+.. _MIT License: https://github.com/zuo/unittest_expander/blob/main/LICENSE.txt
+
 
 Installing
 ----------

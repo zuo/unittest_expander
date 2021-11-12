@@ -14,12 +14,39 @@
 
 import sys
 import os
+import os.path as osp
+import re
+
+
+VERSION_LINE_REGEX = re.compile(br'''
+    ^
+    version
+    \s*
+    =
+    \s*
+    (?P<version_str>
+        \S+
+    )
+    \s*
+    $
+''', re.VERBOSE)
+
+
+def get_version_str():
+    setup_cfg_path = osp.join(os.pardir, 'setup.cfg')
+    with open(setup_cfg_path, 'rb') as f:
+        for line in f:
+            match = VERSION_LINE_REGEX.search(line)
+            if match:
+                return match.group('version_str').decode('utf-8')
+    raise AssertionError('version not found')
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(os.pardir))
 
 # -- General configuration ------------------------------------------------
 
@@ -48,14 +75,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'unittest_expander'
-copyright = u'2014, Jan Kaliszewski (zuo)'
+copyright = u'2014-2021, Jan Kaliszewski (zuo) and others'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = '0.3.9.dev7'
+release = get_version_str()
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
 
@@ -201,7 +228,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     ('index', 'unittest_expander.tex', u'unittest\\_expander Documentation',
-     u'Jan Kaliszewski (zuo)', 'manual'),
+     u'Jan Kaliszewski (zuo) and others', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,7 +258,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'unittest_expander', u'unittest_expander Documentation',
-     [u'Jan Kaliszewski (zuo)'], 1)
+     [u'Jan Kaliszewski (zuo) and others'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -245,8 +272,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'unittest_expander', u'unittest_expander Documentation',
-     u'Jan Kaliszewski (zuo)', 'unittest_expander',
-     'One line description of project.', 'Miscellaneous'),
+     u'Jan Kaliszewski (zuo) and others', 'unittest_expander',
+     'Easy and flexible unittest parameterization.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -266,9 +293,9 @@ texinfo_documents = [
 
 # Bibliographic Dublin Core info.
 epub_title = u'unittest_expander'
-epub_author = u'Jan Kaliszewski (zuo)'
+epub_author = u'Jan Kaliszewski (zuo) and others'
 epub_publisher = u'Jan Kaliszewski (zuo)'
-epub_copyright = u'2014, Jan Kaliszewski (zuo)'
+epub_copyright = u'2014-2021, Jan Kaliszewski (zuo) and others'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'unittest_expander'

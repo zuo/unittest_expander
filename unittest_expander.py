@@ -1,4 +1,5 @@
-# Copyright (c) 2014-2021 Jan Kaliszewski (zuo). All rights reserved.
+# Copyright (c) 2014-2021 Jan Kaliszewski (zuo) and others...
+# All rights reserved.
 #
 # Licensed under the MIT License:
 #
