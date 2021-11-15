@@ -2346,18 +2346,40 @@ _DEFAULT_PARAMETRIZED_NAME_FORMATTER = string.Formatter()
 
 if _PY3:
     def _get_context_manager_enter_and_exit(cm):
-        # for similarity with the `with` statement's behaviour:
-        # *first* get the __exit__ attribute, *then* the __enter__ attribute
-        # (get both from the class and bind to the instance)
         cm_type = type(cm)
-        exit = types.MethodType(cm_type.__exit__, cm)
-        enter = types.MethodType(cm_type.__enter__, cm)
+        # for consistency with the `with` statement's behavior:
+        if sys.version_info[:2] >= (3, 11):
+            # * under Python 3.11+:
+            #   raise TypeError if any of the context manager
+            #   protocol's required elements is not present
+            #   (see: https://bugs.python.org/issue12022
+            #   and https://bugs.python.org/issue44471)
+            try:
+                enter_func = cm_type.__enter__
+                exit_func = cm_type.__exit__
+            except AttributeError:
+                raise TypeError(
+                    '{0.__module__!r}.{0.__qualname__!r} object does not '
+                    'support the context manager protocol'.format(cm_type))
+        elif sys.version_info[:2] >= (3, 6):
+            # * under Python from 3.6 through 3.10:
+            #   *first* get __enter__, *then* get __exit__
+            #   (see: https://bugs.python.org/issue27100)
+            enter_func = cm_type.__enter__
+            exit_func = cm_type.__exit__
+        else:
+            # * under Python 3.x older than 3.6:
+            #   *first* get __exit__, *then* get __enter__
+            exit_func = cm_type.__exit__
+            enter_func = cm_type.__enter__
+        # (make instance methods by binding the functions to the instance)
+        enter = types.MethodType(enter_func, cm)
+        exit = types.MethodType(exit_func, cm)
         return enter, exit
 else:
     def _get_context_manager_enter_and_exit(cm):
-        ### TODO: update this behavior to match modern Python versions...
-        # for similarity with the `with` statement's behaviour,
-        # *first* get the __exit__ attribute, *then* the __enter__ attribute
+        # for consistency with the `with` statement's behavior under
+        # Python 2.7, *first* get __exit__, *then* get __enter__
         cm_type = type(cm)
         if cm_type is types.InstanceType:
             # (old-style class -> get from the instance)
