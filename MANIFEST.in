@@ -1,5 +1,6 @@
 include *.py
 include *.txt
 include *.rst
-recursive-include docs *.py *.rst *.bat Makefile .placeholder
+recursive-include docs *.py *.txt *.rst *.bat Makefile .placeholder
+recursive-include .github *.yml
 prune docs/_build

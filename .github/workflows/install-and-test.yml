@@ -2,7 +2,7 @@
 # well as on some versions of PyPy, installs the library and runs
 # its doctests.
 
-name: Install and run doctests
+name: Install and Test
 
 on:
   push:
