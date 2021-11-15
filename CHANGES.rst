@@ -34,12 +34,12 @@ Changes
 
 * **Deprecation notice:** decorating test *classes* with **foreach()**
   -- to generate new, parameterized, test *classes* -- is now deprecated
-  (causing emission of a **DeprecationWarning**); in a future version of
-  *unittest_expander* the feature will be either **removed** or undergo
-  **profound, backwards incompatible changes**; the current shape of the
-  feature is deemed broken by design (in particular, because of the lack
-  of composability, that becomes apparent when it comes to class
-  inheritance...).
+  (causing emission of a **DeprecationWarning**); in future versions of
+  *unittest_expander* it will either be **unsupported** or (later) have
+  a **different meaning**; the current shape of the feature is deemed
+  broken by design (in particular, because of the lack of composability,
+  that becomes apparent when it comes to class inheritance...).
+
 * **Deprecation notice:** using a *tuple* as a parameter collection
   passed as the *sole* argument to **paramseq()** or **foreach()**
   is now deprecated (causing emission of a **DeprecationWarning**);
@@ -94,14 +94,26 @@ Changes
   **callable(...)** predicate, instead of the previously checked
   **isinstance(..., collections.Callable)** condition).
 
+* A bunch of tests-and/or-documentation-related updates, fixes and
+  improvements.
+
+* A new GitHub workflow has been added: *Install and Test*.
+
 * A few package-setup-related updates/improvements (in particular, the
   ``pyproject.toml`` and ``setup.cfg`` files have been added and the
   ``setup.py`` file has been removed).
 
-* A bunch of tests-and/or-documentation-related updates, fixes and
-  improvements.
+* The `.gititnore` and `.editorconfig` files have been added.
 
 * TBD?...
+
+**Many thanks** to:
+
+* `@KOLANICH <https://github.com/KOLANICH>`_
+* `Hugo van Kemenade (@hugovk) <https://github.com/hugovk>`_
+* `John Vandenberg (@jayvdb) <https://github.com/jayvdb>`_
+
+for their contribution to this release!
 
 
 0.3.1 (2014-08-19)
