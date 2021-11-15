@@ -29,14 +29,15 @@ The :func:`foreach` method/class decorator
    *param_collection* must be a parameter collection -- that is, one of:
 
    * a :class:`paramseq` instance,
-   * a sequence (``isinstance(param_collection, collections.Sequence)``
-     returns :obj:`True`) but *not* a string,
-   * a mapping (``isinstance(param_collection, collections.Mapping)``
-     returns :obj:`True`),
-   * a set (``isinstance(param_collection, collections.Set)`` returns
-     :obj:`True`),
-   * a callable (``callable(param_collection)`` returns :obj:`True`)
-     that returns an iterable object (such as generator).
+   * a sequence (i.e., such an object that
+     ``isinstance(obj, collections.abc.Sequence)`` returns :obj:`True`)
+     but *not* a string,
+   * a mapping (i.e., such an object that
+     ``isinstance(obj, collections.abc.Mapping)`` returns :obj:`True`),
+   * a set (i.e., such an object that
+     ``isinstance(obj, collections.abc.Set)`` returns :obj:`True`),
+   * a callable (i.e., such an object that ``callable(obj)`` returns
+     :obj:`True`) that returns an iterable object (such as a generator).
 
    Each item of a parameter collection is one of:
 
@@ -55,6 +56,9 @@ The :func:`foreach` method/class decorator
    collection item (see above); for keyword arguments, their names will
    be used to call :meth:`param.label`.
 
+.. deprecated:: 0.4.0
+   Decorating test *classes* will *not* be supported in future versions.
+
 The :class:`paramseq` class
 ---------------------------
 
@@ -63,14 +67,15 @@ The :class:`paramseq` class
    *param_collection* must be a parameter collection -- that is, one of:
 
    * a :class:`paramseq` instance,
-   * a sequence (``isinstance(param_collection, collections.Sequence)``
-     returns :obj:`True`) but *not* a string,
-   * a mapping (``isinstance(param_collection, collections.Mapping)``
-     returns :obj:`True`),
-   * a set (``isinstance(param_collection, collections.Set)`` returns
-     :obj:`True`),
-   * a callable (``callable(param_collection)`` returns :obj:`True`)
-     that returns an iterable object (such as generator).
+   * a sequence (i.e., such an object that
+     ``isinstance(obj, collections.abc.Sequence)`` returns :obj:`True`)
+     but *not* a string,
+   * a mapping (i.e., such an object that
+     ``isinstance(obj, collections.abc.Mapping)`` returns :obj:`True`),
+   * a set (i.e., such an object that
+     ``isinstance(obj, collections.abc.Set)`` returns :obj:`True`),
+   * a callable (i.e., such an object that ``callable(obj)`` returns
+     :obj:`True`) that returns an iterable object (such as a generator).
 
    Each item of a parameter collection is one of:
 
