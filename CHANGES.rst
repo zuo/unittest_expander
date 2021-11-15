@@ -1,8 +1,8 @@
 Changes
 =======
 
-0.X.X (2021-11-XX)
-------------------
+Unreleased
+----------
 
 * From now on, the following versions of Python are supported: **3.5**
   through **3.10**, as well as **2.7**. *Note:* the versions 2.6, 3.2,
@@ -94,26 +94,24 @@ Changes
   **callable(...)** predicate, instead of the previously checked
   **isinstance(..., collections.Callable)** condition).
 
-* A bunch of tests-and/or-documentation-related updates, fixes and
-  improvements.
+* A bunch of package-setup-and-metadata-related additions, updates,
+  fixes, improvements and removals (in particular, the ``pyproject.toml``
+  and ``setup.cfg`` files have been added, and the ``setup.py`` file has
+  been removed).
 
-* A new GitHub workflow has been added: *Install and Test*.
+* Added the ``.gitignore`` and ``.editorconfig`` files.
 
-* A few package-setup-related updates/improvements (in particular, the
-  ``pyproject.toml`` and ``setup.cfg`` files have been added and the
-  ``setup.py`` file has been removed).
-
-* The `.gititnore` and `.editorconfig` files have been added.
-
-* TBD?...
+* A bunch of tests-and/or-documentation-related additions, updates,
+  fixes and improvements, including addition of the *Install and Test*
+  GitHub workflow.
 
 **Many thanks** to:
 
-* `@KOLANICH <https://github.com/KOLANICH>`_
-* `Hugo van Kemenade (@hugovk) <https://github.com/hugovk>`_
-* `John Vandenberg (@jayvdb) <https://github.com/jayvdb>`_
+* KOLANICH (`@KOLANICH <https://github.com/KOLANICH>`_),
+* Hugo van Kemenade (`@hugovk <https://github.com/hugovk>`_),
+* John Vandenberg (`@jayvdb <https://github.com/jayvdb>`_)
 
-for their contribution to this release!
+-- for their contribution to this release!
 
 
 0.3.1 (2014-08-19)

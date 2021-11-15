@@ -273,7 +273,7 @@ man_pages = [
 texinfo_documents = [
     ('index', 'unittest_expander', u'unittest_expander Documentation',
      u'Jan Kaliszewski (zuo) and others', 'unittest_expander',
-     'Easy and flexible unittest parameterization.', 'Miscellaneous'),
+     'Easy and flexible unit test parameterization.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.

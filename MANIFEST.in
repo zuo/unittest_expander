@@ -1,6 +1,10 @@
 include *.py
+include *.cfg
+include *.toml
 include *.txt
 include *.rst
+include .editorconfig
+include .gitignore
 recursive-include docs *.py *.txt *.rst *.bat Makefile .placeholder
 recursive-include .github *.yml
 prune docs/_build
