@@ -4,9 +4,9 @@ Changes
 0.X.X (2021-10-XX)
 ------------------
 
-* From now on, the following versions of Python are officially
-  supported: **2.7** and from **3.4** through **3.10**. *Note:* the
-  versions 2.6, 3.2 and 3.3 are *no longer* officially supported.
+* From now on, the following versions of Python are supported: **3.5**
+  through **3.10**, as well as **2.7**. *Note:* the versions 2.6, 3.2,
+  3.3 and 3.4 are *no longer* officially supported.
 
 * Now, if two (or more) parameter collections are combined to make a
   Cartesian product of them (as an effect of decorating a test with
