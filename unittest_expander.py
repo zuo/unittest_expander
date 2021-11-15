@@ -29,8 +29,8 @@ based on :class:`unittest.TestCase` from the Python standard library.
 
 The :mod:`unittest_expander` module provides the following tools:
 
-* test case class decorator: :func:`expand`,
-* test case method (or class) decorator: :func:`foreach`,
+* a test class decorator: :func:`expand`,
+* a test method decorator: :func:`foreach`,
 * two helper classes: :class:`param` and :class:`paramseq`.
 
 Let's see how to use them...
@@ -278,7 +278,8 @@ Smart parameter collection: :class:`paramseq`
 How to concatenate some separately created parameter collections?
 
 Just transform them (or at least the first of them) into
-:class:`paramseq` instances -- and then add one to another:
+:class:`paramseq` instances -- and then add one to another
+(with the ``+`` operator):
 
 >>> from unittest_expander import paramseq
 >>> 
@@ -345,18 +346,26 @@ test_is_even__<sys.maxsize> ... ok
 ...Ran 14 tests...
 OK
 
-Note that the parameter collections (such as sequences, mappings, sets
-or :class:`paramseq` instances) do not need to be created or bound
-within the test case class body; you could, for example, import them
-from a separate module.  Obviously, it makes code reuse and
-refactorization easier.
+.. note::
 
-Also, note that the signatures of the :func:`foreach` decorator and
-the :class:`paramseq` constructor are identical: you pass in either
-exactly one positional argument which is a parameter collection or
-several (more than one) positional and/or keyword arguments being
-singular parameter values or tuples of parameter values, or
-:class:`param` instances.
+   Parameter collections (such as sequences, mappings, sets or
+   :class:`paramseq` instances) do not need to be created or bound
+   within the test case class body; you could, for example, import them
+   from a separate module.  Obviously, it makes code reuse and
+   refactorization easier.
+
+   Also, note that the signatures of the :func:`foreach` decorator and
+   the :class:`paramseq` constructor are identical: you pass in either
+   exactly one positional argument which is a parameter collection or
+   several (more than one) positional and/or keyword arguments being
+   singular parameter values or tuples of parameter values, or
+   :class:`param` instances.
+
+.. note::
+
+   We said that a parameter collection can be a sequence (among others;
+   see the note above).  To be more precise: it can be a sequence except
+   that it cannot be a string*;
 
 A :class:`paramseq` instance can also be created from a callable object
 that returns a sequence or another iterable (e.g. a generator):
@@ -410,17 +419,19 @@ example) that is passed into the :class:`paramseq` constructor can
 accept no arguments or one positional argument -- in the latter case
 the test case class is passed in.
 
-*Note:* the callable object is called, and its iterable result is
-iterated over, *when* the :func:`expand` decorator is being executed,
-that is, *before* generating parameterized test methods.
+.. note::
 
-What *should also be emphasized* is that those operations (the
-aforementioned call plus iteration over its result) are performed
-*separately* for each use of :func:`foreach` with our :class:`paramseq`
-instance as its argument (or with another :class:`paramseq` instance
-that includes our instance; see the following code snippet in which the
-``input_values_and_results`` instance includes the previously created
-``randomized`` instance...).
+   The callable object is called, and its iterable result is iterated
+   over, *when* the :func:`expand` decorator is being executed, that is,
+   *before* generating parameterized test methods.
+
+   What *should also be emphasized* is that those operations (the
+   aforementioned call and then iteration over its result) are performed
+   *separately* for each use of :func:`foreach` with our
+   :class:`paramseq` instance as its argument (or with another
+   :class:`paramseq` instance that includes our instance; see the
+   following code snippet in which the ``input_values_and_results``
+   instance includes the previously created ``randomized`` instance...).
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -535,7 +546,7 @@ test_is_even__<integer, random odd> ... ok
 OK
 
 If parameters combined this way specify some conflicting keyword
-arguments it is detected and reported as an error:
+arguments they are detected and an error is reported:
 
 >>> params1 = [param(a=1, b=2, c=3)]
 >>> params2 = [param(b=4, c=3, d=2)]
@@ -555,8 +566,8 @@ ValueError: conflicting keyword arguments: 'b', 'c'
 
 .. _context-basics:
 
-Fixtures -- part I: :meth:`param.context`
-=========================================
+Context-manager-based fixtures: :meth:`param.context`
+=====================================================
 
 When dealing with resources managed with `context managers`_, you can
 specify a *context manager factory* and its arguments using the
@@ -614,9 +625,10 @@ test_save_load_with_spaces__<load='abc',save='abc'> ... ok
 ...Ran 4 tests...
 OK
 
-*Note:* if a test method accepts the `context_targets` keyword argument,
-a list of context manager *as-targets* (i.e. objects returned by context
-managers' :meth:`__enter__`) will be passed in as that argument.
+*Additional feature:* you can see in the above example is that if a test
+method accepts the `context_targets` keyword argument then a list of
+context manager *as-targets* (i.e. objects returned by context managers'
+:meth:`__enter__`) will be passed in as that argument.
 
 It is a list because there can be more than one *context* per parameter
 collection's item, e.g.:
@@ -819,7 +831,7 @@ FAILED (failures=1, errors=5)
 ... ]
 True
 
-*Note:* contexts attached to test *method* params (in contrast to
+Note that contexts attached to test *method* params (in contrast to
 those attached to test *class* params -- see below:
 :ref:`foreach-as-class-decorator`) are handled *directly* before (by
 running :meth:`__enter__`) and after (by running :meth:`__exit__`) a
@@ -887,10 +899,12 @@ test_save_load__<load='abc',save='abc'> ... ok
 ...Ran 2 tests...
 OK
 
-*Note:* :meth:`paramseq.context` as well as :meth:`param.context`
-and :meth:`param.label` methods create new objects (respectively
-:class:`paramseq` or :class:`param` instances), *without* modifying
-the existing ones.
+.. note::
+
+   :meth:`paramseq.context` as well as :meth:`param.context` and
+   :meth:`param.label` methods create new objects (respectively
+   :class:`paramseq` or :class:`param` instances), *without* modifying
+   the existing ones.
 
 >>> pseq1 = paramseq(1, 2, 3)
 >>> pseq2 = pseq1.context(open, '/etc/hostname', 'rb')
@@ -917,17 +931,17 @@ should be considered immutable.
 
 .. _foreach-as-class-decorator:
 
-Fixtures -- part II: :func:`foreach` as a class decorator
-=========================================================
+Deprecated feature: :func:`foreach` as a class decorator
+========================================================
 
 .. warning::
 
     This is the description of a deprecated feature.
 
     The parts of *unittest_expander* related to applying :func:`foreach`
-    **to classes** are broken by design and will be, in future versions
+    **to classes** are broken by design and will be, in a future version
     of the library, either revamped (in a backwards incompatible way)
-    or even completely removed.
+    or just completely removed.
 
 :func:`foreach` can be used not only as a test case *method* decorator
 but also as a test case *class* decorator -- to generate parameterized
@@ -998,7 +1012,7 @@ As you see, you can combine :func:`foreach` as *class* decorator(s) with
 parameterized with the Cartesian product of the involved parameter
 collections.
 
-*Note:* when using :func:`foreach` as a *class* decorator you must
+*Important:* when using :func:`foreach` as a *class* decorator you must
 remember to place :func:`expand` as the topmost (the outer) class
 decorator (above all :func:`foreach` decorators).
 
@@ -1278,7 +1292,7 @@ FAILED (failures=1, errors=7)
 ... ]
 True
 
-*Note:* contexts attached to test *class* params (in contrast to
+Note that contexts attached to test *class* params (in contrast to
 those attached to test *method* params -- see: :ref:`context-basics`)
 are automatically handled within :meth:`setUp` and (if applicable)
 :meth:`tearDown` -- so :meth:`setUp` and :meth:`tearDown` *are*
@@ -1316,11 +1330,11 @@ generated by :func:`expand` applied to a class decorated with
 
 * when extending :meth:`setUp` and/or :meth:`tearDown` methods:
 
-  * in :meth:`setUp`, calling :meth:`setUp` of superclass should be the
-    first action;
-  * in :meth:`tearDown`, calling :meth:`tearDown` of superclass should
-    be the last action -- and you shall ensure (by using a ``finally``
-    clause) that this action is *always* executed.
+  * in :meth:`setUp`, calling :meth:`setUp` of the superclass should be
+    the first action;
+  * in :meth:`tearDown`, calling :meth:`tearDown` of the superclass
+    should be the last action -- and you shall ensure (by using a
+    ``finally`` clause) that this action is *always* executed.
 
 For example:
 
@@ -1378,13 +1392,13 @@ Contexts cannot suppress exceptions unless you enable that explicitly
 The Python *context manager* protocol provides a way to suppress an
 exception occuring in the code enclosed by a context: the exception is
 *suppresed* (*not* propagated) if the context manager's
-:meth:`__exit__` method returns a true value (such as :obj:`True`).
+:meth:`__exit__` method returns a *true* value (such as :obj:`True`).
 
 It does **not** apply to context managers declared with
 :meth:`param.context` or :meth:`paramseq.context`: if :meth:`__exit__`
-of such a context manager returns a true value it is ignored and the
+of such a context manager returns a *true* value it is ignored and the
 exception (if any) is propagated anyway.  The rationale of this
-behaviour is that suppressing exceptions is generally not a good idea
+behavior is that suppressing exceptions is generally not a good idea
 when dealing with testing (it could easily make your tests leaky and
 useless).
 
@@ -1392,7 +1406,7 @@ However, if you **really** need to allow your context manager to
 suppress exceptions, pass the keyword argument
 ``__enable_exc_suppress__=True`` to the :meth:`param.context` or
 :meth:`paramseq.context` method (and, of course, make the
-:meth:`__exit__` context manager's method return a true value).
+:meth:`__exit__` context manager's method return a *true* value).
 
 >>> class SillySuppressingCM(object):
 ...     def __enter__(self): return self
@@ -1515,7 +1529,7 @@ OK
 True
 
 Normally -- without ``__enable_exc_suppress__=True`` -- exceptions
-*are* propagated even when :meth:`__exit__` returns a true value:
+*are* propagated even when :meth:`__exit__` returns a *true* value:
 
 >>> into_dict = {}
 >>> @expand(into=into_dict)
@@ -1629,7 +1643,7 @@ with :class:`Substitute` instances:
 [42]
 >>> DummyTest.attr is DummyTest.actual_object.attr
 True
->>> (set(dir(DummyTest.actual_object)) - set(['__call__'])
+>>> (set(dir(DummyTest.actual_object)) - {'__call__'}
 ...  ).issubset(dir(DummyTest))
 True
 
@@ -1642,7 +1656,7 @@ True
 [43, 44]
 >>> test_it.attr is test_it.actual_object.attr
 True
->>> (set(dir(test_it.actual_object)) - set(['__call__'])
+>>> (set(dir(test_it.actual_object)) - {'__call__'}
 ...  ).issubset(dir(test_it))
 True
 
@@ -1777,7 +1791,7 @@ test_save_load__parameterized_2 (...TestSaveLoad^^parameterized^4) ... ok
 ...Ran 8 tests...
 OK
 
-Set those attributes to :obj:`None` to restore the default behaviour:
+Set those attributes to :obj:`None` to restore the default behavior:
 
 >>> expand.global_name_pattern = None
 >>> expand.global_name_formatter = None
@@ -1962,7 +1976,7 @@ True
 True
 
 But things complicate when you apply :func:`foreach` to classes.  For
-such cases -- for now -- the answer is: *do not try this at home*.
+such cases the answer is: *do not try this at home*.
 
 As it was said earlier, the parts of *unittest_expander* related to
 applying :func:`foreach` to classes are broken by design and will be
@@ -2117,8 +2131,8 @@ The :func:`foreach` decorator is designed to be applied *only* to:
 
 You should *not* apply it to anything else (especially, not to static
 or class methods).  If you do, the effect is undefined: an error may
-occur (immediately or, for example, when applying :func:`expand`) or
-the whole thing may be just ignored.
+occur (immediately or, for example, when applying :func:`expand`) or,
+e.g., the whole thing may be just ignored.
 
 
 .. doctest::
@@ -2138,15 +2152,15 @@ the whole thing may be just ignored.
     True
     >>> isinstance(paramseq([1, 2]), paramseq)
     True
-    >>> isinstance(paramseq(set([1, 2])), paramseq)
+    >>> isinstance(paramseq({1, 2}), paramseq)
     True
     >>> isinstance(paramseq(a=3, b=4), paramseq)
     True
     >>> isinstance(paramseq(paramseq([1, 2])), paramseq)
     True
-    >>> isinstance(paramseq([1, 2]) + set([3, 4]) + (5, 6), paramseq)
+    >>> isinstance(paramseq([1, 2]) + {3, 4} + (5, 6), paramseq)
     True
-    >>> isinstance(set([3, 4]) + paramseq([1, 2]) + (5, 6), paramseq)
+    >>> isinstance({3, 4} + paramseq([1, 2]) + (5, 6), paramseq)
     True
 
     >>> paramseq([1, 2]) + 3         # doctest: +ELLIPSIS

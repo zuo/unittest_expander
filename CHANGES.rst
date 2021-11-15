@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.X.X (2021-10-XX)
+0.X.X (2021-11-XX)
 ------------------
 
 * From now on, the following versions of Python are supported: **3.5**
@@ -10,13 +10,13 @@ Changes
 
 * Now, if two (or more) parameter collections are combined to make a
   Cartesian product of them (as an effect of decorating a test with
-  two or more **foreach()** invocations), and a conflict is detected
-  between any *keyword arguments* previously used to create **param()**
-  instances that are now combined, then **expand()** raises a
+  two or more **foreach(...)** invocations), and a conflict is detected
+  between any *keyword arguments* previously used to create **param**
+  instances that are now combined, then the **expand** decorator raises
   **ValueError** (in older versions of *unittest_expander* no exception
-  was raised; instead of that, a keyword argument being a component of
-  one **param()** was silently overwritten by the corresponding keyword
-  argument being a component of the other **param()**).
+  was raised; instead, a keyword argument being a component of one
+  **param** was silently overwritten by the corresponding keyword
+  argument being a component of the other **param**).
 
 * When it comes to **param.context()** (and **paramseq.context()**),
   now the standard Python context manager's mechanism of suppressing
@@ -30,16 +30,18 @@ Changes
   If needed, the possibility of suppressing exceptions by **__exit__()**
   returning a *true* value can be explicitly *enabled* on a per case by
   case basis by passing ``__enable_exc_suppress__=True`` to
-  **param.context()** (or to **paramseq.context()**).
+  **param.context()** (or **paramseq.context()**).
 
 * **Deprecation notice:** decorating test *classes* with **foreach()**
   -- to generate new, parameterized, test *classes* -- is now deprecated
   (causing emission of a **DeprecationWarning**); in a future version of
   *unittest_expander* the feature will be either **removed** or undergo
-  **profound changes** (surely, backwards incompatible), as its current
-  shape is deemed broken by design (in particular, when it comes to, but
-  not limited to, the lack of composability -- which becomes apparent
-  when **expand()**-ing is combined with class inheritance...).
+  **profound, backwards incompatible changes**; the current shape of the
+  feature is deemed broken by design (in particular, because of the lack
+  of composability, that becomes apparent when it comes to class
+  inheritance...).
+
+* **Deprecation notice:** TBD...
 
 * A bugfix: now test methods with *keyword-only* arguments and/or *type
   annotations* are supported (previously a **ValueError** was raised by
@@ -77,11 +79,11 @@ Changes
   **expand()** from such a class raised an **AttributeError**);
 
   (2) now the ``context_targets`` attribute is set (to an empty list)
-  also if there are no contexts (making it possible for test code to
+  also if there are no contexts (making it possible for a test code to
   refer to ``self.context_targets`` without fear of **AttributeError**);
 
-  (3) now a context's **__exit__()** is never called without the
-  corresponding (preceding) **__enter__()** call being successful.
+  (3) now a *context*'s **__exit__()** is never called without the
+  corresponding **__enter__()** call being successful.
 
 * A few really minor behavioral changes/improvements (in particular, now
   a *callable* parameter collection is required to satisfy the built-in
@@ -89,9 +91,10 @@ Changes
   **isinstance(..., collections.Callable)** condition).
 
 * A few package-setup-related updates/improvements (in particular, the
-  ``pyproject.toml`` file has been added).
+  ``pyproject.toml`` and ``setup.cfg`` files have been added and the
+  ``setup.py`` file has been removed).
 
-* A bunch of tests/documentation-related updates, fixes and
+* A bunch of tests-and/or-documentation-related updates, fixes and
   improvements.
 
 * TBD?...

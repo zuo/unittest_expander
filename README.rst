@@ -19,7 +19,7 @@ Python standard library).
 Installing
 ----------
 
-The easiest way to install the library is to execute (possibly in a
+The easiest way to install the library is to execute (preferably in a
 `virtualenv`_) the command::
 
     python -m pip install unittest_expander
@@ -29,13 +29,13 @@ have the *pip* tool installed -- see:
 https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 
 Alternatively, you can `download`_ the library source archive, unpack
-it, ``cd`` to the unpacked directory and execute (possibly in a
+it, ``cd`` to the unpacked directory and execute (preferably in a
 `virtualenv`_) the following command::
 
     python -m pip install .
 
-(you may need to have administrator privileges if you are executing it
-*not* in a *virtualenv*).
+Note: you may need to have administrator privileges if you do *not*
+operate in a *virtualenv*.
 
 It is also possible to use the library without installing it: as its
 code is contained in a single file (``unittest_expander.py``), you can
@@ -62,7 +62,7 @@ Consider the following **ugly** test:
                 ([0], 0),
                 ([3], 3),
                 ([1, 3, 1], 5),
-                (set([1, 3]), 4),
+                (frozenset({1, 3}), 4),
                 ({1:'a', 3:'b'}, 4),
             ]:
                 self.assertEqual(sum(iterable), expected)
@@ -81,7 +81,7 @@ Is it cool?  **Not at all!**  So let's improve it:
             ([0], 0),
             ([3], 3),
             ([1, 3, 1], 5),
-            (set([1, 3]), 4),
+            (frozenset({1, 3}), 4),
             ({1:'a', 3:'b'}, 4),
         )
         def test_sum(self, iterable, expected):
@@ -107,7 +107,7 @@ way:
             param([0], expected=0),
             param([3], expected=3),
             param([1, 3, 1], expected=5),
-            param(set([1, 3]), expected=4),
+            param(frozenset({1, 3}), expected=4),
             param({1:'a', 3:'b'}, expected=4).label('even dict is ok'),
         ]
 
