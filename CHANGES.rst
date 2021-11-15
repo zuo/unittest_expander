@@ -40,8 +40,12 @@ Changes
   feature is deemed broken by design (in particular, because of the lack
   of composability, that becomes apparent when it comes to class
   inheritance...).
-
-* **Deprecation notice:** TBD...
+* **Deprecation notice:** using a *tuple* as a parameter collection
+  passed as the *sole* argument to **paramseq()** or **foreach()**
+  is now deprecated (causing emission of a **DeprecationWarning**);
+  in future versions of *unittest_expander* it will either be
+  **unsupported** or (later) have a **different meaning** (namely:
+  acting as the only *item* of the specified parameter collection).
 
 * A bugfix: now test methods with *keyword-only* arguments and/or *type
   annotations* are supported (previously a **ValueError** was raised by

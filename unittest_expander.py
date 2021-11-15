@@ -366,6 +366,15 @@ OK
    see the note above).  To be more precise: it can be a sequence except
    that it cannot be a string*;
 
+.. warning::
+
+   Also, a parameter collection should *not* be a tuple (i.e., an
+   instance of the built-in type :class:`tuple` or of any subclass of
+   it, e.g., a *named tuple*), as that is deprecated and will *not* be
+   supported in future versions of *unittest_expander* (note that we say
+   about a parameter collection, *not* about an *item* of it; such an
+   item being a tuple of parameter values is perfectly OK).
+
 A :class:`paramseq` instance can also be created from a callable object
 that returns a sequence or another iterable (e.g. a generator):
 
@@ -2559,11 +2568,15 @@ class paramseq(object):
             self._init_with_param_collections(args, kwargs)
 
     def __add__(self, other):
+        if isinstance(other, tuple):
+            other = list(other)
         if self._is_legal_param_collection(other):
             return self._from_param_collections(self, other)
         return NotImplemented
 
     def __radd__(self, other):
+        if isinstance(other, tuple):
+            other = list(other)
         if self._is_legal_param_collection(other):
             return self._from_param_collections(other, self)
         return NotImplemented
@@ -2591,6 +2604,11 @@ class paramseq(object):
 
     @staticmethod
     def _is_legal_param_collection(obj):
+        if isinstance(obj, tuple):
+            warnings.warn(
+                'using a tuple as a parameter collection will not be '
+                'supported in future versions of unittest_expander.',
+                DeprecationWarning)
         return (
             isinstance(obj, (
                 paramseq,

@@ -39,6 +39,11 @@ The :func:`foreach` method/class decorator
    * a callable (i.e., such an object that ``callable(obj)`` returns
      :obj:`True`) that returns an iterable object (such as a generator).
 
+   .. deprecated:: 0.4.0
+      A parameter collection being a tuple (i.e., an instance of the
+      built-in type :class:`tuple` or of a subclass of it, e.g., a
+      *named tuple*) will *not* be supported in future versions.
+
    Each item of a parameter collection is one of:
 
    * a :class:`param` instance,
@@ -76,6 +81,11 @@ The :class:`paramseq` class
      ``isinstance(obj, collections.abc.Set)`` returns :obj:`True`),
    * a callable (i.e., such an object that ``callable(obj)`` returns
      :obj:`True`) that returns an iterable object (such as a generator).
+
+   .. deprecated:: 0.4.0
+      A parameter collection being a tuple (i.e., an instance of the
+      built-in type :class:`tuple` or of any subclass of it, e.g., a
+      *named tuple*) will *not* be supported in future versions.
 
    Each item of a parameter collection is one of:
 
