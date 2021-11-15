@@ -84,8 +84,8 @@ parametrized versions of the methods.
 
 Let's run this stuff...
 
->>> # a helper function that will run tests in our examples
->>> # -- NORMALLY YOU DON'T NEED IT, of course!
+>>> # a helper function that will run tests in our examples --
+>>> # NORMALLY YOU DON'T NEED IT, of course!
 >>> import sys
 >>> def run_tests(*test_case_classes):
 ...     suite = unittest.TestSuite(
@@ -370,10 +370,11 @@ OK
 
    Also, a parameter collection should *not* be a tuple (i.e., an
    instance of the built-in type :class:`tuple` or of any subclass of
-   it, e.g., a *named tuple*), as that is deprecated and will *not* be
-   supported in future versions of *unittest_expander* (note that we say
-   about a parameter collection, *not* about an *item* of it; such an
-   item being a tuple of parameter values is perfectly OK).
+   it, e.g., a *named tuple*), as that is deprecated and, in future
+   versions of *unittest_expander*, will either be **unsupported** or
+   (later) have a **different meaning** (note that we refer to a tuple
+   being a parameter collection, *not* a parameter collection's *item*;
+   a tuple being such an item is perfectly OK).
 
 A :class:`paramseq` instance can also be created from a callable object
 that returns a sequence or another iterable (e.g. a generator):
@@ -633,9 +634,9 @@ test_save_load_with_spaces__<load='abc',save='abc'> ... ok
 ...Ran 4 tests...
 OK
 
-*Additional feature:* you can see in the above example is that if a test
-method accepts the `context_targets` keyword argument then a list of
-context manager *as-targets* (i.e. objects returned by context managers'
+As you can see in the above example, if a test method accepts the
+`context_targets` keyword argument then a list of context manager
+*as-targets* (i.e. objects returned by context managers'
 :meth:`__enter__`) will be passed in as that argument.
 
 It is a list because there can be more than one *context* per parameter
@@ -947,9 +948,9 @@ Deprecated feature: :func:`foreach` as a class decorator
     This is the description of a deprecated feature.
 
     The parts of *unittest_expander* related to applying :func:`foreach`
-    **to classes** are broken by design and will be, in a future version
-    of the library, either revamped (in a backwards incompatible way)
-    or just completely removed.
+    **to classes** are broken by design and, in future versions of
+    *unittest_expander*, will either be **unsupported** or (later) have
+    a completely **different meaning**.
 
 :func:`foreach` can be used not only as a test case *method* decorator
 but also as a test case *class* decorator -- to generate parametrized
@@ -1984,12 +1985,9 @@ True
 True
 
 But things complicate when you apply :func:`foreach` to classes.  For
-such cases the answer is: *do not try this at home*.
-
-As it was said earlier, the parts of *unittest_expander* related to
-applying :func:`foreach` to classes are broken by design and will be
-revamped (in a backwards incompatible way), or even completely
-removed, in future versions of *unittest_expander*.
+such cases the answer is: *do not try this at home*.  As it was said
+earlier, the parts of *unittest_expander* related to applying
+:func:`foreach` to classes are deprecated.
 
 
 "Do my test classes need to inherit from :class:`unittest.TestCase`?"
@@ -2135,7 +2133,7 @@ The :func:`foreach` decorator is designed to be applied *only* to:
   functions that define regular test case instance methods);
 * test (or test mix-in) classes themselves
 
-(as noted above, the latter is a deprecated feature).
+(and, as noted above, the latter is a deprecated feature).
 
 You should *not* apply it to anything else (especially, not to static
 or class methods).  If you do, the effect is undefined: an error may
