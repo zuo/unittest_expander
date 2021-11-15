@@ -1,5 +1,5 @@
-*unittest_expander* -- test parameterization library
-====================================================
+*unittest_expander* -- test parametrization library
+===================================================
 
 .. toctree::
    :maxdepth: 2
@@ -20,4 +20,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`search`
-

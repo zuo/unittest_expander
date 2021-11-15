@@ -23,7 +23,7 @@
 
 """
 *unittest_expander* is a Python library that provides flexible and
-easy-to-use tools to parameterize your unit tests, especially those
+easy-to-use tools to parametrize your unit tests, especially those
 based on :class:`unittest.TestCase` from the Python standard library.
 
 The :mod:`unittest_expander` module provides the following tools:
@@ -80,7 +80,7 @@ As you see, it's fairly simple: you attach parameter collections to your
 test methods with the :func:`foreach` decorator and decorate the whole
 test case class with the :func:`expand` decorator.  The latter does the
 actual job, i.e. generates (and adds to the test case class)
-parameterized versions of the methods.
+parametrized versions of the methods.
 
 Let's run this stuff...
 
@@ -431,7 +431,7 @@ the test case class is passed in.
 
    The callable object is called, and its iterable result is iterated
    over, *when* the :func:`expand` decorator is being executed, that is,
-   *before* generating parameterized test methods.
+   *before* generating parametrized test methods.
 
    What *should also be emphasized* is that those operations (the
    aforementioned call and then iteration over its result) are performed
@@ -526,7 +526,7 @@ Cartesian product:
 ...         floating=float,
 ...     )
 ...
-...     # let's combine them (7 * 2 -> 14 parameterized tests)
+...     # let's combine them (7 * 2 -> 14 parametrized tests)
 ...     @foreach(input_values_and_results)
 ...     @foreach(input_types)
 ...     def test_is_even(self, input_type, n, expected):
@@ -580,7 +580,7 @@ Context-manager-based fixtures: :meth:`param.context`
 When dealing with resources managed with `context managers`_, you can
 specify a *context manager factory* and its arguments using the
 :meth:`~param.context` method of a :class:`param` object -- then each
-call of the resultant parameterized test will be enclosed in a dedicated
+call of the resultant parametrized test will be enclosed in a dedicated
 *context manager* instance (created by calling the *context manager
 factory* with the given arguments).
 
@@ -843,7 +843,7 @@ Note that contexts attached to test *method* params (in contrast to
 those attached to test *class* params -- see below:
 :ref:`foreach-as-class-decorator`) are handled *directly* before (by
 running :meth:`__enter__`) and after (by running :meth:`__exit__`) a
-given parameterized test method call, that is, *after* :meth:`setUp`
+given parametrized test method call, that is, *after* :meth:`setUp`
 and *before* :meth:`tearDown` calls -- so :meth:`setUp` and
 :meth:`tearDown` are unaffected by any errors related to those
 contexts.
@@ -952,7 +952,7 @@ Deprecated feature: :func:`foreach` as a class decorator
     or just completely removed.
 
 :func:`foreach` can be used not only as a test case *method* decorator
-but also as a test case *class* decorator -- to generate parameterized
+but also as a test case *class* decorator -- to generate parametrized
 test case *classes*.
 
 That allows you to share each specified parameter/context/label across
@@ -1002,7 +1002,7 @@ methods.
 >>> 
 >>> test_classes = [globals()[name] for name in dir()
 ...                 if name.startswith('TestSaveLoad__')]
->>> # (note: 2 * 2 * 2 param items -> 8 parameterized tests)
+>>> # (note: 2 * 2 * 2 param items -> 8 parametrized tests)
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
 test_save_load__<suffix=' '> (..._<'foo',b=42, load='',save=''>) ... ok
 test_save_load__<suffix='XX'> (..._<'foo',b=42, load='',save=''>) ... ok
@@ -1017,7 +1017,7 @@ OK
 
 As you see, you can combine :func:`foreach` as *class* decorator(s) with
 :func:`foreach` as *method* decorator(s) -- you will obtain tests
-parameterized with the Cartesian product of the involved parameter
+parametrized with the Cartesian product of the involved parameter
 collections.
 
 *Important:* when using :func:`foreach` as a *class* decorator you must
@@ -1025,7 +1025,7 @@ remember to place :func:`expand` as the topmost (the outer) class
 decorator (above all :func:`foreach` decorators).
 
 The *into* keyword argument for the :func:`expand` decorator specifies
-where the generated (parameterized) subclasses of the decorated test
+where the generated (parametrized) subclasses of the decorated test
 case class should be placed; the attribute value should be either a
 mapping (typically: the :func:`globals()` dictionary) or a
 (non-read-only) Python module object, or a (possibly dotted) name of
@@ -1638,7 +1638,7 @@ original objects (classes or methods) decorated with :func:`foreach`?"
 ...     attr = [42]
 ...     test_it.attr = [43, 44]
 
-They cannot be left where they are because, without parameterization,
+They cannot be left where they are because, without parametrization,
 they are not valid tests (but rather kind of test templates).  For that
 reason, they are always replaced (by the :func:`expand`'s machinery)
 with :class:`Substitute` instances:
@@ -1679,7 +1679,7 @@ introspection).
 Custom method/class name formatting
 ===================================
 
-If you don't like how parameterized method/class names are formatted --
+If you don't like how parametrized method/class names are formatted --
 you can customize that globally by:
 
 * setting :attr:`expand.global_name_pattern` to a :meth:`str.format`-like
@@ -1690,7 +1690,7 @@ you can customize that globally by:
   * ``{base_obj}`` -- the original test method or class,
   * ``{label}`` -- the test label (automatically generated or
     explicitly specified with :meth:`param.label`),
-  * ``{count}`` -- consecutive number of a generated parameterized
+  * ``{count}`` -- consecutive number of a generated parametrized
     method or class;
 
   (in future versions of the library other format fields may be added)
@@ -1704,7 +1704,7 @@ and/or
 
 For example:
 
->>> expand.global_name_pattern = '{base_name}__parameterized_{count}'
+>>> expand.global_name_pattern = '{base_name}__parametrized_{count}'
 >>> 
 >>> into_dict = {}
 >>> 
@@ -1726,21 +1726,21 @@ For example:
 >>> for name in sorted(into_dict):  # doctest: +ELLIPSIS
 ...     name
 ...
-'TestSaveLoad__parameterized_1'
-'TestSaveLoad__parameterized_2'
-'TestSaveLoad__parameterized_3'
-'TestSaveLoad__parameterized_4'
+'TestSaveLoad__parametrized_1'
+'TestSaveLoad__parametrized_2'
+'TestSaveLoad__parametrized_3'
+'TestSaveLoad__parametrized_4'
 >>> 
 >>> test_classes = [into_dict[name] for name in sorted(into_dict)]
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test_save_load__parameterized_1 (...TestSaveLoad__parameterized_1) ... ok
-test_save_load__parameterized_2 (...TestSaveLoad__parameterized_1) ... ok
-test_save_load__parameterized_1 (...TestSaveLoad__parameterized_2) ... ok
-test_save_load__parameterized_2 (...TestSaveLoad__parameterized_2) ... ok
-test_save_load__parameterized_1 (...TestSaveLoad__parameterized_3) ... ok
-test_save_load__parameterized_2 (...TestSaveLoad__parameterized_3) ... ok
-test_save_load__parameterized_1 (...TestSaveLoad__parameterized_4) ... ok
-test_save_load__parameterized_2 (...TestSaveLoad__parameterized_4) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_1) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_1) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_2) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_2) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_3) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_3) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_4) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_4) ... ok
 ...Ran 8 tests...
 OK
 
@@ -1783,19 +1783,19 @@ OK
 ...
 "!'foo',b=42, load='',save=''!"
 "!'foo',b=42, load='abc',save='abc'!"
-'TestSaveLoad^^parameterized^3'
-'TestSaveLoad^^parameterized^4'
+'TestSaveLoad^^parametrized^3'
+'TestSaveLoad^^parametrized^4'
 >>> 
 >>> test_classes = [into_dict[name] for name in sorted(into_dict)]
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test_save_load__parameterized_1 (...!'foo',b=42, load='',save=''!) ... ok
-test_save_load__parameterized_2 (...!'foo',b=42, load='',save=''!) ... ok
-test_save_load__parameterized_1 (...!'foo',b=42, load='abc',save='abc'!) ... ok
-test_save_load__parameterized_2 (...!'foo',b=42, load='abc',save='abc'!) ... ok
-test_save_load__parameterized_1 (...TestSaveLoad^^parameterized^3) ... ok
-test_save_load__parameterized_2 (...TestSaveLoad^^parameterized^3) ... ok
-test_save_load__parameterized_1 (...TestSaveLoad^^parameterized^4) ... ok
-test_save_load__parameterized_2 (...TestSaveLoad^^parameterized^4) ... ok
+test_save_load__parametrized_1 (...!'foo',b=42, load='',save=''!) ... ok
+test_save_load__parametrized_2 (...!'foo',b=42, load='',save=''!) ... ok
+test_save_load__parametrized_1 (...!'foo',b=42, load='abc',save='abc'!) ... ok
+test_save_load__parametrized_2 (...!'foo',b=42, load='abc',save='abc'!) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad^^parametrized^3) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad^^parametrized^3) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad^^parametrized^4) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad^^parametrized^4) ... ok
 ...Ran 8 tests...
 OK
 

@@ -23,7 +23,7 @@ Related Links (Historical Note)
 
 Before/when creating first versions of *unittest_expander* I (Jan)
 checked out several other projects and resources related to unit test
-parameterization in Python.
+parametrization (aka *parameterization*) in Python.
 
 Some of them were mature and actively maintained projects, others were
 just minor drafts; some depended (contrary to *unittest_expander*) on
