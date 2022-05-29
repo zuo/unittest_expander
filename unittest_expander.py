@@ -364,7 +364,7 @@ OK
 
    We said that a parameter collection can be a sequence (among others;
    see the note above).  To be more precise: it can be a sequence except
-   that it cannot be a string*;
+   that it *cannot be a string*.
 
 .. warning::
 
@@ -377,7 +377,7 @@ OK
    a tuple being such an item is perfectly OK).
 
 A :class:`paramseq` instance can also be created from a callable object
-that returns a sequence or another iterable (e.g. a generator):
+that returns a sequence or another iterable (e.g., a generator):
 
 >>> from random import randint
 >>> 
@@ -423,24 +423,24 @@ test_is_even_negated_when_incremented__<random odd> ... ok
 ...Ran 4 tests...
 OK
 
-The callable object (such as the generator function in the above
-example) that is passed into the :class:`paramseq` constructor can
-accept no arguments or one positional argument -- in the latter case
-the test case class is passed in.
+A callable object (such as the generator function in the above example)
+which is passed into the :class:`paramseq` constructor can accept no
+arguments or one positional argument -- in the latter case the test case
+class will be passed in.
 
 .. note::
 
-   The callable object is called, and its iterable result is iterated
-   over, *when* the :func:`expand` decorator is being executed, that is,
+   The callable object will be called, and its iterable result will be
+   iterated over, *when* the :func:`expand` decorator is being executed,
    *before* generating parametrized test methods.
 
-   What *should also be emphasized* is that those operations (the
-   aforementioned call and then iteration over its result) are performed
-   *separately* for each use of :func:`foreach` with our
-   :class:`paramseq` instance as its argument (or with another
-   :class:`paramseq` instance that includes our instance; see the
-   following code snippet in which the ``input_values_and_results``
-   instance includes the previously created ``randomized`` instance...).
+What *should also be emphasized* is that those operations (the
+aforementioned call and then iteration over its result) will be
+performed *separately* for each use of :func:`foreach` with our
+:class:`paramseq` instance as its argument (or with another
+:class:`paramseq` instance that includes our instance; see the
+following code snippet in which the ``input_values_and_results``
+instance includes the previously created ``randomized`` instance).
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -908,12 +908,10 @@ test_save_load__<load='abc',save='abc'> ... ok
 ...Ran 2 tests...
 OK
 
-.. note::
-
-   :meth:`paramseq.context` as well as :meth:`param.context` and
-   :meth:`param.label` methods create new objects (respectively
-   :class:`paramseq` or :class:`param` instances), *without* modifying
-   the existing ones.
+It should be noted that :meth:`paramseq.context` as well as
+:meth:`param.context` and :meth:`param.label` methods create new objects
+(respectively :class:`paramseq` or :class:`param` instances), *without*
+modifying the existing ones.
 
 >>> pseq1 = paramseq(1, 2, 3)
 >>> pseq2 = pseq1.context(open, '/etc/hostname', 'rb')
@@ -2359,8 +2357,8 @@ if _PY3:
             # * under Python 3.11+:
             #   raise TypeError if any of the context manager
             #   protocol's required elements is not present
-            #   (see: https://bugs.python.org/issue12022
-            #   and https://bugs.python.org/issue44471)
+            #   (see: https://github.com/python/cpython/issues/56231
+            #   and https://github.com/python/cpython/issues/88637)
             try:
                 enter_func = cm_type.__enter__
                 exit_func = cm_type.__exit__
@@ -2371,7 +2369,7 @@ if _PY3:
         elif sys.version_info[:2] >= (3, 6):
             # * under Python from 3.6 through 3.10:
             #   *first* get __enter__, *then* get __exit__
-            #   (see: https://bugs.python.org/issue27100)
+            #   (see: https://github.com/python/cpython/issues/71287)
             enter_func = cm_type.__enter__
             exit_func = cm_type.__exit__
         else:
@@ -2478,7 +2476,7 @@ class param(object):
                 args=param_inst._args,
                 kwargs=param_inst._kwargs,
                 context_list=param_inst._context_list,
-                # note: calling _get_label() here
+                # (note: calling _get_label() here!)
                 label_list=[param_inst._get_label()])
         return new
 
