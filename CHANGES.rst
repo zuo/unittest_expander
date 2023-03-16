@@ -1,6 +1,12 @@
 Changes
 =======
 
+Unreleased (to be updated...)
+-----------------------------
+
+* Documentation improvements, updates and minor fixes.
+
+
 0.4.0 (2023-03-16)
 ------------------
 

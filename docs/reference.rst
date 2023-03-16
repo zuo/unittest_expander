@@ -31,8 +31,8 @@ The :func:`expand` class decorator
    -- are "expanded", that is, actual parametrized versions of those
    methods (and/or classes) are generated.
 
-   The public interface the decorator provides includes also the
-   following attributes (making it possible to :ref:`change how
+   The public interface provided by :func:`expand` includes also the
+   following attributes (making it possible to :ref:`customize how
    names of parametrized test methods and classes are generated
    <custom-name-formatting>`):
 
@@ -65,7 +65,7 @@ The :func:`foreach` method/class decorator
 
    .. deprecated:: 0.4.0
 
-      A parameter collection being a tuple (i.e., an instance of
+      A parameter collection given as a tuple (i.e., an instance of
       the built-in type :class:`tuple` or of a subclass of it, e.g.,
       a *named tuple*) will become *illegal* in the version *0.5.0*
       (note that this deprecation concerns tuples used as *parameter
@@ -126,7 +126,7 @@ The :class:`paramseq` class
 
    .. deprecated:: 0.4.0
 
-      A parameter collection being a tuple (i.e., an instance of
+      A parameter collection given as a tuple (i.e., an instance of
       the built-in type :class:`tuple` or of a subclass of it, e.g.,
       a *named tuple*) will become *illegal* in the version *0.5.0*
       (note that this deprecation concerns tuples used as *parameter
@@ -157,7 +157,7 @@ The :class:`paramseq` class
    A :class:`paramseq` object is the canonical form of a parameter
    collection -- whose items are :class:`param` objects.
 
-   The public interface this class provides includes the following
+   The public interface provided by this class includes the following
    instance methods:
 
    .. method:: __add__(param_collection)
@@ -167,12 +167,22 @@ The :class:`paramseq` class
       *param_collection* (see the description of the :class:`paramseq`
       constructor's argument *param_collection*...).
 
+      .. deprecated:: 0.4.0
+
+         *param_collection* being a tuple will become *illegal* in the
+         version *0.5.0*.
+
    .. method:: __radd__(param_collection)
 
       Returns a new :class:`paramseq` instance -- being a result of
       concatenation of given *param_collection* (see the description of
       the :class:`paramseq` constructor's argument *param_collection*...)
       and the current :class:`paramseq` instance.
+
+      .. deprecated:: 0.4.0
+
+         *param_collection* being a tuple will become *illegal* in the
+         version *0.5.0*.
 
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \
@@ -195,11 +205,10 @@ The :class:`param` class
    ———
 
    A :class:`param` object is the canonical form of a parameter
-   collection's *item* -- which represents a single :ref:`combination of
-   test parameter values <param-basics>` (to be passed to single test
-   method calls...).
+   collection's *item* -- which represents a single :ref:`combination
+   of test parameter values <param-basics>`.
 
-   The public interface this class provides includes the following
+   The public interface provided by this class includes the following
    instance methods:
 
    .. method:: context(context_manager_factory, \
@@ -231,10 +240,10 @@ The :class:`Substitute` class
 
    ———
 
-   Apart from exposing in a transparent way nearly all attributes of the
-   proxied object (also methods -- except :meth:`__call__`), the public
-   interface this class provides includes the following instance
-   attribute:
+   Apart from exposing in a transparent way nearly all attributes of
+   the proxied object (also methods -- with a notable exception of
+   :meth:`__call__`), the public interface provided by this class
+   includes the following instance attribute:
 
    .. attribute:: actual_object
 
