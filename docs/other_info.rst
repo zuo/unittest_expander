@@ -15,6 +15,11 @@ the code repository.
 
 .. _GitHub pull requests: https://github.com/zuo/unittest_expander/pulls?q=is%3Apr+is%3Amerged
 
+Also, the project owes a lot to those who `report bugs and
+propose/discuss enhancements`_.
+
+.. _report bugs and propose/discuss enhancements: https://github.com/zuo/unittest_expander/issues?q=
+
 There were also some inspirations; see the following section to learn
 about some of them...
 
@@ -54,6 +59,6 @@ Anyway, here are the links:
 
 See also:
 
-* https://bugs.python.org/issue7897
-* https://bugs.python.org/issue12600
-* https://hg.python.org/cpython/rev/e6a33938b03f/
+* https://github.com/python/cpython/issues/52145
+* https://github.com/python/cpython/issues/56809
+* https://github.com/python/cpython/commit/56517e5cb91c896024934a520d365d6e275eb1ad

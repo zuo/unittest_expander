@@ -60,6 +60,9 @@ The :func:`foreach` method/class decorator
      :obj:`True`) that returns an iterable object (for example, a
      generator/iterator).
 
+   Any valid parameter collection will be, under the hood, automatically
+   converted to a :class:`paramseq`.
+
    .. deprecated:: 0.4.0
 
       A parameter collection being a tuple (i.e., an instance of
@@ -68,14 +71,10 @@ The :func:`foreach` method/class decorator
       (note that this deprecation concerns tuples used as *parameter
       collections* themselves, *not* as *items* of parameter
       collections; the latter are -- and will be -- perfectly OK).
-
       As a parameter collection, instead of a tuple, use another type
       (e.g., a :class:`list`).
 
-   Any parameter collection will be, under the hood, automatically
-   converted to a :class:`paramseq`.
-
-   Each item of the parameter collection should be one of:
+   Each item of a parameter collection should be one of:
 
    * a :class:`param` instance,
    * a :class:`tuple` (converted automatically to a :class:`param`
@@ -133,11 +132,10 @@ The :class:`paramseq` class
       (note that this deprecation concerns tuples used as *parameter
       collections* themselves, *not* as *items* of parameter
       collections; the latter are -- and will be -- perfectly OK).
-
       As a parameter collection, instead of a tuple, use another type
       (e.g., a :class:`list`).
 
-   Each item of the parameter collection should be one of:
+   Each item of a parameter collection should be one of:
 
    * a :class:`param` instance,
    * a :class:`tuple` (converted automatically to a :class:`param`
@@ -235,7 +233,7 @@ The :class:`Substitute` class
 
    Apart from exposing in a transparent way nearly all attributes of the
    proxied object (also methods -- except :meth:`__call__`), the public
-   interface this class provides includes also the following instance
+   interface this class provides includes the following instance
    attribute:
 
    .. attribute:: actual_object
