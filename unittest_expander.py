@@ -371,13 +371,13 @@ OK
 
    Also, a parameter collection should *not* be a tuple (i.e., an
    instance of the built-in type :class:`tuple` or of any subclass of
-   it, e.g., a *named tuple*), as that is **deprecated** and will become
+   it, e.g., a *named tuple*), as this is **deprecated** and will become
    **illegal** in the *0.5.0* version of *unittest_expander*.
 
-   Note that here we refer to a tuple being a *parameter collection*,
-   *not* a parameter collection's *item* (tuples being such items,
-   acting as simple substitutes of :class:`param` objects, are --
-   and will always be -- perfectly OK).
+   Note that this deprecation concerns tuples used as *parameter
+   collections*, *not* as *item* of parameter collection (tuples being
+   such items, acting as simple substitutes of :class:`param` objects,
+   are -- and will always be -- perfectly OK).
 
 A :class:`paramseq` instance can also be created from a callable object
 that returns a sequence or another iterable (e.g., a generator/iterator):
@@ -558,7 +558,7 @@ test_is_even__<integer, random odd> ... ok
 OK
 
 If parameters combined this way specify some conflicting keyword
-arguments they are detected and an error is reported:
+arguments, they are detected and an error is reported:
 
 >>> params1 = [param(a=1, b=2, c=3)]
 >>> params2 = [param(b=4, c=3, d=2)]
@@ -1416,8 +1416,8 @@ exception occuring in the code enclosed by a context: the exception is
 
 It does **not** apply to context managers declared with
 :meth:`param.context` or :meth:`paramseq.context`: if :meth:`__exit__`
-of such a context manager returns a *true* value it is ignored and the
-exception (if any) is propagated anyway.  The rationale of this
+of such a context manager returns a *true* value, it is ignored and
+the exception (if any) is propagated anyway.  The rationale of this
 behavior is that suppressing exceptions is generally not a good idea
 when dealing with testing (it could easily make your tests leaky and
 useless).
@@ -1590,7 +1590,7 @@ test_it__... ERROR
 FAILED (failures=1, errors=5)
 
 It is worth emphasizing that ``_enable_exc_suppress_=True`` changes
-nothing when context manager's :meth:`__exit__` returns a false value:
+nothing when context manager's :meth:`__exit__` returns a *false* value:
 
 >>> into_dict = {}
 >>> @expand(into=into_dict)
@@ -1652,7 +1652,7 @@ original objects (classes or methods) decorated with :func:`foreach`?"
 ...     test_it.attr = [43, 44]
 
 They cannot be left where they are because, without parametrization,
-they are not valid tests (but rather kind of test templates).  For that
+they are not valid tests (but rather kind of test templates).  For this
 reason, they are always replaced (by the :func:`expand`'s machinery)
 with :class:`Substitute` instances:
 
@@ -2116,7 +2116,7 @@ True
 True
 
 However, note that if you decorate your test class (and not only its
-methods) with :func:`foreach` the test running tools you use are
+methods) with :func:`foreach`, the test running tools you use are
 expected to call :meth:`setUp` and :meth:`tearDown` methods
 appropriately -- as *unittest*'s test running machinery does (though
 your test class does not need to implement these methods by itself).
