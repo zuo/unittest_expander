@@ -1,8 +1,8 @@
 Changes
 =======
 
-Not ready (0.4.0-release-candidate-4 -- to be updated...)
----------------------------------------------------------
+0.4.0 (2023-03-16)
+------------------
 
 * From now on, the following versions of Python are officially
   supported: *3.6* through *3.11*, as well as *2.7* (still). This means,
