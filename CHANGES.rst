@@ -1,7 +1,7 @@
 Changes
 =======
 
-Not ready (0.4.0-release-candidate-2 -- to be updated...)
+Not ready (0.4.0-release-candidate-3 -- to be updated...)
 ---------------------------------------------------------
 
 * From now on, the following versions of Python are officially
