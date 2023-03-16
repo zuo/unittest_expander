@@ -40,8 +40,8 @@ Let's see how to use them...
 Basic use of :func:`expand` and :func:`foreach`
 ===============================================
 
-Assume we have a (somewhat trivial, in fact) function that checks
-whether the given number is even or not:
+Assume we have a function that checks whether the given number is even
+or not:
 
 >>> def is_even(n):
 ...     return n % 2 == 0
@@ -75,12 +75,13 @@ So let's write our tests in a smarter way:
 ...     # just to demonstrate that test cases are really isolated
 ...     def setUp(self):
 ...         sys.stdout.write(' [DEBUG: separate test setUp] ')
+...         sys.stdout.flush()
 
 As you see, it's fairly simple: you attach parameter collections to your
 test methods with the :func:`foreach` decorator and decorate the whole
 test case class with the :func:`expand` decorator.  The latter does the
 actual job, i.e. generates (and adds to the test case class)
-parametrized versions of the methods.
+parametrized versions of the test methods.
 
 Let's run this stuff...
 
@@ -364,27 +365,29 @@ OK
 
    We said that a parameter collection can be a sequence (among others;
    see the note above).  To be more precise: it can be a sequence except
-   that it *cannot be a string*.
+   that it *cannot be a text string*.
 
 .. warning::
 
    Also, a parameter collection should *not* be a tuple (i.e., an
    instance of the built-in type :class:`tuple` or of any subclass of
-   it, e.g., a *named tuple*), as that is deprecated and, in future
-   versions of *unittest_expander*, will either be **unsupported** or
-   (later) have a **different meaning** (note that we refer to a tuple
-   being a parameter collection, *not* a parameter collection's *item*;
-   a tuple being such an item is perfectly OK).
+   it, e.g., a *named tuple*), as that is **deprecated** and will become
+   **illegal** in the *0.5.0* version of *unittest_expander*.
+
+   Note that here we refer to a tuple being a *parameter collection*,
+   *not* a parameter collection's *item* (tuples being such items, used
+   as simple substitutes of :class:`param` objects, are -- and will be
+   -- perfectly OK).
 
 A :class:`paramseq` instance can also be created from a callable object
-that returns a sequence or another iterable (e.g., a generator):
+that returns a sequence or another iterable (e.g., a generator/iterator):
 
 >>> from random import randint
 >>> 
 >>> @paramseq   # <- yes, used as a decorator
 ... def randomized(test_case_cls):
 ...     LO, HI = test_case_cls.LO, test_case_cls.HI
-...     print('DEBUG: LO = {0}; HI = {1}'.format(LO, HI))
+...     print('DEBUG: LO = {}; HI = {}'.format(LO, HI))
 ...     print('----')
 ...     yield param(randint(LO, HI) * 2,
 ...                 expected=True).label('random even')
@@ -423,24 +426,24 @@ test_is_even_negated_when_incremented__<random odd> ... ok
 ...Ran 4 tests...
 OK
 
-A callable object (such as the generator function in the above example)
+A callable object (such as the generator function in the example above)
 which is passed into the :class:`paramseq` constructor can accept no
-arguments or one positional argument -- in the latter case the test case
-class will be passed in.
+arguments or one positional argument -- in the latter case the *test
+case class* will be passed in.
 
 .. note::
 
-   The callable object will be called, and its iterable result will be
-   iterated over, *when* the :func:`expand` decorator is being executed,
-   *before* generating parametrized test methods.
+   The callable object will be called -- and its iterable result will
+   be iterated over (consumed) -- *when* the :func:`expand` decorator
+   is being executed, *before* generating parametrized test methods.
 
 What *should also be emphasized* is that those operations (the
-aforementioned call and then iteration over its result) will be
-performed *separately* for each use of :func:`foreach` with our
-:class:`paramseq` instance as its argument (or with another
-:class:`paramseq` instance that includes our instance; see the
-following code snippet in which the ``input_values_and_results``
-instance includes the previously created ``randomized`` instance).
+aforementioned call and iterating over its result) will be performed
+*separately* for each use of :func:`foreach` with our :class:`paramseq`
+instance as its argument (or with another :class:`paramseq` instance
+that includes our instance; see the following code snippet in which the
+``input_values_and_results`` instance includes the previously created
+``randomized`` instance).
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -500,8 +503,8 @@ Combining several :func:`foreach` to get Cartesian product
 ==========================================================
 
 You can apply two or more :func:`foreach` decorators to the same test
-method -- to combine several parameter collections, obtaining their
-Cartesian product:
+method -- to combine several parameter collections, obtaining the
+Cartesian product of them:
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -602,6 +605,7 @@ factory* with the given arguments).
 ...     def test_save_load(self, save, load, context_targets):
 ...         file = context_targets[0]
 ...         file.write(save)
+...         file.flush()
 ...         file.seek(0)
 ...         load_actually = file.read()
 ...         self.assertEqual(load_actually, load)
@@ -612,6 +616,7 @@ factory* with the given arguments).
 ...     def test_save_load_with_spaces(self, save, load, context_targets):
 ...         file = context_targets[0]
 ...         file.write(' ' + save + ' ')
+...         file.flush()
 ...         file.seek(0)
 ...         load_actually = file.read()
 ...         self.assertEqual(load_actually, ' ' + load + ' ')
@@ -645,9 +650,9 @@ collection's item, e.g.:
 >>> import contextlib
 >>> @contextlib.contextmanager
 ... def debug_cm(tag=None):
-...     debug.append('enter' + (':{0}'.format(tag) if tag else ''))
+...     debug.append('enter' + (':{}'.format(tag) if tag else ''))
 ...     yield tag
-...     debug.append('exit' + (':{0}'.format(tag) if tag else ''))
+...     debug.append('exit' + (':{}'.format(tag) if tag else ''))
 ...
 >>> debug = []
 >>> 
@@ -672,6 +677,7 @@ collection's item, e.g.:
 ...         file, tag = context_targets
 ...         assert tag == expected_tag
 ...         file.write(save)
+...         file.flush()
 ...         file.seek(0)
 ...         load_actually = file.read()
 ...         self.assertEqual(load_actually, load)
@@ -898,6 +904,7 @@ instance aggregates:
 ...         file, silly_cm_target = context_targets
 ...         assert silly_cm_target == 42
 ...         file.write(save)
+...         file.flush()
 ...         file.seek(0)
 ...         load_actually = file.read()
 ...         self.assertEqual(load_actually, load)
@@ -943,12 +950,14 @@ Deprecated feature: :func:`foreach` as a class decorator
 
 .. warning::
 
-    This is the description of a deprecated feature.
+   Here we describe a **deprecated** feature.
 
-    The parts of *unittest_expander* related to applying :func:`foreach`
-    **to classes** are broken by design and, in future versions of
-    *unittest_expander*, will either be **unsupported** or (later) have
-    a completely **different meaning**.
+   Decorating a *class* with :func:`foreach` will become **unsupported**
+   in the *0.5.0* version of *unittest_expander*.
+
+   Another **deprecation**, strictly related to the above, is that the
+   ``into`` keyword argument to :func:`expand` will become **illegal**
+   in the *0.5.0* version of *unittest_expander*.
 
 :func:`foreach` can be used not only as a test case *method* decorator
 but also as a test case *class* decorator -- to generate parametrized
@@ -979,12 +988,11 @@ methods.
 ...         assert self.params == ('foo',)  # self.params <- *positional* ones
 ...         assert self.b in (42, 433)
 ...         assert 'foo' in self.label
-...         # (note: on Python 2.7+ we could resign from using contexts
-...         # and just use unittest.TestCase.addCleanup() here...)
 ...
 ...     @foreach(param(suffix=' '), param(suffix='XX'))       # 2 param items
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
+...         self.file.flush()
 ...         self.file.seek(0)
 ...         load_actually = self.file.read()
 ...         self.assertEqual(load_actually, self.load + suffix)
@@ -1003,14 +1011,14 @@ methods.
 ...                 if name.startswith('TestSaveLoad__')]
 >>> # (note: 2 * 2 * 2 param items -> 8 parametrized tests)
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test_save_load__<suffix=' '> (..._<'foo',b=42, load='',save=''>) ... ok
-test_save_load__<suffix='XX'> (..._<'foo',b=42, load='',save=''>) ... ok
-test_save_load__<suffix=' '> (..._<'foo',b=42, load='abc',save='abc'>) ... ok
-test_save_load__<suffix='XX'> (..._<'foo',b=42, load='abc',save='abc'>) ... ok
-test_save_load__<suffix=' '> (..._<'foo',b=433, load='',save=''>) ... ok
-test_save_load__<suffix='XX'> (..._<'foo',b=433, load='',save=''>) ... ok
-test_save_load__<suffix=' '> (..._<'foo',b=433, load='abc',save='abc'>) ... ok
-test_save_load__<suffix='XX'> (..._<'foo',b=433, load='abc',save='abc'>) ... ok
+test_save_load__<suffix=' '> (..._<'foo',b=42, load='',save=''>...) ... ok
+test_save_load__<suffix='XX'> (..._<'foo',b=42, load='',save=''>...) ... ok
+test_save_load__<suffix=' '> (..._<'foo',b=42, load='abc',save='abc'>...) ... ok
+test_save_load__<suffix='XX'> (..._<'foo',b=42, load='abc',save='abc'>...) ... ok
+test_save_load__<suffix=' '> (..._<'foo',b=433, load='',save=''>...) ... ok
+test_save_load__<suffix='XX'> (..._<'foo',b=433, load='',save=''>...) ... ok
+test_save_load__<suffix=' '> (..._<'foo',b=433, load='abc',save='abc'>...) ... ok
+test_save_load__<suffix='XX'> (..._<'foo',b=433, load='abc',save='abc'>...) ... ok
 ...Ran 8 tests...
 OK
 
@@ -1044,6 +1052,7 @@ Below: an example with the *into* argument being a module object:
 ...
 ...     def test_save_load(self):
 ...         self.file.write(self.save)
+...         self.file.flush()
 ...         self.file.seek(0)
 ...         load_actually = self.file.read()
 ...         self.assertEqual(load_actually, self.load)
@@ -1059,8 +1068,8 @@ Below: an example with the *into* argument being a module object:
 >>> TestSaveLoad__2 = getattr(module, "TestSaveLoad__<load='abc',save='abc'>")
 >>> 
 >>> run_tests(TestSaveLoad__1, TestSaveLoad__2)  # doctest: +ELLIPSIS
-test_save_load (...TestSaveLoad__<load='',save=''>) ... ok
-test_save_load (...TestSaveLoad__<load='abc',save='abc'>) ... ok
+test_save_load (...TestSaveLoad__<load='',save=''>...) ... ok
+test_save_load (...TestSaveLoad__<load='abc',save='abc'>...) ... ok
 ...Ran 2 tests...
 OK
 
@@ -1078,6 +1087,7 @@ OK
 ...
 ...     def test_save_load(self):
 ...         self.file.write(self.save)
+...         self.file.flush()
 ...         self.file.seek(0)
 ...         load_actually = self.file.read()
 ...         self.assertEqual(load_actually, self.load)
@@ -1093,8 +1103,8 @@ OK
 >>> TestSaveLoad__2 = getattr(module, "TestSaveLoad__<load='abc',save='abc'>")
 >>> 
 >>> run_tests(TestSaveLoad__1, TestSaveLoad__2)  # doctest: +ELLIPSIS
-test_save_load (...TestSaveLoad__<load='',save=''>) ... ok
-test_save_load (...TestSaveLoad__<load='abc',save='abc'>) ... ok
+test_save_load (...TestSaveLoad__<load='',save=''>...) ... ok
+test_save_load (...TestSaveLoad__<load='abc',save='abc'>...) ... ok
 ...Ran 2 tests...
 OK
 
@@ -1135,6 +1145,7 @@ it perfectly ``:-)``):
 ...
 ...     def test_save_load(self):
 ...         self.file.write(self.save)
+...         self.file.flush()
 ...         self.file.seek(0)
 ...         load_actually = self.file.read()
 ...         self.assertEqual(load_actually, self.load)
@@ -1151,8 +1162,8 @@ it perfectly ``:-)``):
 >>> TestSaveLoadIt__2 = globals()["TestSaveLoadIt__<load='abc',save='abc'>"]
 >>> 
 >>> run_tests(TestSaveLoadIt__1, TestSaveLoadIt__2)  # doctest: +ELLIPSIS
-test_save_load (...TestSaveLoadIt__<load='',save=''>) ... ok
-test_save_load (...TestSaveLoadIt__<load='abc',save='abc'>) ... ok
+test_save_load (...TestSaveLoadIt__<load='',save=''>...) ... ok
+test_save_load (...TestSaveLoadIt__<load='abc',save='abc'>...) ... ok
 ...Ran 2 tests...
 OK
 
@@ -1216,15 +1227,15 @@ Contexts are, obviously, properly handled -- also when errors occur
 >>> 
 >>> test_classes = [into_dict[name] for name in sorted(into_dict)]
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test (...SillyTest__<inner_context_enter_error>) ... ERROR
-test (...SillyTest__<inner_context_exit_error>) ... ERROR
-test (...SillyTest__<no_error>) ... ok
-test (...SillyTest__<outer_context_enter_error>) ... ERROR
-test (...SillyTest__<outer_context_exit_error>) ... ERROR
-test (...SillyTest__<setUp_error>) ... ERROR
-test (...SillyTest__<tearDown_error>) ... ERROR
-test (...SillyTest__<test_error>) ... ERROR
-test (...SillyTest__<test_fail>) ... FAIL
+test (...SillyTest__<inner_context_enter_error>...) ... ERROR
+test (...SillyTest__<inner_context_exit_error>...) ... ERROR
+test (...SillyTest__<no_error>...) ... ok
+test (...SillyTest__<outer_context_enter_error>...) ... ERROR
+test (...SillyTest__<outer_context_exit_error>...) ... ERROR
+test (...SillyTest__<setUp_error>...) ... ERROR
+test (...SillyTest__<tearDown_error>...) ... ERROR
+test (...SillyTest__<test_error>...) ... ERROR
+test (...SillyTest__<test_fail>...) ... FAIL
 ...Ran 9 tests...
 FAILED (failures=1, errors=7)
 >>> debug == [
@@ -1316,11 +1327,13 @@ Additional note about extending :meth:`setUp` and :meth:`tearDown`
 
 .. warning::
 
-    This is the description of a deprecated feature.
+   Here we refer to applying the :func:`foreach` decorator to a *class*
+   which is a **deprecated** feature (see the warning at the beginning
+   of the :ref:`foreach-as-class-decorator` section).
 
 As you can see in the above examples, you can, without any problem,
-implement your own :meth:`setUp` and/or :meth:`tearDown` methods in
-test classes decorated with :func:`foreach` and :func:`expand`; the
+implement your own :meth:`setUp` and/or :meth:`tearDown` methods in test
+classes that are decorated with :func:`foreach` and :func:`expand`; the
 *unittest_expander* machinery, which provides its own version of these
 methods, will incorporate your implementations automatically -- by
 obtaining them with func:`super` and calling (*within* the scope of
@@ -1372,7 +1385,7 @@ For example:
 ...
 >>> debug = []
 >>> run_tests(SillyTestSubclass)  # doctest: +ELLIPSIS
-test (...SillyTestSubclass) ... ok
+test (...SillyTestSubclass...) ... ok
 ...Ran 1 test...
 OK
 >>> debug == [
@@ -1410,16 +1423,17 @@ when dealing with testing (it could easily make your tests leaky and
 useless).
 
 However, if you **really** need to allow your context manager to
-suppress exceptions, pass the keyword argument
-``__enable_exc_suppress__=True`` to the :meth:`param.context` or
-:meth:`paramseq.context` method (and, of course, make the
-:meth:`__exit__` context manager's method return a *true* value).
+suppress exceptions, pass the keyword argument ``_enable_exc_suppress_=True``
+(note the single underscores at the beginning and the end of its name)
+to the :meth:`param.context` or :meth:`paramseq.context` method (and,
+of course, make the :meth:`__exit__` context manager's method return a
+*true* value).
 
 >>> class SillySuppressingCM(object):
 ...     def __enter__(self): return self
 ...     def __exit__(self, exc_type, exc_val, exc_tb):
 ...         if exc_type is not None:
-...             debug.append('suppressing {0}'.format(exc_type.__name__))
+...             debug.append('suppressing {}'.format(exc_type.__name__))
 ...         return True  # suppress any exception
 ...
 >>> @expand
@@ -1427,12 +1441,12 @@ suppress exceptions, pass the keyword argument
 ...
 ...     @foreach(
 ...         param(test_error=AssertionError)
-...             .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...             .context(SillySuppressingCM, _enable_exc_suppress_=True),
 ...         param(test_error=KeyError)
-...             .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...             .context(SillySuppressingCM, _enable_exc_suppress_=True),
 ...     )
 ...     def test_it(self, test_error):
-...         debug.append('raising {0}'.format(test_error.__name__))
+...         debug.append('raising {}'.format(test_error.__name__))
 ...         raise test_error('ha!')
 ...
 >>> debug = []
@@ -1451,24 +1465,24 @@ True
 
 Another example:
 
->>> class ErrorCM(object):
+>>> class ErrorCM:  # (<- here we have an old-style class if Python 2.x is used)
 ...     def __init__(self, error): self.error = error
 ...     def __enter__(self): return self
 ...     def __exit__(self, exc_type, exc_val, exc_tb):
 ...         if exc_type is not None:
-...             debug.append('replacing {0} with {1}'.format(
+...             debug.append('replacing {} with {}'.format(
 ...                 exc_type.__name__, self.error.__name__))
 ...         else:
-...             debug.append('raising {0}'.format(self.error.__name__))
+...             debug.append('raising {}'.format(self.error.__name__))
 ...         raise self.error('argh!')
 ...
 >>> into_dict = {}
 >>> @expand(into=into_dict)
 ... @foreach([
 ...     param(setup_error=OSError)
-...         .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...         .context(SillySuppressingCM, _enable_exc_suppress_=True),
 ...     param(setup_error=OSError)
-...         .context(SillySuppressingCM, __enable_exc_suppress__=True)
+...         .context(SillySuppressingCM, _enable_exc_suppress_=True)
 ...         .context(ErrorCM, error=TypeError),
 ...     param(setup_error=None),
 ... ])
@@ -1476,18 +1490,18 @@ Another example:
 ...
 ...     def setUp(self):
 ...         if self.setup_error is not None:
-...             debug.append('raising {0}'.format(self.setup_error.__name__))
+...             debug.append('raising {}'.format(self.setup_error.__name__))
 ...             raise self.setup_error('ooops!')
 ...
 ...     @foreach([
 ...         param(test_error=AssertionError)
-...             .context(SillySuppressingCM, __enable_exc_suppress__=True),
+...             .context(SillySuppressingCM, _enable_exc_suppress_=True),
 ...         param(test_error=KeyError)
-...             .context(SillySuppressingCM, __enable_exc_suppress__=True)
+...             .context(SillySuppressingCM, _enable_exc_suppress_=True)
 ...             .context(ErrorCM, error=RuntimeError),
 ...     ])
 ...     def test_it(self, test_error):
-...         debug.append('raising {0}'.format(test_error.__name__))
+...         debug.append('raising {}'.format(test_error.__name__))
 ...         raise test_error('ha!')
 ...
 >>> debug = []
@@ -1535,7 +1549,7 @@ OK
 ... ]
 True
 
-Normally -- without ``__enable_exc_suppress__=True`` -- exceptions
+Normally -- without ``_enable_exc_suppress_=True`` -- exceptions
 *are* propagated even when :meth:`__exit__` returns a *true* value:
 
 >>> into_dict = {}
@@ -1575,7 +1589,7 @@ test_it__... ERROR
 ...Ran 6 tests...
 FAILED (failures=1, errors=5)
 
-It is worth emphasizing that ``__enable_exc_suppress__=True`` changes
+It is worth emphasizing that ``_enable_exc_suppress_=True`` changes
 nothing when context manager's :meth:`__exit__` returns a false value:
 
 >>> into_dict = {}
@@ -1586,7 +1600,7 @@ nothing when context manager's :meth:`__exit__` returns a false value:
 ...     param(setup_error=OSError)
 ...         .context(SillySuppressingCM)
 ...         .context(ErrorCM, error=TypeError,
-...                  __enable_exc_suppress__=True),
+...                  _enable_exc_suppress_=True),
 ...     param(setup_error=None),
 ... ])
 ... class AnotherSillyExcTest3(unittest.TestCase):
@@ -1601,7 +1615,7 @@ nothing when context manager's :meth:`__exit__` returns a false value:
 ...         param(test_error=KeyError)
 ...             .context(SillySuppressingCM)
 ...             .context(ErrorCM, error=RuntimeError,
-...                      __enable_exc_suppress__=True),
+...                      _enable_exc_suppress_=True),
 ...     ])
 ...     def test_it(self, test_error):
 ...         raise test_error('ha!')
@@ -1718,6 +1732,7 @@ For example:
 ...     @foreach(param(suffix=' '), param(suffix='XX'))
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
+...         self.file.flush()
 ...         self.file.seek(0)
 ...         load_actually = self.file.read()
 ...         self.assertEqual(load_actually, self.load + suffix)
@@ -1732,14 +1747,14 @@ For example:
 >>> 
 >>> test_classes = [into_dict[name] for name in sorted(into_dict)]
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test_save_load__parametrized_1 (...TestSaveLoad__parametrized_1) ... ok
-test_save_load__parametrized_2 (...TestSaveLoad__parametrized_1) ... ok
-test_save_load__parametrized_1 (...TestSaveLoad__parametrized_2) ... ok
-test_save_load__parametrized_2 (...TestSaveLoad__parametrized_2) ... ok
-test_save_load__parametrized_1 (...TestSaveLoad__parametrized_3) ... ok
-test_save_load__parametrized_2 (...TestSaveLoad__parametrized_3) ... ok
-test_save_load__parametrized_1 (...TestSaveLoad__parametrized_4) ... ok
-test_save_load__parametrized_2 (...TestSaveLoad__parametrized_4) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_1...) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_1...) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_2...) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_2...) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_3...) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_3...) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad__parametrized_4...) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad__parametrized_4...) ... ok
 ...Ran 8 tests...
 OK
 
@@ -1750,7 +1765,7 @@ OK
 ...     def format(self, format_string, *args, **kwargs):
 ...         label = kwargs['label']
 ...         if '42' in label:
-...             return '!{0}!'.format(label)
+...             return '!{}!'.format(label)
 ...         else:
 ...             result = super(SillyFormatter,
 ...                            self).format(format_string, *args, **kwargs)
@@ -1773,6 +1788,7 @@ OK
 ...     @foreach([param(suffix=' '), param(suffix='XX')])
 ...     def test_save_load(self, suffix):
 ...         self.file.write(self.save + suffix)
+...         self.file.flush()
 ...         self.file.seek(0)
 ...         load_actually = self.file.read()
 ...         self.assertEqual(load_actually, self.load + suffix)
@@ -1787,14 +1803,14 @@ OK
 >>> 
 >>> test_classes = [into_dict[name] for name in sorted(into_dict)]
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test_save_load__parametrized_1 (...!'foo',b=42, load='',save=''!) ... ok
-test_save_load__parametrized_2 (...!'foo',b=42, load='',save=''!) ... ok
-test_save_load__parametrized_1 (...!'foo',b=42, load='abc',save='abc'!) ... ok
-test_save_load__parametrized_2 (...!'foo',b=42, load='abc',save='abc'!) ... ok
-test_save_load__parametrized_1 (...TestSaveLoad^^parametrized^3) ... ok
-test_save_load__parametrized_2 (...TestSaveLoad^^parametrized^3) ... ok
-test_save_load__parametrized_1 (...TestSaveLoad^^parametrized^4) ... ok
-test_save_load__parametrized_2 (...TestSaveLoad^^parametrized^4) ... ok
+test_save_load__parametrized_1 (...!'foo',b=42, load='',save=''!...) ... ok
+test_save_load__parametrized_2 (...!'foo',b=42, load='',save=''!...) ... ok
+test_save_load__parametrized_1 (...!'foo',b=42, load='abc',save='abc'!...) ... ok
+test_save_load__parametrized_2 (...!'foo',b=42, load='abc',save='abc'!...) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad^^parametrized^3...) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad^^parametrized^3...) ... ok
+test_save_load__parametrized_1 (...TestSaveLoad^^parametrized^4...) ... ok
+test_save_load__parametrized_2 (...TestSaveLoad^^parametrized^4...) ... ok
 ...Ran 8 tests...
 OK
 
@@ -1854,18 +1870,18 @@ adds a suffix to a newly formatted name, e.g.:
 ...                 if obj != ('spam', 'spam', 'spam')]
 ...
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test_even__<-16> (...Test_is_even__<'foo',b=42>__2) ... ok
-test_even__<0> (...Test_is_even__<'foo',b=42>__2) ... ok
-test_even__<0>__2 (...Test_is_even__<'foo',b=42>__2) ... ok
-test_even__<0>__3 (...Test_is_even__<'foo',b=42>__2) ... ok
-test_even__<0>__4 (...Test_is_even__<'foo',b=42>__2) ... ok
-test_even__<4>__3 (...Test_is_even__<'foo',b=42>__2) ... ok
-test_even__<-16> (...Test_is_even__<'foo',b=433>) ... ok
-test_even__<0> (...Test_is_even__<'foo',b=433>) ... ok
-test_even__<0>__2 (...Test_is_even__<'foo',b=433>) ... ok
-test_even__<0>__3 (...Test_is_even__<'foo',b=433>) ... ok
-test_even__<0>__4 (...Test_is_even__<'foo',b=433>) ... ok
-test_even__<4>__3 (...Test_is_even__<'foo',b=433>) ... ok
+test_even__<-16> (...Test_is_even__<'foo',b=42>__2...) ... ok
+test_even__<0> (...Test_is_even__<'foo',b=42>__2...) ... ok
+test_even__<0>__2 (...Test_is_even__<'foo',b=42>__2...) ... ok
+test_even__<0>__3 (...Test_is_even__<'foo',b=42>__2...) ... ok
+test_even__<0>__4 (...Test_is_even__<'foo',b=42>__2...) ... ok
+test_even__<4>__3 (...Test_is_even__<'foo',b=42>__2...) ... ok
+test_even__<-16> (...Test_is_even__<'foo',b=433>...) ... ok
+test_even__<0> (...Test_is_even__<'foo',b=433>...) ... ok
+test_even__<0>__2 (...Test_is_even__<'foo',b=433>...) ... ok
+test_even__<0>__3 (...Test_is_even__<'foo',b=433>...) ... ok
+test_even__<0>__4 (...Test_is_even__<'foo',b=433>...) ... ok
+test_even__<4>__3 (...Test_is_even__<'foo',b=433>...) ... ok
 ...Ran 12 tests...
 OK
 
@@ -1891,11 +1907,15 @@ Yes, you can.  Please consider the following example:
 ...     @foreach(method_params)
 ...     def test(self, y):
 ...         [x] = self.params
-...         debug.append((x, y, self.z))
+...         debug.append((x, y, self.n))
 ...
 >>> @expand(into=into_dict)
 ... class TestActual(MyTestMixIn, unittest.TestCase):
-...     z = 42
+...     n = 42
+...
+>>> @expand(into=into_dict)
+... class TestYetAnother(MyTestMixIn, unittest.TestCase):
+...     n = 12345
 ...
 >>> for name in sorted(into_dict):
 ...     name
@@ -1903,23 +1923,40 @@ Yes, you can.  Please consider the following example:
 'TestActual__<1>'
 'TestActual__<2>'
 'TestActual__<3>'
+'TestYetAnother__<1>'
+'TestYetAnother__<2>'
+'TestYetAnother__<3>'
 >>> 
 >>> test_classes = [into_dict[name] for name in sorted(into_dict)]
 >>> run_tests(*test_classes)  # doctest: +ELLIPSIS
-test__<7> (...TestActual__<1>) ... ok
-test__<8> (...TestActual__<1>) ... ok
-test__<9> (...TestActual__<1>) ... ok
-test__<7> (...TestActual__<2>) ... ok
-test__<8> (...TestActual__<2>) ... ok
-test__<9> (...TestActual__<2>) ... ok
-test__<7> (...TestActual__<3>) ... ok
-test__<8> (...TestActual__<3>) ... ok
-test__<9> (...TestActual__<3>) ... ok
-...Ran 9 tests...
+test__<7> (...TestActual__<1>...) ... ok
+test__<8> (...TestActual__<1>...) ... ok
+test__<9> (...TestActual__<1>...) ... ok
+test__<7> (...TestActual__<2>...) ... ok
+test__<8> (...TestActual__<2>...) ... ok
+test__<9> (...TestActual__<2>...) ... ok
+test__<7> (...TestActual__<3>...) ... ok
+test__<8> (...TestActual__<3>...) ... ok
+test__<9> (...TestActual__<3>...) ... ok
+test__<7> (...TestYetAnother__<1>...) ... ok
+test__<8> (...TestYetAnother__<1>...) ... ok
+test__<9> (...TestYetAnother__<1>...) ... ok
+test__<7> (...TestYetAnother__<2>...) ... ok
+test__<8> (...TestYetAnother__<2>...) ... ok
+test__<9> (...TestYetAnother__<2>...) ... ok
+test__<7> (...TestYetAnother__<3>...) ... ok
+test__<8> (...TestYetAnother__<3>...) ... ok
+test__<9> (...TestYetAnother__<3>...) ... ok
+...Ran 18 tests...
 OK
->>> type(MyTestMixIn) is type  # MyTestMixIn not touched by @expand
+>>> (type(MyTestMixIn) is type and
+...  inspect.isfunction(vars(MyTestMixIn)['test']))          # (not touched by @expand)
 True
->>> type(TestActual) is Substitute
+>>> type(TestActual) is type(TestYetAnother) is Substitute           # (replaced by @expand)
+True
+>>> type(vars(TestActual.actual_object)['test']) is Substitute       # (replaced by @expand)
+True
+>>> type(vars(TestYetAnother.actual_object)['test']) is Substitute   # (replaced by @expand)
 True
 >>> debug == [
 ...     'enter:C', 'enter:M', (1, 7, 42), 'exit:M', 'exit:C',
@@ -1931,6 +1968,15 @@ True
 ...     'enter:C', 'enter:M', (3, 7, 42), 'exit:M', 'exit:C',
 ...     'enter:C', 'enter:M', (3, 8, 42), 'exit:M', 'exit:C',
 ...     'enter:C', 'enter:M', (3, 9, 42), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (1, 7, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (1, 8, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (1, 9, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (2, 7, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (2, 8, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (2, 9, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (3, 7, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (3, 8, 12345), 'exit:M', 'exit:C',
+...     'enter:C', 'enter:M', (3, 9, 12345), 'exit:M', 'exit:C',
 ... ]
 True
 
@@ -1940,13 +1986,57 @@ use from including them; for the same reason, most often, it is
 probably better not to make them subclasses of
 :class:`unittest.TestCase`.
 
+A similar yet simpler example (*without* using :func:`foreach`
+as a *test class decorator*, which -- :ref:`as stated earlier
+<foreach-as-class-decorator>` -- is a deprecated feature):
+
+>>> debug = []
+>>> class MyTestMixIn(object):
+...
+...     @foreach(method_params)  # (see method_params defined earlier...)
+...     def test(self, x):
+...         debug.append((x, self.n))
+...
+>>> @expand
+... class TestActual(MyTestMixIn, unittest.TestCase):
+...     n = 42
+...
+>>> @expand
+... class TestYetAnother(MyTestMixIn, unittest.TestCase):
+...     n = 12345
+...
+>>> run_tests(TestActual, TestYetAnother)  # doctest: +ELLIPSIS
+test__<7> (...TestActual...) ... ok
+test__<8> (...TestActual...) ... ok
+test__<9> (...TestActual...) ... ok
+test__<7> (...TestYetAnother...) ... ok
+test__<8> (...TestYetAnother...) ... ok
+test__<9> (...TestYetAnother...) ... ok
+...Ran 6 tests...
+OK
+>>> inspect.isfunction(vars(MyTestMixIn)['test'])      # (not touched by @expand)
+True
+>>> type(vars(TestActual)['test']) is Substitute       # (replaced by @expand)
+True
+>>> type(vars(TestYetAnother)['test']) is Substitute   # (replaced by @expand)
+True
+>>> debug == [
+...     'enter:M', (7, 42), 'exit:M',
+...     'enter:M', (8, 42), 'exit:M',
+...     'enter:M', (9, 42), 'exit:M',
+...     'enter:M', (7, 12345), 'exit:M',
+...     'enter:M', (8, 12345), 'exit:M',
+...     'enter:M', (9, 12345), 'exit:M',
+... ]
+True
+
 
 "Can I :func:`expand` a subclass of an already :func:`expand`-ed class?"
 ------------------------------------------------------------------------
 
-As long as you do *not* apply :func:`foreach` to test classes (but
-only to test methods) -- *yes, you can* (in past *unittest_expander*
-versions it was broken but now it works perfectly):
+As long as you do *not* apply :func:`foreach` to test classes (but only
+to test methods) -- *yes, you can* (in some of the past versions of
+*unittest_expander* it was broken but now it works perfectly):
 
 >>> debug = []
 >>> into_dict = {}
@@ -1969,12 +2059,12 @@ versions it was broken but now it works perfectly):
 ...         debug.append(n)
 ...
 >>> run_tests(TestSubclass)  # doctest: +ELLIPSIS
-test__<1> (...TestSubclass) ... ok
-test__<2> (...TestSubclass) ... ok
-test__<3> (...TestSubclass) ... ok
-test_another__<1> (...TestSubclass) ... ok
-test_another__<2> (...TestSubclass) ... ok
-test_another__<3> (...TestSubclass) ... ok
+test__<1> (...TestSubclass...) ... ok
+test__<2> (...TestSubclass...) ... ok
+test__<3> (...TestSubclass...) ... ok
+test_another__<1> (...TestSubclass...) ... ok
+test_another__<2> (...TestSubclass...) ... ok
+test_another__<3> (...TestSubclass...) ... ok
 ...Ran 6 tests...
 OK
 >>> type(TestSubclass.test) is Substitute
@@ -1982,10 +2072,11 @@ True
 >>> type(TestSubclass.test_another) is Substitute
 True
 
-But things complicate when you apply :func:`foreach` to classes.  For
-such cases the answer is: *do not try this at home*.  As it was said
-earlier, the parts of *unittest_expander* related to applying
-:func:`foreach` to classes are deprecated.
+But things complicate when you apply :func:`foreach` to classes.
+For such cases the answer is: *do not try this at home*.  :ref:`As
+it was said earlier <foreach-as-class-decorator>`, the parts of
+*unittest_expander* related to applying :func:`foreach` to classes
+are **deprecated** anyway.
 
 
 "Do my test classes need to inherit from :class:`unittest.TestCase`?"
@@ -2032,7 +2123,9 @@ your test class does not need to implement these methods by itself).
 
 .. warning::
 
-    This is the description of a deprecated feature.
+   Here we refer to applying the :func:`foreach` decorator to a *class*
+   which is a **deprecated** feature (see the warning at the beginning
+   of the :ref:`foreach-as-class-decorator` section).
 
 >>> debug = []
 >>> into_dict = {}
@@ -2101,6 +2194,7 @@ all:
 ...
 ...     def test(self):
 ...         sys.stdout.write(' [DEBUG: OK] ')
+...         sys.stdout.flush()
 ...
 >>> run_tests(TestIt)  # doctest: +ELLIPSIS
 test ... [DEBUG: OK] ok
@@ -2113,6 +2207,7 @@ OK
 ...
 ...     def test(self):
 ...         sys.stdout.write(' [DEBUG: OK] ')
+...         sys.stdout.flush()
 ...
 >>> run_tests(TestIt2)  # doctest: +ELLIPSIS
 test ... [DEBUG: OK] ok
@@ -2125,18 +2220,21 @@ OK
 "To what objects can :func:`foreach` be applied?"
 -------------------------------------------------
 
-The :func:`foreach` decorator is designed to be applied *only* to:
+The :func:`foreach` decorator is designed to be applied *only*:
 
-* functions being members of test (or test mix-in) classes (that is,
-  functions that define regular test case instance methods);
-* test (or test mix-in) classes themselves
+* to regular test methods (being instance methods, *not* static or class
+  methods), that is, to functions being attributes of test (or test
+  mix-in) classes;
+* to test (or test mix-in) classes themselves
 
-(and, as noted above, the latter is a deprecated feature).
+(but note that, :ref:`as noted earlier <foreach-as-class-decorator>`,
+the latter is a deprecated feature).
 
-You should *not* apply it to anything else (especially, not to static
-or class methods).  If you do, the effect is undefined: an error may
-occur (immediately or, for example, when applying :func:`expand`) or,
-e.g., the whole thing may be just ignored.
+You should *not* apply the decorator to anything else (especially,
+not to static or class methods).  If you do, the effect is undefined:
+an exception or some other faulty/unexpected behavior may be observed
+(immediately or, for example, when :func:`expand` is applied, or when
+tests are run...).
 
 
 .. doctest::
@@ -2164,8 +2262,88 @@ e.g., the whole thing may be just ignored.
     True
     >>> isinstance(paramseq([1, 2]) + {3, 4} + (5, 6), paramseq)
     True
+    >>> isinstance((5, 6) + paramseq([1, 2]) + {3, 4}, paramseq)
+    True
     >>> isinstance({3, 4} + paramseq([1, 2]) + (5, 6), paramseq)
     True
+
+    >>> @expand()  # <- effectively, same as `@expand` without `()`
+    ... class Test_is_even(unittest.TestCase):
+    ...
+    ...     params1a = paramseq() + (  # Note: even though passing a tuple
+    ...         (-14, True),           # to paramseq()/foreach() as the source
+    ...     )                          # param collection is deprecated, adding
+    ...     params1b = (               # a tuple (using `+`) to a paramseq
+    ...         (-1, False),           # instance will remain allowed. XXX: shall it??? (rather no)
+    ...     )
+    ...     params1ab = params1a + params1b
+    ...
+    ...     params1c = (
+    ...         (-8, True),
+    ...     )
+    ...     params1d = paramseq([
+    ...         (-7, False),
+    ...     ])
+    ...     params1cd = params1c + params1d
+    ...
+    ...     params1 = params1ab + params1cd
+    ...
+    ...     params2 = (
+    ...         (),
+    ...         param(),
+    ...         param(0, expected=True),
+    ...         (2, True),
+    ...         param(17, expected=False),
+    ...     )
+    ...
+    ...     params3 = paramseq({
+    ...         'sys.maxsize': (sys.maxsize, False),
+    ...         '-sys.maxsize': (-sys.maxsize, False),
+    ...     })
+    ...
+    ...     params4 = paramseq(
+    ...         (-15, False),
+    ...         param(15, expected=False),
+    ...         noninteger=(1.2345, False),
+    ...         horribleabuse=param('%s', expected=False),
+    ...     )
+    ...
+    ...     params5 = {
+    ...         '18 -> True': (18, True),
+    ...     }
+    ...
+    ...     params6 = (
+    ...         (12399999999999999, False),
+    ...         param(n=12399999999999998, expected=True),
+    ...     )
+    ...
+    ...     @foreach(params1 + params2 + params3 + params4 + params5 + params6)
+    ...     def test_is_even(self, n=0, expected=True):
+    ...         actual = is_even(n)
+    ...         self.assertTrue(isinstance(actual, bool))
+    ...         self.assertEqual(actual, expected)
+    ...
+    >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
+    test_is_even__<-1,False> ... ok
+    test_is_even__<-14,True> ... ok
+    test_is_even__<-15,False> ... ok
+    test_is_even__<-7,False> ... ok
+    test_is_even__<-8,True> ... ok
+    test_is_even__<-sys.maxsize> ... ok
+    test_is_even__<0,expected=True> ... ok
+    test_is_even__<15,expected=False> ... ok
+    test_is_even__<17,expected=False> ... ok
+    test_is_even__<18 -> True> ... ok
+    test_is_even__<2,True> ... ok
+    test_is_even__<<12399999999...>,False> ... ok
+    test_is_even__<> ... ok
+    test_is_even__<>__2 ... ok
+    test_is_even__<expected=True,n=<12399999999...>> ... ok
+    test_is_even__<horribleabuse> ... ok
+    test_is_even__<noninteger> ... ok
+    test_is_even__<sys.maxsize> ... ok
+    ...Ran 18 tests...
+    OK
 
     >>> paramseq([1, 2]) + 3         # doctest: +ELLIPSIS
     Traceback (most recent call last):
@@ -2249,6 +2427,7 @@ e.g., the whole thing may be just ignored.
     ...     ])
     ...     def test(self):
     ...         pass
+    ...
     ...     test.__qualname__ = 'Test.test_foo'
     ...
     >>> no_qn or getattr(Test, 'test__<>').__qualname__ == '<...>.test__<>'
@@ -2273,47 +2452,184 @@ e.g., the whole thing may be just ignored.
 
     >>> @expand
     ... class Test(unittest.TestCase):
+    ...
     ...     @foreach([123])
     ...     class TestNested(unittest.TestCase):
     ...         pass
     ...
-    >>> issubclass(Test.TestNested, unittest.TestCase)
+    ...     @foreach([123])
+    ...     class TestNested_another:  # (<- here we have an old-style class if Python 2.x is used)
+    ...         pass
+    ...
+    >>> (isinstance(Test.TestNested, _CLASS_TYPES) and
+    ...  issubclass(Test.TestNested, unittest.TestCase))
     True
-    >>> sorted(k for k in vars(Test).keys() if not k.startswith('__'))
-    ['TestNested']
+    >>> isinstance(Test.TestNested_another, _CLASS_TYPES)
+    True
+    >>> sorted(k for k in vars(Test).keys() if not k.startswith('_'))
+    ['TestNested', 'TestNested_another']
 
     >>> @expand
     ... class Test(unittest.TestCase):
     ...     into_dict = {}
+    ...
     ...     @expand(into=into_dict)
     ...     @foreach([123])
     ...     class TestNested(unittest.TestCase):
     ...         pass
     ...
+    ...     @expand(into=into_dict)
+    ...     @foreach([123])
+    ...     class TestNested_another:  # (<- here we have an old-style class if Python 2.x is used)
+    ...         pass
+    ...
     >>> type(Test.TestNested) is Substitute
     True
-    >>> sorted(k for k in vars(Test).keys() if not k.startswith('__'))
-    ['TestNested', 'into_dict']
+    >>> type(Test.TestNested_another) is Substitute
+    True
+    >>> sorted(k for k in vars(Test).keys() if not k.startswith('_'))
+    ['TestNested', 'TestNested_another', 'into_dict']
     >>> sorted(Test.into_dict.keys())
-    ['TestNested__<123>']
+    ['TestNested__<123>', 'TestNested_another__<123>']
+
+    >>> @expand
+    ... class Test(unittest.TestCase):
+    ...
+    ...     # (param collection containing 1 empty tuple)
+    ...     @foreach([()])
+    ...     def test(self, label, context_targets):
+    ...         self.assertEqual(label, '')
+    ...         self.assertEqual(context_targets, [])
+    ...
+    ...     # (param collection containing 1 empty param object, with label)
+    ...     @foreach([param().label('spam')])
+    ...     def test_another(self, **kwargs):
+    ...         self.assertEqual(kwargs['label'], 'spam')
+    ...         self.assertEqual(kwargs['context_targets'], [])
+    ...
+    >>> run_tests(Test)                  # doctest: +ELLIPSIS
+    test__<> ... ok
+    test_another__<spam> ... ok
+    ...Ran 2 test...
+    OK
 
     >>> into_dict = {}
     >>> @expand(into=into_dict)
-    ... @foreach([42])
+    ... @foreach([()])
     ... class Test(unittest.TestCase):
+    ...
     ...     def setUp(self):
-    ...         sys.stdout.write(' | .context_targets={0!r} | '.format(
-    ...             self.context_targets))
+    ...         sys.stdout.write(
+    ...             ' | .label={!r} | .context_targets={!r} | '.format(
+    ...                 self.label,
+    ...                 self.context_targets))
+    ...         sys.stdout.flush()
+    ...
     ...     def test(self):
-    ...         pass
+    ...         self.assertEqual(self.label, '')
+    ...         self.assertEqual(self.context_targets, [])
     ...
     >>> test_cls = into_dict.popitem()[1]
     >>> run_tests(test_cls)              # doctest: +ELLIPSIS
-    test... | .context_targets=[] | ok
+    test... | .label='' | .context_targets=[] | ok
     ...Ran 1 test...
     OK
 
+    >>> @expand
+    ... class TestWithWrongContext(unittest.TestCase):
+    ...
+    ...     @foreach([
+    ...         # int does not implement the *context manager* protocol
+    ...         param(foo='abc').context(int, '42'),
+    ...     ])
+    ...     def test(self, foo):
+    ...         pass
+    ...
+    >>> run_tests(TestWithWrongContext)  # doctest: +ELLIPSIS
+    test__<foo='abc'> ... ERROR
+    ...
+    Traceback (most recent call last):
+      ...
+    <EXCEPTION WHEN NOT-A-CONTEXT-MANAGER GIVEN>
+    ...
+    Ran 1 test...
+    FAILED (errors=1)
 """
+
+import sys
+
+_PY3 = (sys.version_info[0] >= 3)
+_PY3_11_OR_NEWER = (sys.version_info[:2] >= (3, 11))
+_PY3_7_OR_OLDER = (sys.version_info[:2] <= (3, 7))
+
+if _PY3:
+    if _PY3_11_OR_NEWER:
+        __doc__ = __doc__.replace(
+            '<EXCEPTION WHEN NOT-A-CONTEXT-MANAGER GIVEN>',
+            "TypeError: ...does not support the context manager protocol...")
+    else:
+        __doc__ = __doc__.replace(
+            '<EXCEPTION WHEN NOT-A-CONTEXT-MANAGER GIVEN>',
+            'AttributeError: ...__enter__...')
+
+    __doc__ += """
+    >>> @expand
+    ... class Test_is_even(unittest.TestCase):
+    ...
+    ...     # (let's also cover test methods whose signatures include
+    ...     # *various kinds of arguments* and *type annotations*...)
+    ...
+    ...     @foreach(
+    ...         param(-14, expected=True),
+    ...         param(-1, expected=False),
+    ...         param(0, expected=True),
+    ...         param(2, expected=True),
+    ...         param(17, expected=False),
+    ...     )
+    ...     def test_is_even(self, n, *, expected, label):
+    ...         actual = is_even(n)
+    ...         self.assertTrue(isinstance(actual, bool))
+    ...         self.assertEqual(actual, expected)
+    ...         self.assertIsInstance(label, str)
+    ...
+    ...     @foreach(
+    ...         param('X', 'Y', 1, 2, '345', n=42),
+    ...         param('X', y='Y', n=42),
+    ...         param('X', y='Y'),
+    ...     )
+    ...     def test_whatever(self, x: str, /, y: str, *args: object, n: int = 42, **kw) -> None:
+    ...         self.assertEqual(x, 'X')
+    ...         self.assertEqual(y, 'Y')
+    ...         self.assertIn(args, [(), (1, 2, '345')])
+    ...         self.assertEqual(n, 42)
+    ...         self.assertTrue(set(_GENERIC_KWARGS).issubset(kw))
+    ...
+    ...     ## FIXME: *accepted generic kwargs* should not include
+    ...     ##        names of detected positional-only parameters
+    ...     # @foreach([param()])
+    ...     # def test_xxx(self, label='tralala', /):
+    ...     #     self.assertEqual(label, 'tralala')
+    ...
+    >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
+    test_is_even__<-1,expected=False> ... ok
+    test_is_even__<-14,expected=True> ... ok
+    test_is_even__<0,expected=True> ... ok
+    test_is_even__<17,expected=False> ... ok
+    test_is_even__<2,expected=True> ... ok
+    test_whatever__<'X','Y',1,2,'345',n=42> ... ok
+    test_whatever__<'X',n=42,y='Y'> ... ok
+    test_whatever__<'X',y='Y'> ... ok
+    ...Ran 8 tests...
+    OK
+    """
+    if _PY3_7_OR_OLDER:
+        __doc__ = __doc__.replace(
+            'test_whatever(self, x: str, /, y: str, *args',
+            'test_whatever(self, x: str, y: str, *args')
+else:
+    __doc__ = __doc__.replace(
+        '<EXCEPTION WHEN NOT-A-CONTEXT-MANAGER GIVEN>',
+        'AttributeError: ...__exit__...')
 
 
 try:
@@ -2324,7 +2640,6 @@ import functools
 import inspect
 import itertools
 import string
-import sys
 import types
 import warnings
 
@@ -2337,9 +2652,8 @@ __all__ = (
 )
 
 
-_PY3 = sys.version_info[0] >= 3
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
-_STRING_TYPES = (str,) if _PY3 else (str, unicode)
+_TEXT_STRING_TYPES = (str,) if _PY3 else (str, unicode)
 
 _PARAMSEQ_OBJS_ATTR = '__attached_paramseq_objs'
 
@@ -2353,30 +2667,19 @@ if _PY3:
     def _get_context_manager_enter_and_exit(cm):
         cm_type = type(cm)
         # for consistency with the `with` statement's behavior:
-        if sys.version_info[:2] >= (3, 11):
-            # * under Python 3.11+:
-            #   raise TypeError if any of the context manager
-            #   protocol's required elements is not present
-            #   (see: https://github.com/python/cpython/issues/56231
-            #   and https://github.com/python/cpython/issues/88637)
+        if _PY3_11_OR_NEWER:
+            # (see: https://github.com/python/cpython/issues/56231
+            # and https://github.com/python/cpython/issues/88637)
             try:
                 enter_func = cm_type.__enter__
                 exit_func = cm_type.__exit__
-            except AttributeError:
+            except AttributeError:                                      # XXX @Py3: `as exc`
                 raise TypeError(
-                    '{0.__module__!r}.{0.__qualname__!r} object does not '
-                    'support the context manager protocol'.format(cm_type))
-        elif sys.version_info[:2] >= (3, 6):
-            # * under Python from 3.6 through 3.10:
-            #   *first* get __enter__, *then* get __exit__
-            #   (see: https://github.com/python/cpython/issues/71287)
-            enter_func = cm_type.__enter__
-            exit_func = cm_type.__exit__
+                    '{.__qualname__!r} object does not support the '
+                    'context manager protocol'.format(cm_type))         # XXX @Py3: `from exc`
         else:
-            # * under Python 3.x older than 3.6:
-            #   *first* get __exit__, *then* get __enter__
-            exit_func = cm_type.__exit__
             enter_func = cm_type.__enter__
+            exit_func = cm_type.__exit__
         # (make instance methods by binding the functions to the instance)
         enter = types.MethodType(enter_func, cm)
         exit = types.MethodType(exit_func, cm)
@@ -2415,7 +2718,7 @@ class _Context(object):
     def __init__(self, context_manager_factory, *args, **kwargs):
         self._context_manager_factory = context_manager_factory
         self._enable_exc_suppress = kwargs.pop(
-            '__enable_exc_suppress__', False)
+            '_enable_exc_suppress_', False)
         self._args = args
         self._kwargs = kwargs
 
@@ -2504,38 +2807,37 @@ class param(object):
         try:
             return self.__cached_cm_factory
         except AttributeError:
-            if self._context_list:
-                # we need to combine several context managers (from the
-                # contexts) but Python 2 does not have contextlib.ExitStack,
-                # and contextlib.nested() is deprecated (for good reasons)
-                # -- so we will just generate and execute the code:
-                src_code = (
-                    'import contextlib\n'
-                    '@contextlib.contextmanager\n'
-                    'def cm_factory():\n'
-                    '    context_targets = [None] * len(context_list)\n'
-                    '    {0}'
-                    'yield context_targets\n'.format(''.join(
+            # we need to combine several context managers (from the
+            # contexts) but Python 2 does not have contextlib.ExitStack,
+            # and contextlib.nested() is deprecated (for good reasons)
+            # -- so we will just generate and execute the code:
+            src_code = (
+                'import contextlib\n'
+                '@contextlib.contextmanager\n'
+                'def cm_factory():\n'
+                '    context_targets = [None] * len(context_list)\n'
+                '    {enclosing_withs}yield context_targets\n'.format(
+                    # (note: if self._context_list is empty,
+                    # enclosing_withs will be an empty string)
+                    enclosing_withs=''.join(
                         ('with context_list[{0}]._make_context_manager() '
                          'as context_targets[{0}]:\n{next_indent}'
                         ).format(i, next_indent=((8 + 4 * i) * ' '))
                         for i in range(len(self._context_list)))))
-                # Py2+Py3-compatible substitute of exec in a given namespace
-                code = compile(src_code, '<string>', 'exec')
-                namespace = {'context_list': self._context_list}
-                eval(code, namespace)
-                self.__cached_cm_factory = namespace['cm_factory']
-            else:
-                self.__cached_cm_factory = None
+            # Py2+Py3-compatible substitute of exec in a given namespace
+            code = compile(src_code, '<string>', 'exec')
+            namespace = {'context_list': self._context_list}
+            eval(code, namespace)
+            self.__cached_cm_factory = namespace['cm_factory']
             return self.__cached_cm_factory
 
     def _get_label(self):
         if self._label_list:
-            return ', '.join(label for label in self._label_list)
+            return ', '.join(self._label_list)
         else:
             short_repr = self._short_repr
             args_reprs = (short_repr(val) for val in self._args)
-            kwargs_reprs = ('{0}={1}'.format(key, short_repr(val))
+            kwargs_reprs = ('{}={}'.format(key, short_repr(val))
                             for key, val in sorted(self._kwargs.items()))
             return ','.join(itertools.chain(args_reprs, kwargs_reprs))
 
@@ -2543,7 +2845,7 @@ class param(object):
     def _short_repr(obj, max_len=16):
         r = repr(obj)
         if len(r) > max_len:
-            r = '<{0}...>'.format(r.lstrip('<')[:max_len-5])
+            r = '<{}...>'.format(r.lstrip('<')[:max_len-5])
         return r
 
 
@@ -2593,7 +2895,7 @@ class paramseq(object):
         for param_col in param_collections:
             if not self._is_legal_param_collection(param_col):
                 raise TypeError(
-                    '{0!r} is not a legal parameter '
+                    '{!r} is not a legal parameter '
                     'collection'.format(param_col))
         self._param_collections = param_collections
         self._context_list = []
@@ -2602,8 +2904,8 @@ class paramseq(object):
     def _is_legal_param_collection(obj):
         if isinstance(obj, tuple):
             warnings.warn(
-                'using a tuple as a parameter collection will not be '
-                'supported in future versions of unittest_expander.',
+                'using a tuple as a parameter collection will become '
+                'illegal in the version 0.5.0 of unittest_expander.',
                 DeprecationWarning)
         return (
             isinstance(obj, (
@@ -2612,7 +2914,7 @@ class paramseq(object):
                 collections_abc.Set,
                 collections_abc.Mapping)
             ) and
-            not isinstance(obj, _STRING_TYPES)
+            not isinstance(obj, _TEXT_STRING_TYPES)
         ) or callable(obj)
 
     def _generate_params(self, test_cls):
@@ -2662,7 +2964,7 @@ def foreach(*args, **kwargs):
         if isinstance(func_or_cls, _CLASS_TYPES):
             warnings.warn(
                 'decorating test *classes* with @foreach() will not be '
-                'supported in future versions of unittest_expander.',
+                'supported in the version 0.5.0 of unittest_expander.',
                 DeprecationWarning)
         return func_or_cls
     return decorator
@@ -2670,13 +2972,22 @@ def foreach(*args, **kwargs):
 
 # test case *class* decorator...
 def expand(test_cls=None, **kwargs):
-    into = kwargs.pop('into', None)
+    if 'into' in kwargs:
+        warnings.warn(
+            'passing the `into` keyword argument to @expand() will '
+            'become illegal in the version 0.5.0 of unittest_expander.',
+            DeprecationWarning)
+        into = kwargs.pop('into')
+    else:
+        into = kwargs.pop('__into_with_warning_already_emitted_if_needed', None)
     if kwargs:
         raise TypeError(
             'expand() got unexpected keyword arguments: ' +
             ', '.join(sorted(map(repr, kwargs))))
     if test_cls is None:
-        return functools.partial(expand, into=into)
+        return functools.partial(
+            expand,
+            __into_with_warning_already_emitted_if_needed=into)
     _expand_test_methods(test_cls)
     return _expand_test_cls(test_cls, into)
 
@@ -2709,7 +3020,7 @@ def _get_attrs_to_substitute_and_add(test_cls):
 
 def _get_base_func(obj):
     if (getattr(obj, _PARAMSEQ_OBJS_ATTR, None) is None
-          or isinstance(obj, (Substitute, type))):
+          or isinstance(obj, (Substitute, _CLASS_TYPES))):
         base_func = None
     else:
         base_func = _obtain_base_func_from(obj)
@@ -2731,7 +3042,7 @@ if _PY3:
     def _obtain_base_func_from(obj):
         # no unbound methods in Python 3
         if not isinstance(obj, types.FunctionType):
-            raise TypeError('{0!r} is not a function'.format(obj))
+            raise TypeError('{!r} is not a function'.format(obj))
         return obj
 
     def _obtain_accepted_generic_kwargs_from(base_func):
@@ -2744,7 +3055,7 @@ if _PY3:
 else:
     def _obtain_base_func_from(obj):
         if not isinstance(obj, types.MethodType):
-            raise TypeError('{0!r} is not a method'.format(obj))
+            raise TypeError('{!r} is not a method'.format(obj))
         return obj.__func__
 
     def _obtain_accepted_generic_kwargs_from(base_func):
@@ -2763,7 +3074,7 @@ def _expand_test_cls(base_test_cls, into):
     else:
         assert isinstance(paramseq_objs, list)
         if not isinstance(base_test_cls, _CLASS_TYPES):
-            raise TypeError('{0!r} is not a class'.format(base_test_cls))
+            raise TypeError('{!r} is not a class'.format(base_test_cls))
         into = _resolve_the_into_arg(into, globals_frame_depth=3)
         seen_names = set(list(into.keys()) + [base_test_cls.__name__])
         for cls in _generate_parametrized_classes(
@@ -2775,14 +3086,14 @@ def _resolve_the_into_arg(into, globals_frame_depth):
     orig_into = into
     if into is None:
         into = sys._getframe(globals_frame_depth).f_globals['__name__']
-    if isinstance(into, _STRING_TYPES):
+    if isinstance(into, _TEXT_STRING_TYPES):
         into = __import__(into, globals(), locals(), ['*'], 0)
     if inspect.ismodule(into):
         into = vars(into)
     if not isinstance(into, collections_abc.MutableMapping):
         raise TypeError(
             "resolved 'into' argument is not a mutable mapping "
-            "({0!r} given, resolved to {1!r})".format(orig_into, into))
+            "({!r} given, resolved to {!r})".format(orig_into, into))
     return into
 
 
@@ -2818,27 +3129,18 @@ def _make_parametrized_func(base_name, base_func, count, param_inst,
     p_kwargs = param_inst._kwargs
     label = param_inst._get_label()
     cm_factory = param_inst._get_context_manager_factory()
-    if cm_factory is None:
-        @functools.wraps(base_func)
-        def generated_func(*args, **kwargs):
-            args += p_args
-            kwargs.update(**p_kwargs)
+
+    @functools.wraps(base_func)
+    def generated_func(*args, **kwargs):
+        args += p_args
+        kwargs.update(**p_kwargs)
+        with cm_factory() as context_targets:
             if 'context_targets' in accepted_generic_kwargs:
-                kwargs.setdefault('context_targets', [])
+                kwargs.setdefault('context_targets', context_targets)
             if 'label' in accepted_generic_kwargs:
                 kwargs.setdefault('label', label)
             return base_func(*args, **kwargs)
-    else:
-        @functools.wraps(base_func)
-        def generated_func(*args, **kwargs):
-            args += p_args
-            kwargs.update(**p_kwargs)
-            with cm_factory() as context_targets:
-                if 'context_targets' in accepted_generic_kwargs:
-                    kwargs.setdefault('context_targets', context_targets)
-                if 'label' in accepted_generic_kwargs:
-                    kwargs.setdefault('label', label)
-                return base_func(*args, **kwargs)
+
     delattr(generated_func, _PARAMSEQ_OBJS_ATTR)
     generated_func.__name__ = _format_name_for_parametrized(
         base_name, base_func, label, count, seen_names)
@@ -2859,14 +3161,11 @@ def _make_parametrized_cls(base_test_cls, count, param_inst, seen_names):
                 setattr(self, name, obj)
             ready_exit = None
             try:
-                if cm_factory is None:
-                    self.context_targets = []
-                else:
-                    cm = cm_factory()
-                    enter, exit = _get_context_manager_enter_and_exit(cm)
-                    self.context_targets = enter()
-                    ready_exit = exit
-                self.__exit = ready_exit
+                cm = cm_factory()
+                enter, exit = _get_context_manager_enter_and_exit(cm)
+                self.context_targets = enter()
+                ready_exit = exit  # (note: from now on, exit can be called)
+                self.__exit = exit
                 try:
                     super_setUp = super(generated_test_cls, self).setUp
                 except AttributeError:
@@ -2926,7 +3225,7 @@ def _format_name_for_parametrized(base_name, base_obj,
     uniq_tag = 2
     while name in seen_names:
         # ensure that, for a particular class, names are unique
-        name = '{0}__{1}'.format(stem_name, uniq_tag)
+        name = '{}__{}'.format(stem_name, uniq_tag)
         uniq_tag += 1
     seen_names.add(name)
     return name

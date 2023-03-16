@@ -27,6 +27,11 @@ The :func:`expand` class decorator
 
    .. attribute:: expand.global_name_formatter
 
+.. deprecated:: 0.4.0
+
+   The *into* argument will become *illegal* in the version *0.5.0*.
+
+
 The :func:`foreach` method/class decorator
 ------------------------------------------
 
@@ -43,20 +48,24 @@ The :func:`foreach` method/class decorator
    * a set (i.e., such an object that
      ``isinstance(obj, collections.abc.Set)`` returns :obj:`True`),
    * a callable (i.e., such an object that ``callable(obj)`` returns
-     :obj:`True`) that returns an iterable object (such as a generator).
+     :obj:`True`) that returns an iterable object (for example, a
+     generator/iterator).
 
    .. deprecated:: 0.4.0
+
       A parameter collection being a tuple (i.e., an instance of the
       built-in type :class:`tuple` or of a subclass of it, e.g., a
-      *named tuple*) will *not* be supported in future versions.
+      *named tuple*) will become *illegal* in the version *0.5.0*
+      (note that this deprecation concerns tuples used as *parameter
+      collections*, *not* as *items* of parameter collections).
 
    Each item of a parameter collection is one of:
 
    * a :class:`param` instance,
    * a :class:`tuple` (converted automatically to a :class:`param`
-     that contains the items of the tuple),
+     that contains the items of that tuple),
    * any other object (converted automatically to a :class:`param`
-     that contains only one item: the object).
+     that contains only one item: that object).
 
 *or*
 
@@ -68,7 +77,9 @@ The :func:`foreach` method/class decorator
    be used to call :meth:`param.label`.
 
 .. deprecated:: 0.4.0
-   Decorating test *classes* will *not* be supported in future versions.
+
+   Support for decorating test *classes* with :func:`foreach` will be
+   *removed* in the version *0.5.0*.
 
 The :class:`paramseq` class
 ---------------------------
@@ -86,20 +97,24 @@ The :class:`paramseq` class
    * a set (i.e., such an object that
      ``isinstance(obj, collections.abc.Set)`` returns :obj:`True`),
    * a callable (i.e., such an object that ``callable(obj)`` returns
-     :obj:`True`) that returns an iterable object (such as a generator).
+     :obj:`True`) that returns an iterable object (for example, a
+     generator/iterator).
 
    .. deprecated:: 0.4.0
+
       A parameter collection being a tuple (i.e., an instance of the
       built-in type :class:`tuple` or of any subclass of it, e.g., a
-      *named tuple*) will *not* be supported in future versions.
+      *named tuple*) will become *illegal* in the version *0.5.0*
+      (note that this deprecation concerns tuples used as *parameter
+      collections*, *not* as *items* of parameter collections).
 
    Each item of a parameter collection is one of:
 
    * a :class:`param` instance,
    * a :class:`tuple` (converted automatically to a :class:`param`
-     that contains the items of the tuple),
+     that contains the items of that tuple),
    * any other object (converted automatically to a :class:`param`
-     that contains only one item: the object).
+     that contains only one item: that object).
 
 *or*
 
@@ -127,7 +142,7 @@ The :class:`paramseq` class
 
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \
-                       __enable_exc_suppress__=False)
+                       _enable_exc_suppress_=False)
 
        Returns a new :class:`paramseq` instance contaning clones of the
        items of the current instance -- each cloned with
@@ -143,7 +158,7 @@ The :class:`param` class
 
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \
-                       __enable_exc_suppress__=False)
+                       _enable_exc_suppress_=False)
 
        Returns a new :class:`param` instance being a clone of the
        current instance, with the specified context manager factory (and
@@ -152,8 +167,8 @@ The :class:`param` class
        By default, the possibility to suppress exceptions by returning a
        true value from context manager's :meth:`__exit__` is disabled
        (exceptions are propagated even if :meth:`__exit__` returns
-       :obj:`True`); to enable this possibility specify the
-       *__enable_exc_suppress__* keyword argument as :obj:`True`.
+       :obj:`True`); to enable this possibility you need to set the
+       *_enable_exc_suppress_* keyword argument to :obj:`True`.
 
    .. method:: label(text)
 

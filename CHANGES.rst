@@ -1,27 +1,28 @@
 Changes
 =======
 
-0.4.0-beta2 (to be updated...)
-------------------------------
+Not ready (0.4.0-beta3 -- to be updated...)
+-------------------------------------------
 
 * From now on, the following versions of Python are officially
-  supported: *3.5* through *3.10*, as well as *2.7*. That means,
-  in particular, that the versions *2.6*, *3.2*, *3.3* and *3.4* are
-  *no longer* officially supported.
+  supported: *3.6* through *3.11*, as well as *2.7* (still!). This
+  means, in particular, that the versions *2.6*, *3.2*, *3.3*, *3.4*
+  and *3.5* are *no longer* supported.
 
-* Now, if two (or more) parameter collections are combined to make a
+* Now, if two (or more) parameter collections are combined to make the
   Cartesian product of them (as an effect of decorating a test with
   two or more **foreach(...)** invocations), and a conflict is detected
-  between any *keyword arguments* previously used to create **param**
-  instances that are now combined, the **expand** decorator raises
-  **ValueError** (in older versions of *unittest_expander* no exception
-  was raised; instead, a keyword argument being a component of one
-  **param** was silently overwritten by the corresponding keyword
-  argument being a component of the other **param**).
+  between any *keyword arguments* passed earlier to the **param**
+  constructor to create the instances that are being combined, the
+  **expand** decorator raises a **ValueError** (in older versions of
+  *unittest_expander* no exception was raised; instead, a keyword
+  argument being a component of one **param** was silently overwritten
+  by the corresponding keyword argument being a component of the other
+  **param**; that could lead to silent bugs in your tests...).
 
 * When it comes to **param.context()** (and **paramseq.context()**),
   now the standard Python context manager's mechanism of suppressing
-  exceptions by making **__exit__()** return a *true* value is,
+  exceptions (by making **__exit__()** return a *true* value) is,
   by default, consistently *disabled* (i.e. exceptions are *not*
   suppressed, as it could easily become a cause of silent test bugs; the
   previous behavior was inconsistent: exceptions could be suppressed in
@@ -29,45 +30,58 @@ Changes
   not in the case of applying them to test *classes*).
 
   If needed, the possibility of suppressing exceptions by **__exit__()**
-  returning a *true* value can be explicitly *enabled* on a per case by
-  case basis by passing ``__enable_exc_suppress__=True`` to
-  **param.context()** (or **paramseq.context()**).
+  returning a *true* value can be explicitly *enabled* on a case-by-case
+  basis by passing ``_enable_exc_suppress_=True`` to **param.context()**
+  (or **paramseq.context()**).
 
 * **Deprecation notice:** decorating test *classes* with **foreach()**
   -- to generate new, parametrized, test *classes* -- is now deprecated
   (causing emission of a **DeprecationWarning**); in future versions of
-  *unittest_expander* it will either be **unsupported** or (later) have
-  a **different meaning**; the current shape of the feature is deemed
-  broken by design (in particular, because of the lack of composability,
-  that becomes apparent when it comes to class inheritance...).
+  *unittest_expander* it will either be **unsupported** (in *0.5.0*), or
+  (in later versions...) have a **different meaning**; the current shape
+  of the feature is deemed broken by design (in particular, because of
+  the lack of composability; that becomes apparent when class
+  inheritance comes into play...).
 
-* **Deprecation notice:** using a *tuple* as a parameter collection
-  passed as the *sole* argument to **paramseq()** or **foreach()**
-  is now deprecated (causing emission of a **DeprecationWarning**);
-  in future versions of *unittest_expander* it will either be
-  **unsupported** or (later) have a **different meaning** (namely:
-  acting as the only *item* of the specified parameter collection).
+* **Deprecation notice:** a change related to the deprecation described
+  above is that now the **expand**'s keyword argument ``into`` is also
+  deprecated (its use causes emission of a **DeprecationWarning**) and
+  will become **illegal** in *unittest_expander 0.5.0*.
 
-* A bugfix: now test methods with *keyword-only* arguments and/or *type
-  annotations* are supported (previously a **ValueError** was raised by
-  **expand()** if such a method was decorated with **foreach()**).
-  The background is that under Python 3.x, from now on,
+* **Deprecation notice:** using a tuple (i.e., an instance of the
+  built-in type **tuple** or of any subclass of it, e.g., a *named
+  tuple*) as a *parameter collection*, passed as the *sole* argument
+  to **foreach()** or **paramseq()**, is now deprecated (causing
+  emission of a **DeprecationWarning**) and will become **illegal**
+  in *unittest_expander 0.5.0*.  Instead of a tuple, use a *parameter
+  collection* of another type (e.g., a **list**).
+
+  Note that this deprecation concerns tuples used as *parameter
+  collections*, *not* as *items* of parameter collections (tuples being
+  such items, used as simple substitutes of **param** objects, are --
+  and will be -- perfectly OK).
+
+* Two compatibility fixes:
+
+  (1) now test methods with *keyword-only* arguments and/or *type
+  annotations* are supported (previously an error was raised by
+  **expand()** if such a method was decorated with **foreach()**);
+  the background is that under Python 3.x, from now on,
   **inspect.getfullargspec()** (instead of its legacy predecessor,
-  **inspect.getargspec()**) is used to inspect test method signatures.
+  **inspect.getargspec()**) is used to inspect test method signatures;
 
-* A compatibility fix: now standard *abstract base classes* of
-  collections are imported from ``collections.abc``; an import from
-  ``collections`` is performed only as a fallback (relevant to Python
-  2.7).
+  (2) now standard *abstract base classes* of collections are imported
+  from ``collections.abc``; an import from ``collections`` is performed
+  only as a fallback (relevant to Python 2.7).
 
 * Two bugfixes related to the **expand()** decorator:
 
-  (1) now classes (type objects) and **Substitute** objects are
-  skipped when scanning a test class for attributes that have
+  (1) now class/type objects and **Substitute** objects are ignored
+  when scanning a test class for attributes (methods) that have
   **foreach()**-created marks;
 
-  (2) **foreach()**-created marks are no longer retained on
-  parametrized test methods generated by the **expand()**'s machinery.
+  (2) **foreach()**-created marks are no longer retained on parametrized
+  test methods generated by the **expand()**'s machinery.
 
   Thanks to those fixes, it is now possible to apply **expand()** to
   subclasses of an **expand()**-ed class -- provided that **foreach()**
@@ -79,16 +93,17 @@ Changes
   (which is a deprecated feature -- see the relevant *deprecation
   notice* above):
 
-  (1) a **foreach()**-decorated test class which does not inherit from
-  **unittest.TestCase** is no longer required to provide its own
-  implementations of **setUp()** and **tearDown()** (previously
-  **setUp()** and **tearDown()** automatically provided by classes
-  derived with **expand()** from such a class raised an
-  **AttributeError**);
+  (1) a **foreach()**-decorated test class which does *not* inherit
+  from **unittest.TestCase** is no longer required to provide its
+  own implementations of **setUp()** and **tearDown()** (previously,
+  if they were missing, an **AttributeError** were raised by the
+  **setUp()** and **tearDown()** implementations provided by
+  **expand()**-generated subclasses);
 
-  (2) now the ``context_targets`` attribute is set (to an empty list)
-  also if there are no contexts (making it possible for a test code to
-  refer to ``self.context_targets`` without fear of **AttributeError**);
+  (2) now the ``context_targets`` attribute of a test class instance
+  is set also if there are no contexts (to an empty list -- making it
+  possible for a test code to refer to ``self.context_targets`` without
+  fear of an **AttributeError**);
 
   (3) now a *context*'s **__exit__()** is never called without the
   corresponding **__enter__()** call being successful.
@@ -96,7 +111,8 @@ Changes
 * A few really minor behavioral changes/improvements (in particular, now
   a *callable* parameter collection is required to satisfy the built-in
   **callable(...)** predicate, instead of the previously checked
-  **isinstance(..., collections.Callable)** condition).
+  **isinstance(..., collections.Callable)** condition; that should not
+  matter in practice).
 
 * A bunch of package-setup-and-metadata-related additions, updates,
   fixes, improvements and removals (in particular, ``pyproject.toml``
