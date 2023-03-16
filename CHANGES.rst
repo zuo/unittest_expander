@@ -1,7 +1,7 @@
 Changes
 =======
 
-Not ready (0.4.0-release-candidate-3 -- to be updated...)
+Not ready (0.4.0-release-candidate-4 -- to be updated...)
 ---------------------------------------------------------
 
 * From now on, the following versions of Python are officially
@@ -51,7 +51,7 @@ Not ready (0.4.0-release-candidate-3 -- to be updated...)
 * **Deprecation notice:** using a tuple (i.e., an instance of the
   built-in type **tuple** or of any subclass of it, e.g., a *named
   tuple*) as a *parameter collection* -- passed as the *sole* argument
-  to **foreach()** or **paramseq()**, or added (using `+`) to an
+  to **foreach()** or **paramseq()**, or added (using ``+``) to an
   existing **paramseq** object -- is now deprecated (causing emission
   of a **DeprecationWarning**) and will become **illegal** in
   *unittest_expander 0.5.0*.  Instead of a tuple, use a collection
