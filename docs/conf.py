@@ -75,7 +75,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'unittest_expander'
-copyright = u'2014-2021, Jan Kaliszewski (zuo) and others'
+copyright = u'2014-2023, Jan Kaliszewski (zuo) and others'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -295,7 +295,7 @@ texinfo_documents = [
 epub_title = u'unittest_expander'
 epub_author = u'Jan Kaliszewski (zuo) and others'
 epub_publisher = u'Jan Kaliszewski (zuo)'
-epub_copyright = u'2014-2021, Jan Kaliszewski (zuo) and others'
+epub_copyright = u'2014-2023, Jan Kaliszewski (zuo) and others'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'unittest_expander'

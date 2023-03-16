@@ -1,5 +1,5 @@
 # This workflow, on each of the supported versions of CPython, as
-# well as on some versions of PyPy, installs the library and runs
+# well as on some version of PyPy, installs the library and runs
 # its doctests.
 
 name: Install and Test
@@ -13,11 +13,19 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["2.7", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "pypy2", "pypy3"]
+        python-version:
+        - "3.11"
+        - "3.10"
+        - "3.9"
+        - "3.8"
+        - "3.7"
+        - "3.6"
+        - "2.7"
+        - "pypy3"
 
     steps:
     - uses: actions/checkout@v2

@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2021 Jan Kaliszewski (zuo) & others. All rights reserved.
+# Copyright (c) 2014-2023 Jan Kaliszewski (zuo) & others. All rights reserved.
 #
 # Licensed under the MIT License:
 #
@@ -375,9 +375,9 @@ OK
    **illegal** in the *0.5.0* version of *unittest_expander*.
 
    Note that here we refer to a tuple being a *parameter collection*,
-   *not* a parameter collection's *item* (tuples being such items, used
-   as simple substitutes of :class:`param` objects, are -- and will be
-   -- perfectly OK).
+   *not* a parameter collection's *item* (tuples being such items,
+   acting as simple substitutes of :class:`param` objects, are --
+   and will always be -- perfectly OK).
 
 A :class:`paramseq` instance can also be created from a callable object
 that returns a sequence or another iterable (e.g., a generator/iterator):
@@ -2260,30 +2260,32 @@ tests are run...).
     True
     >>> isinstance(paramseq(paramseq([1, 2])), paramseq)
     True
-    >>> isinstance(paramseq([1, 2]) + {3, 4} + (5, 6), paramseq)
+    >>> isinstance(paramseq([1, 2]) + {3, 4} + [5, 6], paramseq)
     True
-    >>> isinstance((5, 6) + paramseq([1, 2]) + {3, 4}, paramseq)
-    True
-    >>> isinstance({3, 4} + paramseq([1, 2]) + (5, 6), paramseq)
+    >>> isinstance({3, 4} + paramseq([1, 2]) + [5, 6], paramseq)
     True
 
     >>> @expand()  # <- effectively, same as `@expand` without `()`
     ... class Test_is_even(unittest.TestCase):
     ...
-    ...     params1a = paramseq() + (  # Note: even though passing a tuple
-    ...         (-14, True),           # to paramseq()/foreach() as the source
-    ...     )                          # param collection is deprecated, adding
-    ...     params1b = (               # a tuple (using `+`) to a paramseq
-    ...         (-1, False),           # instance will remain allowed. XXX: shall it??? (rather no)
+    ...     # Note: here, among other things, we cover using tuples as
+    ...     # parameter collections -- which is deprecated, but still
+    ...     # legal in unitest_expander 0.4.x.
+    ...
+    ...     params1a = paramseq() + (
+    ...         (-14, True),
+    ...     )
+    ...     params1b = (
+    ...         (-1, False),
     ...     )
     ...     params1ab = params1a + params1b
     ...
     ...     params1c = (
     ...         (-8, True),
     ...     )
-    ...     params1d = paramseq([
+    ...     params1d = paramseq((
     ...         (-7, False),
-    ...     ])
+    ...     ))
     ...     params1cd = params1c + params1d
     ...
     ...     params1 = params1ab + params1cd
@@ -2318,30 +2320,32 @@ tests are run...).
     ...     )
     ...
     ...     @foreach(params1 + params2 + params3 + params4 + params5 + params6)
-    ...     def test_is_even(self, n=0, expected=True):
+    ...     @foreach(('Foo',))
+    ...     def test_is_even(self, foo, n=0, expected=True):
+    ...         self.assertTrue(foo, 'Foo')
     ...         actual = is_even(n)
     ...         self.assertTrue(isinstance(actual, bool))
     ...         self.assertEqual(actual, expected)
     ...
     >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-    test_is_even__<-1,False> ... ok
-    test_is_even__<-14,True> ... ok
-    test_is_even__<-15,False> ... ok
-    test_is_even__<-7,False> ... ok
-    test_is_even__<-8,True> ... ok
-    test_is_even__<-sys.maxsize> ... ok
-    test_is_even__<0,expected=True> ... ok
-    test_is_even__<15,expected=False> ... ok
-    test_is_even__<17,expected=False> ... ok
-    test_is_even__<18 -> True> ... ok
-    test_is_even__<2,True> ... ok
-    test_is_even__<<12399999999...>,False> ... ok
-    test_is_even__<> ... ok
-    test_is_even__<>__2 ... ok
-    test_is_even__<expected=True,n=<12399999999...>> ... ok
-    test_is_even__<horribleabuse> ... ok
-    test_is_even__<noninteger> ... ok
-    test_is_even__<sys.maxsize> ... ok
+    test_is_even__<'Foo', -1,False> ... ok
+    test_is_even__<'Foo', -14,True> ... ok
+    test_is_even__<'Foo', -15,False> ... ok
+    test_is_even__<'Foo', -7,False> ... ok
+    test_is_even__<'Foo', -8,True> ... ok
+    test_is_even__<'Foo', -sys.maxsize> ... ok
+    test_is_even__<'Foo', 0,expected=True> ... ok
+    test_is_even__<'Foo', 15,expected=False> ... ok
+    test_is_even__<'Foo', 17,expected=False> ... ok
+    test_is_even__<'Foo', 18 -> True> ... ok
+    test_is_even__<'Foo', 2,True> ... ok
+    test_is_even__<'Foo', <12399999999...>,False> ... ok
+    test_is_even__<'Foo', > ... ok
+    test_is_even__<'Foo', >__2 ... ok
+    test_is_even__<'Foo', expected=True,n=<12399999999...>> ... ok
+    test_is_even__<'Foo', horribleabuse> ... ok
+    test_is_even__<'Foo', noninteger> ... ok
+    test_is_even__<'Foo', sys.maxsize> ... ok
     ...Ran 18 tests...
     OK
 
@@ -2854,11 +2858,15 @@ class paramseq(object):
     def __init__(*self_and_args, **kwargs):
         self = self_and_args[0]
         args = self_and_args[1:]
+        self._init_with_appropriate_warn_stacklevel(args, kwargs)
+
+    def _init_with_appropriate_warn_stacklevel(self, args, kwargs):
         if len(args) == 1 and not kwargs:
             # the sole positional argument is a parameter collection
             # (being a collection of: parameter values, tuples of such
             # values, or `param` instances)
-            self._init_with_param_collections(args[0])
+            obj = self._warn_and_coerce_if_tuple(args[0], warn_stacklevel=4)
+            self._init_with_param_collections(obj)
         else:
             # each argument is a parameter value, or a tuple of such
             # values, or a `param` instance -- explicitly labeled if
@@ -2866,18 +2874,26 @@ class paramseq(object):
             self._init_with_param_collections(args, kwargs)
 
     def __add__(self, other):
-        if isinstance(other, tuple):
-            other = list(other)
         if self._is_legal_param_collection(other):
+            other = self._warn_and_coerce_if_tuple(other, warn_stacklevel=3)
             return self._from_param_collections(self, other)
         return NotImplemented
 
     def __radd__(self, other):
-        if isinstance(other, tuple):
-            other = list(other)
         if self._is_legal_param_collection(other):
+            other = self._warn_and_coerce_if_tuple(other, warn_stacklevel=3)
             return self._from_param_collections(other, self)
         return NotImplemented
+
+    def _warn_and_coerce_if_tuple(self, obj, warn_stacklevel):
+        if isinstance(obj, tuple):
+            warnings.warn(
+                'using a tuple as a parameter collection will become '
+                'illegal in the version 0.5.0 of unittest_expander.',
+                DeprecationWarning,
+                stacklevel=warn_stacklevel)
+            obj = list(obj)  # (to avoid future redundant warn() calls)
+        return obj
 
     def context(self, context_manager_factory, *args, **kwargs):
         context = _Context(context_manager_factory, *args, **kwargs)
@@ -2902,11 +2918,6 @@ class paramseq(object):
 
     @staticmethod
     def _is_legal_param_collection(obj):
-        if isinstance(obj, tuple):
-            warnings.warn(
-                'using a tuple as a parameter collection will become '
-                'illegal in the version 0.5.0 of unittest_expander.',
-                DeprecationWarning)
         return (
             isinstance(obj, (
                 paramseq,
@@ -2953,7 +2964,8 @@ class paramseq(object):
 
 # test case *method* or *class* decorator...
 def foreach(*args, **kwargs):
-    ps = paramseq(*args, **kwargs)
+    ps = paramseq.__new__(paramseq)
+    ps._init_with_appropriate_warn_stacklevel(args, kwargs)
     def decorator(func_or_cls):
         stored_paramseq_objs = getattr(func_or_cls, _PARAMSEQ_OBJS_ATTR, None)
         if stored_paramseq_objs is None:
@@ -2965,7 +2977,8 @@ def foreach(*args, **kwargs):
             warnings.warn(
                 'decorating test *classes* with @foreach() will not be '
                 'supported in the version 0.5.0 of unittest_expander.',
-                DeprecationWarning)
+                DeprecationWarning,
+                stacklevel=2)
         return func_or_cls
     return decorator
 
@@ -2976,7 +2989,8 @@ def expand(test_cls=None, **kwargs):
         warnings.warn(
             'passing the `into` keyword argument to @expand() will '
             'become illegal in the version 0.5.0 of unittest_expander.',
-            DeprecationWarning)
+            DeprecationWarning,
+            stacklevel=2)
         into = kwargs.pop('into')
     else:
         into = kwargs.pop('__into_with_warning_already_emitted_if_needed', None)

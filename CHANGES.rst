@@ -1,21 +1,21 @@
 Changes
 =======
 
-Not ready (0.4.0-beta3 -- to be updated...)
+Not ready (0.4.0-beta4 -- to be updated...)
 -------------------------------------------
 
 * From now on, the following versions of Python are officially
-  supported: *3.6* through *3.11*, as well as *2.7* (still!). This
-  means, in particular, that the versions *2.6*, *3.2*, *3.3*, *3.4*
-  and *3.5* are *no longer* supported.
+  supported: *3.6* through *3.11*, as well as *2.7* (still). This means,
+  in particular, that the versions *2.6*, *3.2*, *3.3*, *3.4* and *3.5*
+  are *no longer* supported.
 
 * Now, if two (or more) parameter collections are combined to make the
   Cartesian product of them (as an effect of decorating a test with
   two or more **foreach(...)** invocations), and a conflict is detected
-  between any *keyword arguments* passed earlier to the **param**
-  constructor to create the instances that are being combined, the
-  **expand** decorator raises a **ValueError** (in older versions of
-  *unittest_expander* no exception was raised; instead, a keyword
+  between any *keyword arguments* passed earlier to the **param()**
+  constructor to create the **param** instances that are being combined,
+  the **expand()** decorator raises a **ValueError** (in older versions
+  of *unittest_expander* no exception was raised; instead, a keyword
   argument being a component of one **param** was silently overwritten
   by the corresponding keyword argument being a component of the other
   **param**; that could lead to silent bugs in your tests...).
@@ -35,31 +35,32 @@ Not ready (0.4.0-beta3 -- to be updated...)
   (or **paramseq.context()**).
 
 * **Deprecation notice:** decorating test *classes* with **foreach()**
-  -- to generate new, parametrized, test *classes* -- is now deprecated
+  -- to generate new parametrized test *classes* -- is now deprecated
   (causing emission of a **DeprecationWarning**); in future versions of
-  *unittest_expander* it will either be **unsupported** (in *0.5.0*), or
-  (in later versions...) have a **different meaning**; the current shape
-  of the feature is deemed broken by design (in particular, because of
-  the lack of composability; that becomes apparent when class
-  inheritance comes into play...).
+  *unittest_expander* it will first become **unsupported** (in *0.5.0*),
+  and then, in some version, will (most probably) get a **new meaning**.
+  The current shape of the feature is deemed broken by design (in
+  particular, because of the lack of composability; that becomes
+  apparent when class inheritance comes into play...).
 
 * **Deprecation notice:** a change related to the deprecation described
-  above is that now the **expand**'s keyword argument ``into`` is also
+  above is that now the **expand()**'s keyword argument ``into`` is also
   deprecated (its use causes emission of a **DeprecationWarning**) and
   will become **illegal** in *unittest_expander 0.5.0*.
 
 * **Deprecation notice:** using a tuple (i.e., an instance of the
   built-in type **tuple** or of any subclass of it, e.g., a *named
-  tuple*) as a *parameter collection*, passed as the *sole* argument
-  to **foreach()** or **paramseq()**, is now deprecated (causing
-  emission of a **DeprecationWarning**) and will become **illegal**
-  in *unittest_expander 0.5.0*.  Instead of a tuple, use a *parameter
-  collection* of another type (e.g., a **list**).
+  tuple*) as a *parameter collection* -- passed as the *sole* argument
+  to **foreach()** or **paramseq()**, or added (using `+`) to an
+  existing **paramseq** object -- is now deprecated (causing emission
+  of a **DeprecationWarning**) and will become **illegal** in
+  *unittest_expander 0.5.0*.  Instead of a tuple, use a collection
+  of another type (e.g., a **list**).
 
-  Note that this deprecation concerns tuples used as *parameter
-  collections*, *not* as *items* of parameter collections (tuples being
-  such items, used as simple substitutes of **param** objects, are --
-  and will be -- perfectly OK).
+  Note: this deprecation concerns tuples used as *parameter collections*,
+  *not* as *items* of parameter collections (tuples being such items,
+  acting as simple substitutes of **param** objects, are -- and will
+  always be -- perfectly OK).
 
 * Two compatibility fixes:
 
@@ -71,8 +72,8 @@ Not ready (0.4.0-beta3 -- to be updated...)
   **inspect.getargspec()**) is used to inspect test method signatures;
 
   (2) now standard *abstract base classes* of collections are imported
-  from ``collections.abc``; an import from ``collections`` is performed
-  only as a fallback (relevant to Python 2.7).
+  from ``collections.abc``; an import from ``collections`` is left only
+  as a fallback (relevant to Python 2.7).
 
 * Two bugfixes related to the **expand()** decorator:
 
