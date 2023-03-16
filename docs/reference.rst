@@ -25,10 +25,16 @@ The :func:`expand` class decorator
 
    ———
 
-   The public interface this decorator provides includes also the
-   following attributes, making it possible to :ref:`change the way
-   of formatting names <custom-name-formatting>` of generated test
-   methods/classes:
+   This decorator is intended to be applied to *test classes*: doing
+   that causes that test parameters -- previously attached to related
+   test methods (and/or classes) by decorating them with :func:`foreach`
+   -- are "expanded", that is, actual parametrized versions of those
+   methods (and/or classes) are generated.
+
+   The public interface the decorator provides includes also the
+   following attributes (making it possible to :ref:`change how
+   names of parametrized test methods and classes are generated
+   <custom-name-formatting>`):
 
    .. attribute:: expand.global_name_pattern
 
@@ -63,6 +69,12 @@ The :func:`foreach` method/class decorator
       collections* themselves, *not* as *items* of parameter
       collections; the latter are -- and will be -- perfectly OK).
 
+      As a parameter collection, instead of a tuple, use another type
+      (e.g., a :class:`list`).
+
+   Any parameter collection will be, under the hood, automatically
+   converted to a :class:`paramseq`.
+
    Each item of the parameter collection should be one of:
 
    * a :class:`param` instance,
@@ -77,10 +89,16 @@ The :func:`foreach` method/class decorator
 
    The total number of given arguments (positional and/or keyword ones)
    must be greater than 1.  Each argument will be treated as a parameter
-   collection's *item* (see above); for keyword arguments, their names
-   will be used to :meth:`~param.label` them.
+   collection's *item* (see above); for each keyword argument (if any),
+   its name will be used to :meth:`~param.label` the *item* it refers to.
 
    ———
+
+   This decorator is intended to be applied to test *methods* and/or
+   test *classes* -- to attach to those methods (or classes) the test
+   parameters from the specified parameter collection (only then it is
+   possible to generate, by using :func:`expand`, actual parametrized
+   methods and/or classes...).
 
    .. deprecated:: 0.4.0
 
@@ -116,6 +134,9 @@ The :class:`paramseq` class
       collections* themselves, *not* as *items* of parameter
       collections; the latter are -- and will be -- perfectly OK).
 
+      As a parameter collection, instead of a tuple, use another type
+      (e.g., a :class:`list`).
+
    Each item of the parameter collection should be one of:
 
    * a :class:`param` instance,
@@ -130,10 +151,13 @@ The :class:`paramseq` class
 
    The total number of given arguments (positional and/or keyword ones)
    must be greater than 1.  Each argument will be treated as a parameter
-   collection's *item* (see above); for keyword arguments, their names
-   will be used to :meth:`~param.label` them.
+   collection's *item* (see above); for each keyword argument (if any),
+   its name will be used to :meth:`~param.label` the *item* it refers to.
 
    ———
+
+   A :class:`paramseq` object is the canonical form of a parameter
+   collection -- whose items are :class:`param` objects.
 
    The public interface this class provides includes the following
    instance methods:
@@ -157,9 +181,9 @@ The :class:`paramseq` class
                        _enable_exc_suppress_=False)
 
       Returns a new :class:`paramseq` instance contaning clones
-      of the items of the current instance -- each cloned with
-      :meth:`param.context` (see below) called with the given
-      arguments.
+      of the items of the current instance -- each cloned with a
+      :meth:`param.context` call (see below), to which all given
+      arguments are passed.
 
 
 The :class:`param` class
@@ -171,6 +195,11 @@ The :class:`param` class
    method call(s).
 
    ———
+
+   A :class:`param` object is the canonical form of a parameter
+   collection's *item* -- which represents a single :ref:`combination of
+   test parameter values <param-basics>` (to be passed to single test
+   method calls...).
 
    The public interface this class provides includes the following
    instance methods:
@@ -200,14 +229,15 @@ The :class:`Substitute` class
 
 .. class:: Substitute(actual_object)
 
-   *actual_object* is the object to be wrapped (proxied).
+   *actual_object* is the object :ref:`to be proxied <about-substitute>`.
 
    ———
 
-   The public interface this class provides includes the following
-   instance attribute (besides nearly all attributes of the proxied
-   object -- see: :ref:`about-substitute`):
+   Apart from exposing in a transparent way nearly all attributes of the
+   proxied object (also methods -- except :meth:`__call__`), the public
+   interface this class provides includes also the following instance
+   attribute:
 
    .. attribute:: actual_object
 
-      The proxied object itself (not wrapped).
+      The proxied object itself (unwrapped).

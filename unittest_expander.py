@@ -142,9 +142,9 @@ a test call.
 More flexibility: :class:`param`
 ================================
 
-Parameters can also be specified in a more descriptive way -- with
-keyword arguments.  It is possible when you use :class:`param` objects
-instead of tuples:
+Parameters can be specified in a more descriptive way -- in particular,
+using also keyword arguments.  It is possible when you use :class:`param`
+objects instead of tuples:
 
 >>> from unittest_expander import param
 >>> 

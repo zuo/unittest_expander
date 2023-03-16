@@ -4,10 +4,10 @@ Changes
 0.4.0 (2023-03-16)
 ------------------
 
-* From now on, the following versions of Python are officially
-  supported: *3.6* through *3.11*, as well as *2.7* (still). This means,
-  in particular, that the versions *2.6*, *3.2*, *3.3*, *3.4* and *3.5*
-  are *no longer* supported.
+* From now on, the following versions of Python *are officially
+  supported:* **3.11**, **3.10**, **3.9**, **3.8**, **3.7**, **3.6**
+  and **2.7** (still).  This means, in particular, that the versions
+  *3.5*, *3.4*, *3.3*, *3.2* and *2.6* are *no longer supported*.
 
 * Now, if two (or more) parameter collections are combined to make the
   Cartesian product of them (as an effect of decorating a test with
@@ -73,7 +73,7 @@ Changes
 
   (2) now standard *abstract base classes* of collections are imported
   from ``collections.abc``; an import from ``collections`` is left only
-  as a fallback (relevant to Python 2.7).
+  as a Python-2.7-dedicated fallback.
 
 * Two bugfixes related to the **expand()** decorator:
 
@@ -122,9 +122,9 @@ Changes
 
 * Added ``.gitignore`` and ``.editorconfig`` files.
 
-* A bunch of tests-and/or-documentation-related additions, updates,
-  fixes and improvements, including addition of the *Install and Test*
-  GitHub workflow.
+* A bunch of changes related to tests, CI, documentation, etc.:
+  updates, fixes, improvements and additions (including addition
+  of the *Install and Test* GitHub workflow).
 
 **Many thanks** to:
 
@@ -132,7 +132,7 @@ Changes
 * Hugo van Kemenade (`@hugovk <https://github.com/hugovk>`_),
 * John Vandenberg (`@jayvdb <https://github.com/jayvdb>`_)
 
--- for their contribution to this release!
+-- for their invaluable contribution to this release!
 
 
 0.3.1 (2014-08-19)
