@@ -167,6 +167,9 @@ The :class:`param` class
 
 .. class:: param(*args, **kwargs)
 
+   *args* and *kwargs* specify actual parameters to be passed to test
+   method call(s).
+
    ———
 
    The public interface this class provides includes the following
@@ -196,6 +199,8 @@ The :class:`Substitute` class
 -----------------------------
 
 .. class:: Substitute(actual_object)
+
+   *actual_object* is the object to be wrapped (proxied).
 
    ———
 
