@@ -1,8 +1,8 @@
 Changes
 =======
 
-Unreleased (to be updated...)
------------------------------
+0.4.1 (2023-03-17)
+------------------
 
 * Added the **unittest_expander.__version__** global constant.
 

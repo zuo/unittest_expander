@@ -2687,7 +2687,7 @@ __all__ = (
     'Substitute',
 )
 
-__version__ = '0.4.1rc2'
+__version__ = '0.4.1'
 
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
