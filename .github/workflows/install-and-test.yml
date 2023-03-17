@@ -1,6 +1,6 @@
 # This workflow, on each of the supported versions of CPython, as
 # well as on some version of PyPy, installs the library and runs
-# its doctests.
+# its doctests and the version number consistency check.
 
 name: Install and Test
 
@@ -40,3 +40,6 @@ jobs:
     - name: Run doctests
       run: |
         python run-doctests.py
+    - name: Check version number consistency
+      run: |
+        python check-ver-consistency.py

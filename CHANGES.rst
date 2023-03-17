@@ -4,7 +4,14 @@ Changes
 Unreleased (to be updated...)
 -----------------------------
 
-* Documentation improvements, updates and minor fixes.
+* Added the **unittest_expander.__version__** global constant.
+
+* Tests-and-CI-related improvements and additions -- in particular:
+  added a script that checks whether **unittest_expander.__version__**
+  is equal to **version** in package metadata, and added invocation of
+  that script to the *Install and Test* GitHub workflow.
+
+* Documentation: improvements and minor fixes.
 
 
 0.4.0 (2023-03-16)

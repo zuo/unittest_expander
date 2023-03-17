@@ -2687,6 +2687,8 @@ __all__ = (
     'Substitute',
 )
 
+__version__ = '0.4.1.dev4'
+
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
 _TEXT_STRING_TYPES = (str,) if _PY3 else (str, unicode)
