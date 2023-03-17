@@ -54,7 +54,7 @@ of test isolation (tests depend on other ones -- they may inherit some
 state which can affect their results), less information on failures (a
 test failure prevents subsequent tests from being run), less clear
 result messages (you don't see at first glance which case is the
-actual culprit) etc.
+actual culprit), etc.
 
 So let's write our tests in a smarter way:
 
@@ -79,9 +79,9 @@ So let's write our tests in a smarter way:
 
 As you see, it's fairly simple: you attach parameter collections to your
 test methods with the :func:`foreach` decorator and decorate the whole
-test case class with the :func:`expand` decorator.  The latter does the
-actual job, i.e. generates (and adds to the test case class)
-parametrized versions of the test methods.
+test class with the :func:`expand` decorator.  The latter does the
+actual job, i.e., generates (and adds to the test class) parametrized
+versions of the test methods.
 
 Let's run this stuff...
 
@@ -103,8 +103,8 @@ test_odd__<17> ... [DEBUG: separate test setUp] ok
 ...Ran 5 tests...
 OK
 
-To test our *is_even()* function we created two test case methods --
-each accepting one parameter value.
+To test our *is_even()* function we created two test methods -- each
+accepting one parameter value.
 
 Another approach could be to define a method that accepts a couple of
 arguments:
@@ -223,7 +223,7 @@ OK
 
 .. _other-ways-to-label:
 
-Other ways to label your tests explicitly
+Other ways to explicitly label your tests
 =========================================
 
 You can also label particular tests by passing a dictionary directly
@@ -279,7 +279,7 @@ How to concatenate some separately created parameter collections?
 
 Just transform them (or at least the first of them) into
 :class:`paramseq` instances -- and then add one to another
-(just with the ``+`` operator):
+(with the ``+`` operator):
 
 >>> from unittest_expander import paramseq
 >>> 
@@ -319,7 +319,7 @@ Just transform them (or at least the first of them) into
 ...         param(n=12399999999999998, expected=True),
 ...     ]
 ...
-...     # here we add them one to another (producing a new paramseq)
+...     # just add them one to another (producing a new paramseq)
 ...     all_params = basic + huge + other + just_dict + just_list
 ...
 ...     @foreach(all_params)
@@ -350,7 +350,7 @@ OK
 
    Parameter collections (such as sequences, mappings, sets or
    :class:`paramseq` instances) do not need to be created or bound
-   within the test case class body; you could, for example, import them
+   within the test class body; you could, for example, import them
    from a separate module.  Obviously, it makes data/code reuse and
    refactorization easier.
 
@@ -365,14 +365,16 @@ OK
 
    We said that a parameter collection can be a sequence (among others;
    see the note above).  To be more precise: it can be a sequence except
-   that it *cannot be a text string*.
+   that it *cannot be a text string* (:class:`str` in Py3, :class:`str`
+   or :class:`unicode` in Py2).
 
 .. warning::
 
    Also, a parameter collection should *not* be a tuple (i.e., an
-   instance of the built-in type :class:`tuple` or of any subclass of
-   it, e.g., a *named tuple*), as this is **deprecated** and will become
-   **illegal** in the *0.5.0* version of *unittest_expander*.
+   instance of the built-in type :class:`tuple` or, obviously, of any
+   subclass of it, e.g., a *named tuple*), as this is **deprecated**
+   and will become **illegal** in the *0.5.0* version of
+   *unittest_expander*.
 
    Note that this deprecation concerns tuples used as *parameter
    collections*, *not* as *items* of parameter collections (tuples being
@@ -516,7 +518,7 @@ Cartesian product of them:
 ...                     expected=True).label('random even')
 ...         yield param(randint(-(10 ** 6), 10 ** 6) * 2 + 1,
 ...                     expected=False).label('random odd')
-...     input_values_and_results = randomized + [
+...     input_values_and_results = randomized + [  # (<- note the use of +)
 ...         param(-14, expected=True),
 ...         param(-1, expected=False),
 ...         param(0, expected=True),
@@ -641,7 +643,7 @@ OK
 
 As you can see in the above example, if a test method accepts the
 `context_targets` keyword argument then a list of context manager
-*as-targets* (i.e. objects returned by context managers'
+*as-targets* (i.e., objects returned by context managers'
 :meth:`__enter__`) will be passed in as that argument.
 
 It is a list because there can be more than one *context* per parameter
@@ -959,9 +961,9 @@ Deprecated feature: :func:`foreach` as a class decorator
    ``into`` keyword argument to :func:`expand` will become **illegal**
    in the *0.5.0* version of *unittest_expander*.
 
-:func:`foreach` can be used not only as a test case *method* decorator
-but also as a test case *class* decorator -- to generate parametrized
-test case *classes*.
+:func:`foreach` can be used not only as a test *method* decorator but
+also as a test *class* decorator -- to generate parametrized test
+*classes*.
 
 That allows you to share each specified parameter/context/label across
 all test methods.  Parameters (and labels, and context targets) are
@@ -1316,7 +1318,7 @@ are automatically handled within :meth:`setUp` and (if applicable)
 :meth:`tearDown` -- so :meth:`setUp` and :meth:`tearDown` *are*
 affected by errors related to those contexts.  On the other hand,
 context finalization is *not* affected by any exceptions from actual
-test methods (i.e. context managers' :meth:`__exit__` methods are
+test methods (i.e., context managers' :meth:`__exit__` methods are
 called with ``None, None, None`` arguments anyway -- unless
 :meth:`setUp`/:meth:`tearDown` or an enclosed context manager's
 :meth:`__enter__`/:meth:`__exit__` raises an exception).
@@ -1366,7 +1368,7 @@ For example:
 ...     def setUp(self):
 ...         debug.append('*** before everything ***')
 ...         # <- at this point no contexts are active (and there are
-...         # no self.params, self.label, self.context_targets etc.)
+...         # no self.params, self.label, self.context_targets, etc.)
 ...         super(SillyTestSubclass, self).setUp()
 ...         # *HERE* is the place for your extension's implementation
 ...         debug.append('*** SillyTestSubclass.setUp ***')
@@ -1713,8 +1715,8 @@ True
 
 As you see, such a :class:`Substitute` instance is kind of a
 non-callable proxy to the original class or method (preventing it from
-being included by test loaders but still keeping it available, e.g. for
-introspection).
+being included by test loaders, but still keeping it available for
+introspection, etc.).
 
 
 .. _custom-name-formatting:
@@ -2064,9 +2066,9 @@ True
 "Can I :func:`expand` a subclass of an already :func:`expand`-ed class?"
 ------------------------------------------------------------------------
 
-As long as you do *not* apply :func:`foreach` to test classes (but only
-to test methods) -- *yes, you can* (in some of the past versions of
-*unittest_expander* it was broken but now it works perfectly):
+As long as you do *not* apply :func:`foreach` to test *classes* (but
+only to test *methods*) -- *yes, you can* (in some of the past versions
+of *unittest_expander* it was broken, but now it works perfectly):
 
 >>> debug = []
 >>> into_dict = {}
@@ -2097,12 +2099,12 @@ test_another__<2> (...TestSubclass...) ... ok
 test_another__<3> (...TestSubclass...) ... ok
 ...Ran 6 tests...
 OK
->>> type(TestSubclass.test) is Substitute
+>>> type(TestSubclass.test) is type(Test.test) is Substitute
 True
 >>> type(TestSubclass.test_another) is Substitute
 True
 
-But things complicate when you apply :func:`foreach` to classes.
+But things complicate when you apply :func:`foreach` to test *classes*.
 For such cases the answer is: *do not try this at home*.  :ref:`As
 it was said earlier <foreach-as-class-decorator>`, the parts of
 *unittest_expander* related to applying :func:`foreach` to classes
@@ -2842,7 +2844,7 @@ class param(object):
             return self.__cached_cm_factory
         except AttributeError:
             # we need to combine several context managers (from the
-            # contexts) but Python 2 does not have contextlib.ExitStack,
+            # contexts), but in Py2.7 there is no contextlib.ExitStack,
             # and contextlib.nested() is deprecated (for good reasons)
             # -- so we will just generate and execute the code:
             src_code = (
@@ -2992,7 +2994,7 @@ class paramseq(object):
             return param_col()
 
 
-# test case *method* or *class* decorator...
+# test *method* or *class* decorator...
 def foreach(*args, **kwargs):
     ps = paramseq.__new__(paramseq)
     ps._init_with_appropriate_warn_stacklevel(args, kwargs)
@@ -3013,7 +3015,7 @@ def foreach(*args, **kwargs):
     return decorator
 
 
-# test case *class* decorator...
+# test *class* decorator...
 def expand(test_cls=None, **kwargs):
     if 'into' in kwargs:
         warnings.warn(
