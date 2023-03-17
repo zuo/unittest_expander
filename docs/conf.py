@@ -14,39 +14,14 @@
 
 import sys
 import os
-import os.path as osp
-import re
-
-
-VERSION_LINE_REGEX = re.compile(br'''
-    ^
-    version
-    \s*
-    =
-    \s*
-    (?P<version_str>
-        \S+
-    )
-    \s*
-    $
-''', re.VERBOSE)
-
-
-def get_version_str():
-    setup_cfg_path = osp.join(os.pardir, 'setup.cfg')
-    with open(setup_cfg_path, 'rb') as f:
-        for line in f:
-            match = VERSION_LINE_REGEX.search(line)
-            if match:
-                return match.group('version_str').decode('utf-8')
-    raise AssertionError('version not found')
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath(os.pardir))
+
+import unittest_expander
 
 # -- General configuration ------------------------------------------------
 
@@ -82,7 +57,7 @@ copyright = u'2014-2023, Jan Kaliszewski (zuo) and others'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = get_version_str()
+release = unittest_expander.__version__
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
 
