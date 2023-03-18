@@ -1,8 +1,8 @@
 Changes
 =======
 
-Unreleased (to be updated...)
------------------------------
+0.4.2 (2023-03-18)
+------------------
 
 * A minor interface usability fix: from now on, the **expand()**
   decorator's attributes **global_name_pattern** and
@@ -11,7 +11,7 @@ Unreleased (to be updated...)
   trying to get any of them without first setting it caused an
   **AttributeError**).
 
-* Documentation: several updates and minor fixes/improvements.
+* Documentation: several updates, improvements and minor fixes.
 
 
 0.4.1 (2023-03-17)
