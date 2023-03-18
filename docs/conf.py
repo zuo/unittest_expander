@@ -34,6 +34,7 @@ import unittest_expander
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -98,6 +99,9 @@ pygments_style = 'sphinx'
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
+
+# Configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'http://docs.python.org/3': None}
 
 
 # -- Options for HTML output ----------------------------------------------
