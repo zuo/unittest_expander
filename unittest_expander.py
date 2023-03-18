@@ -2695,7 +2695,7 @@ __all__ = (
     'Substitute',
 )
 
-__version__ = '0.4.2'
+__version__ = '0.4.3.dev0'
 
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
@@ -3093,7 +3093,6 @@ def _get_paramseq_objs(base_func):
 
 def _get_accepted_generic_kwargs(base_func):
     accepted_generic_kwargs = _obtain_accepted_generic_kwargs_from(base_func)
-    # XXX: here additional stuff from `@takes_...()` decorators?
     assert isinstance(accepted_generic_kwargs, set)
     return accepted_generic_kwargs
 

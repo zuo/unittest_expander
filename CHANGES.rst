@@ -1,6 +1,14 @@
 Changes
 =======
 
+Unreleased (to be updated...)
+-----------------------------
+
+* A minor fix regarding some files related to CI and package metadata...
+
+* Documentation and code comments: minor updates/cleanups.
+
+
 0.4.2 (2023-03-18)
 ------------------
 

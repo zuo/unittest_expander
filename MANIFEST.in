@@ -1,6 +1,7 @@
 include *.py
 include *.cfg
 include *.toml
+include *.yml
 include *.txt
 include *.rst
 include .editorconfig
