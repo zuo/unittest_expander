@@ -17,7 +17,7 @@ Unreleased (to be updated...)
 0.4.1 (2023-03-17)
 ------------------
 
-* Added the **__version__** constant to the **unittest_expander** module.
+* Added to the **unittest_expander** module the **__version__** constant.
 
 * Improvements and additions related to tests, CI, generation of
   documentation, etc.; in particular: added a script that checks whether

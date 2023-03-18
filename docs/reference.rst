@@ -38,11 +38,7 @@ The :func:`expand` class decorator
 
    .. attribute:: expand.global_name_pattern
 
-      :value: None
-
    .. attribute:: expand.global_name_formatter
-
-      :value: None
 
 
 The :func:`foreach` method/class decorator
@@ -260,6 +256,4 @@ The :data:`__version__` constant
 .. data:: __version__
 
    The version of :mod:`unittest_expander` as a :pep:`440`-compliant
-   identifier.
-
-   :type: str
+   identifier (being a :class:`str`).
