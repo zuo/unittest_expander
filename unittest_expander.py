@@ -1748,6 +1748,14 @@ and/or
   Python standard library (or to any object whose :meth:`format`
   method acts similarily to :meth:`string.Formatter.format`).
 
+.. doctest::
+    :hide:
+
+    >>> expand.global_name_pattern is None
+    True
+    >>> expand.global_name_formatter is None
+    True
+
 For example:
 
 >>> expand.global_name_pattern = '{base_name}__parametrized_{count}'
@@ -2687,7 +2695,7 @@ __all__ = (
     'Substitute',
 )
 
-__version__ = '0.4.1'
+__version__ = '0.4.2.dev0'
 
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
@@ -3038,6 +3046,9 @@ def expand(test_cls=None, **kwargs):
             __into_with_warning_already_emitted_if_needed=into)
     _expand_test_methods(test_cls)
     return _expand_test_cls(test_cls, into)
+
+expand.global_name_pattern = None
+expand.global_name_formatter = None
 
 
 def _expand_test_methods(test_cls):

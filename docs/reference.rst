@@ -4,10 +4,10 @@ Module Contents
 .. module:: unittest_expander
 
 The module :mod:`unittest_expander`'s public interface consists of the
-following functions and classes.
+following functions, classes and constants.
 
 (See: :doc:`narrative_documentation` -- for a much richer description of
-them, including a lot of usage examples...)
+most of them, including a lot of usage examples...)
 
 
 The :func:`expand` class decorator
@@ -38,7 +38,11 @@ The :func:`expand` class decorator
 
    .. attribute:: expand.global_name_pattern
 
+      :value: None
+
    .. attribute:: expand.global_name_formatter
+
+      :value: None
 
 
 The :func:`foreach` method/class decorator
@@ -248,3 +252,14 @@ The :class:`Substitute` class
    .. attribute:: actual_object
 
       The proxied object itself (unwrapped).
+
+
+The :data:`__version__` constant
+--------------------------------
+
+.. data:: __version__
+
+   The version of :mod:`unittest_expander` as a :pep:`440`-compliant
+   identifier.
+
+   :type: str

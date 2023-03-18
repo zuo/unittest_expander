@@ -1,14 +1,27 @@
 Changes
 =======
 
+Unreleased (to be updated...)
+-----------------------------
+
+* A minor interface usability fix: from now on, the **expand()**
+  decorator's attributes **global_name_pattern** and
+  **global_name_formatter** are both initially set to **None**
+  (previously, by default, they were not initialized at all, so
+  trying to get any of them without first setting it caused an
+  **AttributeError**).
+
+* Documentation: several updates and minor fixes/improvements.
+
+
 0.4.1 (2023-03-17)
 ------------------
 
-* Added the **unittest_expander.__version__** global constant.
+* Added the **__version__** constant to the **unittest_expander** module.
 
-* improvements and additions related to tests, CI, generation of
+* Improvements and additions related to tests, CI, generation of
   documentation, etc.; in particular: added a script that checks whether
-  *unittest_expander.__version__** is equal to **version** in package
+  **unittest_expander.__version__** is equal to **version** in package
   metadata, and added invocation of that script to the *Install and
   Test* GitHub workflow.
 
@@ -159,7 +172,7 @@ Changes
 ------------------
 
 * Improved signatures of the **foreach()** decorator and the
-  **paramseq** constructor: they take either exactly one positional
+  **paramseq()** constructor: they take either exactly one positional
   argument which must be a test parameter collection (as previously: a
   sequence/mapping/set or a **paramseq** instance, or a callable
   returning an iterable...), or *any number of positional and/or keyword
@@ -196,7 +209,7 @@ Changes
 0.1.2 (2014-08-01)
 ------------------
 
-* The signatures of the **foreach()** decorator and the **paramseq**
+* The signatures of the **foreach()** decorator and the **paramseq()**
   constructor have been unified.
 
 * Tests/documentation-related updates and improvements.
