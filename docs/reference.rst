@@ -74,6 +74,12 @@ The :func:`foreach` method/class decorator
       As a parameter collection, instead of a tuple, use another type
       (e.g., a :class:`list`).
 
+   .. deprecated:: 0.4.3
+
+      A parameter collection given as an instance of the Python 3
+      built-in type :class:`bytes` or :class:`bytearray` (or of a
+      subclass thereof) will become *illegal* in the version *0.5.0*.
+
    Each item of a parameter collection should be one of:
 
    * a :class:`param` instance,
@@ -135,6 +141,12 @@ The :class:`paramseq` class
       As a parameter collection, instead of a tuple, use another type
       (e.g., a :class:`list`).
 
+   .. deprecated:: 0.4.3
+
+      A parameter collection given as an instance of the Python 3
+      built-in type :class:`bytes` or :class:`bytearray` (or of a
+      subclass thereof) will become *illegal* in the version *0.5.0*.
+
    Each item of a parameter collection should be one of:
 
    * a :class:`param` instance,
@@ -172,6 +184,11 @@ The :class:`paramseq` class
          *param_collection* being a tuple will become *illegal* in the
          version *0.5.0*.
 
+      .. deprecated:: 0.4.3
+
+         *param_collection* being a Python 3 :class:`bytes` or
+         :class:`bytearray` will become *illegal* in the version *0.5.0*.
+
    .. method:: __radd__(param_collection)
 
       Returns a new :class:`paramseq` instance -- being a result of
@@ -183,6 +200,11 @@ The :class:`paramseq` class
 
          *param_collection* being a tuple will become *illegal* in the
          version *0.5.0*.
+
+      .. deprecated:: 0.4.3
+
+         *param_collection* being a Python 3 :class:`bytes` or
+         :class:`bytearray` will become *illegal* in the version *0.5.0*.
 
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \

@@ -4,7 +4,15 @@ Changes
 Unreleased (to be updated...)
 -----------------------------
 
-* A minor fix regarding some files related to CI and package metadata...
+* **Deprecation notice:** using an instance of the Python 3 built-in
+  type **bytes** or **bytearray** (or of any subclass thereof) as
+  a *parameter collection* -- passed as the *sole* argument to
+  **foreach()** or **paramseq()**, or added (using ``+``) to an
+  existing **paramseq** object -- is now deprecated (causing emission
+  of a **DeprecationWarning**) and will become **illegal** in
+  *unittest_expander 0.5.0*.
+
+* A minor fix regarding CI and package metadata...
 
 * Documentation and code comments: minor updates/cleanups.
 

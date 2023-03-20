@@ -2695,7 +2695,7 @@ __all__ = (
     'Substitute',
 )
 
-__version__ = '0.4.3.dev0'
+__version__ = '0.4.3rc1'
 
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
@@ -2907,7 +2907,7 @@ class paramseq(object):
             # the sole positional argument is a parameter collection
             # (being a collection of: parameter values, tuples of such
             # values, or `param` instances)
-            obj = self._warn_and_coerce_if_tuple(args[0], warn_stacklevel=4)
+            obj = self._warn_and_coerce_if_deprecated_type(args[0], warn_stacklevel=4)
             self._init_with_param_collections(obj)
         else:
             # each argument is a parameter value, or a tuple of such
@@ -2917,21 +2917,29 @@ class paramseq(object):
 
     def __add__(self, other):
         if self._is_legal_param_collection(other):
-            other = self._warn_and_coerce_if_tuple(other, warn_stacklevel=3)
+            other = self._warn_and_coerce_if_deprecated_type(other, warn_stacklevel=3)
             return self._from_param_collections(self, other)
         return NotImplemented
 
     def __radd__(self, other):
         if self._is_legal_param_collection(other):
-            other = self._warn_and_coerce_if_tuple(other, warn_stacklevel=3)
+            other = self._warn_and_coerce_if_deprecated_type(other, warn_stacklevel=3)
             return self._from_param_collections(other, self)
         return NotImplemented
 
-    def _warn_and_coerce_if_tuple(self, obj, warn_stacklevel):
+    def _warn_and_coerce_if_deprecated_type(self, obj, warn_stacklevel):
         if isinstance(obj, tuple):
             warnings.warn(
                 'using a tuple as a parameter collection will become '
                 'illegal in the version 0.5.0 of unittest_expander.',
+                DeprecationWarning,
+                stacklevel=warn_stacklevel)
+            obj = list(obj)  # (to avoid future redundant warn() calls)
+        if _PY3 and isinstance(obj, (bytes, bytearray)):
+            warnings.warn(
+                'using a bytes or bytearray object as a parameter '
+                'collection will become illegal in the version 0.5.0 '
+                'of unittest_expander.',
                 DeprecationWarning,
                 stacklevel=warn_stacklevel)
             obj = list(obj)  # (to avoid future redundant warn() calls)
