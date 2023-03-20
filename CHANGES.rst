@@ -1,8 +1,8 @@
 Changes
 =======
 
-Unreleased (to be updated...)
------------------------------
+0.4.3 (2023-03-21)
+------------------
 
 * **Deprecation notice:** using an instance of the Python 3 built-in
   type **bytes** or **bytearray** (or of any subclass thereof) as
