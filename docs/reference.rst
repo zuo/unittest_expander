@@ -15,25 +15,14 @@ The :func:`expand` class decorator
 
 .. decorator:: expand
 
-*or*
-
-.. decorator:: expand(*, into=globals())
-
-   .. deprecated:: 0.4.0
-
-      The *into* argument will become *illegal* in the version *0.5.0*.
-
-   ———
-
-   This decorator is intended to be applied to *test classes*: doing
-   that causes that test parameters -- previously attached to related
-   test methods (and/or classes) by decorating them with :func:`foreach`
-   -- are "expanded", that is, actual parametrized versions of those
-   methods (and/or classes) are generated.
+   Apply this decorator to a *test class* to generate actual
+   *parametrized* test methods, that is, to "expand" test parameter
+   specifications which were earlier attached (by using :func:`foreach`)
+   to test methods owned by the test class.
 
    The public interface provided by :func:`expand` includes also the
    following attributes (making it possible to :ref:`customize how
-   names of parametrized test methods and classes are generated
+   names of parametrized test methods are generated
    <custom-name-formatting>`):
 
    .. attribute:: expand.global_name_pattern
@@ -41,80 +30,23 @@ The :func:`expand` class decorator
    .. attribute:: expand.global_name_formatter
 
 
-The :func:`foreach` method/class decorator
-------------------------------------------
+The :func:`foreach` method decorator
+------------------------------------
 
 .. decorator:: foreach(param_collection)
-
-   *param_collection* must be a parameter collection -- that is, one of:
-
-   * a :class:`paramseq` instance,
-   * a *sequence* **not being** a *text string* (in other words, such an
-     object for whom ``isinstance(obj, collections.abc.Sequence) and
-     not isinstance(obj, str)`` returns :obj:`True` in Python 3) -- for
-     example, a :class:`list`,
-   * a *mapping* (i.e., such an object that ``isinstance(obj,
-     collections.abc.Mapping)`` returns :obj:`True` in Python 3)
-     -- for example, a :class:`dict`,
-   * a *set* (i.e., such an object that ``isinstance(obj,
-     collections.abc.Set)`` returns :obj:`True` in Python 3)
-     -- for example, a :class:`set` or :class:`frozenset`,
-   * a *callable* (i.e., such an object that ``callable(obj)`` returns
-     :obj:`True`) which is supposed: to accept one positional argument
-     (the *test class*) or no arguments at all, and to return an
-     *iterable* object (i.e., an object that could be used as a ``for``
-     loop's subject, able to yield consecutive items) -- for example, a
-     :term:`generator`.
-
-   Any valid parameter collection will be, under the hood, automatically
-   coerced to a :class:`paramseq`.
-
-   .. deprecated:: 0.4.0
-
-      A parameter collection given as a tuple (i.e., an instance of
-      the built-in type :class:`tuple` or of a subclass of it, e.g.,
-      a *named tuple*) will become *illegal* in the version *0.5.0*
-      (note that this deprecation concerns tuples used as *parameter
-      collections* themselves, *not* as *items* of parameter
-      collections; the latter are -- and will be -- perfectly OK).
-      As a parameter collection, instead of a tuple, use another type
-      (e.g., a :class:`list`).
-
-   .. deprecated:: 0.4.3
-
-      A parameter collection given as an instance of the Python 3
-      built-in type :class:`bytes` or :class:`bytearray` (or of a
-      subclass thereof) will become *illegal* in the version *0.5.0*.
-
-   Each *item* of a parameter collection is supposed to be:
-
-   * a :class:`param` instance,
-   * a :class:`tuple` (converted automatically to a :class:`param`
-     which contains parameter values being the items of that tuple),
-   * any other object (converted automatically to a :class:`param`
-     which contains only one parameter value: that object).
 
 *or*
 
 .. decorator:: foreach(*param_collection_items, **param_collection_labeled_items)
 
-   The total number of given arguments (positional and/or keyword ones)
-   must be greater than 1.  Each argument will be treated as a parameter
-   collection's *item* (see above); for each keyword argument (if any),
-   its name will be used to :meth:`~param.label` the *item* it refers to.
+   Apply this decorator to a *test method* to attach to it the specified
+   test parameters (only then it will be possible to generate, by using
+   :func:`expand`, actual *parametrized* test methods).
 
-   ———
-
-   This decorator is intended to be applied to test *methods* and/or
-   test *classes* -- to attach to those methods (or classes) the test
-   parameters from the specified parameter collection (only then it is
-   possible to generate, by using :func:`expand`, actual parametrized
-   methods and/or classes...).
-
-   .. deprecated:: 0.4.0
-
-      Support for decorating test *classes* with :func:`foreach` will be
-      *removed* in the version *0.5.0*.
+   The given argument(s) specify the test parameters to be attached.
+   To learn more about these arguments -- see the description of
+   :class:`paramseq` (the call signatures of the :func:`foreach`
+   decorator and the :class:`paramseq`'s constructor are the same).
 
 
 The :class:`paramseq` class
@@ -125,10 +57,11 @@ The :class:`paramseq` class
    *param_collection* must be a parameter collection -- that is, one of:
 
    * a :class:`paramseq` instance,
-   * a *sequence* **not being** a *text string* (in other words, such an
-     object for whom ``isinstance(obj, collections.abc.Sequence) and
-     not isinstance(obj, str)`` returns :obj:`True` in Python 3) -- for
-     example, a :class:`list`,
+   * a *sequence* **not being** a :class:`tuple`, *text string* or
+     :class:`bytes`/:class:`bytearray` (in other words, such an object
+     for whom ``isinstance(obj, collections.abc.Sequence) and not
+     isinstance(obj, (tuple, str, bytes, bytearray))`` returns
+     :obj:`True` in Python 3) -- for example, a :class:`list`,
    * a *mapping* (i.e., such an object that ``isinstance(obj,
      collections.abc.Mapping)`` returns :obj:`True` in Python 3)
      -- for example, a :class:`dict`,
@@ -141,23 +74,6 @@ The :class:`paramseq` class
      *iterable* object (i.e., an object that could be used as a ``for``
      loop's subject, able to yield consecutive items) -- for example, a
      :term:`generator`.
-
-   .. deprecated:: 0.4.0
-
-      A parameter collection given as a tuple (i.e., an instance of
-      the built-in type :class:`tuple` or of a subclass of it, e.g.,
-      a *named tuple*) will become *illegal* in the version *0.5.0*
-      (note that this deprecation concerns tuples used as *parameter
-      collections* themselves, *not* as *items* of parameter
-      collections; the latter are -- and will be -- perfectly OK).
-      As a parameter collection, instead of a tuple, use another type
-      (e.g., a :class:`list`).
-
-   .. deprecated:: 0.4.3
-
-      A parameter collection given as an instance of the Python 3
-      built-in type :class:`bytes` or :class:`bytearray` (or of a
-      subclass thereof) will become *illegal* in the version *0.5.0*.
 
    Each *item* of a parameter collection is supposed to be:
 
@@ -191,16 +107,6 @@ The :class:`paramseq` class
       *param_collection* (see the description of the :class:`paramseq`
       constructor's argument *param_collection*...).
 
-      .. deprecated:: 0.4.0
-
-         *param_collection* being a tuple will become *illegal* in the
-         version *0.5.0*.
-
-      .. deprecated:: 0.4.3
-
-         *param_collection* being a Python 3 :class:`bytes` or
-         :class:`bytearray` will become *illegal* in the version *0.5.0*.
-
    .. method:: __radd__(param_collection)
 
       Returns a new :class:`paramseq` instance -- being a result of
@@ -208,21 +114,11 @@ The :class:`paramseq` class
       the :class:`paramseq` constructor's argument *param_collection*...)
       and the current :class:`paramseq` instance.
 
-      .. deprecated:: 0.4.0
-
-         *param_collection* being a tuple will become *illegal* in the
-         version *0.5.0*.
-
-      .. deprecated:: 0.4.3
-
-         *param_collection* being a Python 3 :class:`bytes` or
-         :class:`bytearray` will become *illegal* in the version *0.5.0*.
-
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \
                        _enable_exc_suppress_=False)
 
-      Returns a new :class:`paramseq` instance contaning clones
+      Returns a new :class:`paramseq` instance containing clones
       of the items of the current instance -- each cloned with a
       :meth:`param.context` call (see below), to which all given
       arguments are passed.
@@ -284,8 +180,8 @@ The :class:`Substitute` class
 .. class:: Substitute(actual_object)
 
    *actual_object* is the object :ref:`to be proxied <about-substitute>`
-   (typically, it is a test method or test class, previously decorated
-   with :func:`foreach`).
+   (typically, it is a test method, previously decorated with
+   :func:`foreach`).
 
    ———
 
