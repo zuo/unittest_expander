@@ -348,11 +348,12 @@ OK
 
 .. note::
 
-   Parameter collections (such as sequences, mappings, sets or
-   :class:`paramseq` instances) do not need to be created or bound
-   within the test class body; you could, for example, import them
-   from a separate module.  Obviously, it makes data/code reuse and
-   refactorization easier.
+   Parameter collections -- such as *sequences* (e.g., :class:`list`s),
+   *mappings* (e.g., :class:`dict`s), *sets* (e.g., :class:`set`s and
+   :class:`frozenset`s) or just ready :class:`paramseq` instances -- do
+   not need to be created or bound within the test class body; you
+   could, for example, import them from a separate module. Obviously,
+   that makes data/code reuse and refactorization easier.
 
    Also, note that the signatures of the :func:`foreach` decorator and
    the :class:`paramseq` constructor are identical: you pass in either
@@ -363,10 +364,10 @@ OK
 
 .. note::
 
-   We said that a parameter collection can be a sequence (among others;
-   see the note above).  To be more precise: it can be a sequence except
-   that it *cannot be a text string* (:class:`str` in Py3, :class:`str`
-   or :class:`unicode` in Py2).
+   We said that a parameter collection can be a *sequence* (among
+   others; see the note above).  To be more precise: it can be a
+   *sequence* except that it *cannot be a text string* (:class:`str` in
+   Py3, :class:`str` or :class:`unicode` in Py2).
 
 .. warning::
 
@@ -381,8 +382,16 @@ OK
    such items, acting as simple substitutes of :class:`param` objects,
    are -- and will always be -- perfectly OK).
 
+.. warning::
+
+   Also, a parameter collection should *not* be a Python 3 *binary
+   string-like sequence* (:class:`bytes` or :class:`bytearray`), as this
+   is **deprecated** and will become **illegal** in the *0.5.0* version
+   of *unittest_expander*.
+
 A :class:`paramseq` instance can also be created from a callable object
-that returns a sequence or another iterable (e.g., a generator/iterator):
+(e.g., a function) that returns a *sequence* or another *iterable*
+object (e.g., a :term:`generator iterator`):
 
 >>> from random import randint
 >>> 
@@ -428,14 +437,14 @@ test_is_even_negated_when_incremented__<random odd> ... ok
 ...Ran 4 tests...
 OK
 
-A callable object (such as the generator function in the example above)
-which is passed to the :class:`paramseq` constructor can accept either
-no arguments or one positional argument -- in the latter case the *test
-case class* will be passed in.
+A callable object (such as the :term:`generator` function in the example
+above) which is passed to the :class:`paramseq` constructor can accept
+either no arguments or one positional argument -- in the latter case the
+*test class* will be passed in.
 
 .. note::
 
-   The callable object will be called -- and its iterable result will
+   The callable object will be called -- and its *iterable* result will
    be iterated over (consumed) -- *when* the :func:`expand` decorator
    is being executed, *before* generating parametrized test methods.
 
@@ -1724,19 +1733,20 @@ introspection, etc.).
 Custom method/class name formatting
 ===================================
 
-If you don't like how parametrized method/class names are formatted --
-you can customize that globally by:
+If you don't like how parametrized test method/class names are generated
+-- you can customize that globally by:
 
-* setting :attr:`expand.global_name_pattern` to a :meth:`str.format`-like
-  formattable pattern making use of zero or more of the following
-  replacement fields:
+* setting :attr:`expand.global_name_pattern` to a :meth:`~str.format`-able
+  pattern, making use of zero or more of the following replacement fields:
 
-  * ``{base_name}`` -- the name of the original test method or class,
-  * ``{base_obj}`` -- the original test method or class,
+  * ``{base_name}`` -- the name of the original test method or test class,
+  * ``{base_obj}`` -- the original test method (technically: function)
+     or test class,
   * ``{label}`` -- the test label (automatically generated or
     explicitly specified with :meth:`param.label`),
-  * ``{count}`` -- consecutive number of the generated parametrized
-    method or class;
+  * ``{count}`` -- consecutive number (within a single application of
+    :func:`@expand`) of the generated parametrized test method or test
+    class;
 
   (in future versions of *unittest_expander* more replacement fields may
   be made available)
@@ -1866,8 +1876,9 @@ Set those attributes to :obj:`None` to restore the default behavior:
 Name clashes avoided automatically
 ==================================
 
-:func:`expand` tries to avoid name clashes: when it detects a clash it
-adds a suffix to a newly formatted name, e.g.:
+:func:`expand` tries to avoid name clashes.  When it detects that a
+newly generated name clashes with an existing one, it adds a suffix
+to the new name.  E.g.:
 
 >>> def setting_attrs(attr_dict):
 ...     def deco(cls):
@@ -2695,7 +2706,7 @@ __all__ = (
     'Substitute',
 )
 
-__version__ = '0.4.3'
+__version__ = '0.4.4rc1'
 
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)

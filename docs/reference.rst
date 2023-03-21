@@ -49,19 +49,25 @@ The :func:`foreach` method/class decorator
    *param_collection* must be a parameter collection -- that is, one of:
 
    * a :class:`paramseq` instance,
-   * a sequence (i.e., such an object that
-     ``isinstance(obj, collections.abc.Sequence)`` returns :obj:`True`)
-     but *not* a string,
-   * a mapping (i.e., such an object that
-     ``isinstance(obj, collections.abc.Mapping)`` returns :obj:`True`),
-   * a set (i.e., such an object that
-     ``isinstance(obj, collections.abc.Set)`` returns :obj:`True`),
-   * a callable (i.e., such an object that ``callable(obj)`` returns
-     :obj:`True`) that returns an iterable object (for example, a
-     generator/iterator).
+   * a *sequence* **not being** a *text string* (in other words, such an
+     object for whom ``isinstance(obj, collections.abc.Sequence) and
+     not isinstance(obj, str)`` returns :obj:`True` in Python 3) -- for
+     example, a :class:`list`,
+   * a *mapping* (i.e., such an object that ``isinstance(obj,
+     collections.abc.Mapping)`` returns :obj:`True` in Python 3)
+     -- for example, a :class:`dict`,
+   * a *set* (i.e., such an object that ``isinstance(obj,
+     collections.abc.Set)`` returns :obj:`True` in Python 3)
+     -- for example, a :class:`set` or :class:`frozenset`,
+   * a *callable* (i.e., such an object that ``callable(obj)`` returns
+     :obj:`True`) which is supposed: to accept one positional argument
+     (the *test class*) or no arguments at all, and to return an
+     *iterable* object (i.e., an object that could be used as a ``for``
+     loop's subject, able to yield consecutive items) -- for example, a
+     :term:`generator`.
 
    Any valid parameter collection will be, under the hood, automatically
-   converted to a :class:`paramseq`.
+   coerced to a :class:`paramseq`.
 
    .. deprecated:: 0.4.0
 
@@ -80,13 +86,13 @@ The :func:`foreach` method/class decorator
       built-in type :class:`bytes` or :class:`bytearray` (or of a
       subclass thereof) will become *illegal* in the version *0.5.0*.
 
-   Each item of a parameter collection should be one of:
+   Each *item* of a parameter collection is supposed to be:
 
    * a :class:`param` instance,
    * a :class:`tuple` (converted automatically to a :class:`param`
-     that contains the items of that tuple),
+     which contains parameter values being the items of that tuple),
    * any other object (converted automatically to a :class:`param`
-     that contains only one item: that object).
+     which contains only one parameter value: that object).
 
 *or*
 
@@ -119,16 +125,22 @@ The :class:`paramseq` class
    *param_collection* must be a parameter collection -- that is, one of:
 
    * a :class:`paramseq` instance,
-   * a sequence (i.e., such an object that
-     ``isinstance(obj, collections.abc.Sequence)`` returns :obj:`True`)
-     but *not* a string,
-   * a mapping (i.e., such an object that
-     ``isinstance(obj, collections.abc.Mapping)`` returns :obj:`True`),
-   * a set (i.e., such an object that
-     ``isinstance(obj, collections.abc.Set)`` returns :obj:`True`),
-   * a callable (i.e., such an object that ``callable(obj)`` returns
-     :obj:`True`) that returns an iterable object (for example, a
-     generator/iterator).
+   * a *sequence* **not being** a *text string* (in other words, such an
+     object for whom ``isinstance(obj, collections.abc.Sequence) and
+     not isinstance(obj, str)`` returns :obj:`True` in Python 3) -- for
+     example, a :class:`list`,
+   * a *mapping* (i.e., such an object that ``isinstance(obj,
+     collections.abc.Mapping)`` returns :obj:`True` in Python 3)
+     -- for example, a :class:`dict`,
+   * a *set* (i.e., such an object that ``isinstance(obj,
+     collections.abc.Set)`` returns :obj:`True` in Python 3)
+     -- for example, a :class:`set` or :class:`frozenset`,
+   * a *callable* (i.e., such an object that ``callable(obj)`` returns
+     :obj:`True`) which is supposed: to accept one positional argument
+     (the *test class*) or no arguments at all, and to return an
+     *iterable* object (i.e., an object that could be used as a ``for``
+     loop's subject, able to yield consecutive items) -- for example, a
+     :term:`generator`.
 
    .. deprecated:: 0.4.0
 
@@ -147,13 +159,13 @@ The :class:`paramseq` class
       built-in type :class:`bytes` or :class:`bytearray` (or of a
       subclass thereof) will become *illegal* in the version *0.5.0*.
 
-   Each item of a parameter collection should be one of:
+   Each *item* of a parameter collection is supposed to be:
 
    * a :class:`param` instance,
    * a :class:`tuple` (converted automatically to a :class:`param`
-     that contains the items of that tuple),
+     which contains parameter values being the items of that tuple),
    * any other object (converted automatically to a :class:`param`
-     that contains only one item: that object).
+     which contains only one parameter value: that object).
 
 *or*
 
@@ -166,8 +178,8 @@ The :class:`paramseq` class
 
    ———
 
-   A :class:`paramseq` object is the canonical form of a parameter
-   collection -- whose items are :class:`param` objects.
+   A :class:`paramseq` instance is the canonical form of a parameter
+   collection -- whose items are :class:`param` instances.
 
    The public interface provided by this class includes the following
    instance methods:
@@ -221,14 +233,14 @@ The :class:`param` class
 
 .. class:: param(*args, **kwargs)
 
-   *args* and *kwargs* specify actual parameters to be passed to test
-   method call(s).
+   *args* and *kwargs* specify actual (positional and keyword) arguments
+   to be passed to test method call(s).
 
    ———
 
-   A :class:`param` object is the canonical form of a parameter
-   collection's *item* -- which represents a single :ref:`combination
-   of test parameter values <param-basics>`.
+   A :class:`param` instance is the canonical form of a parameter
+   collection's *item*. It represents a single :ref:`combination of test
+   parameter values <param-basics>`.
 
    The public interface provided by this class includes the following
    instance methods:
@@ -242,7 +254,8 @@ The :class:`param` class
       (and its arguments) attached.
 
       By default, the possibility to suppress exceptions by returning
-      a true value from context manager's :meth:`__exit__` is disabled
+      a *true* value from context manager's :meth:`__exit__` is
+      :ref:`disabled <contexts-cannot-suppress-exceptions>`
       (exceptions are propagated even if :meth:`__exit__` returns
       :obj:`True`); to enable this possibility you need to set the
       *_enable_exc_suppress_* keyword argument to :obj:`True`.
@@ -250,27 +263,11 @@ The :class:`param` class
    .. method:: label(text)
 
       Returns a new :class:`param` instance being a clone of the
-      current instance, with the specified label text attached.
+      current instance, with the specified textual label attached.
 
 
-The :class:`Substitute` class
------------------------------
-
-.. class:: Substitute(actual_object)
-
-   *actual_object* is the object :ref:`to be proxied <about-substitute>`.
-
-   ———
-
-   Apart from exposing in a transparent way nearly all attributes of
-   the proxied object (also methods -- with a notable exception of
-   :meth:`__call__`), the public interface provided by this class
-   includes the following instance attribute:
-
-   .. attribute:: actual_object
-
-      The proxied object itself (unwrapped).
-
+Non-essential constants and classes
+-----------------------------------
 
 The :data:`__version__` constant
 --------------------------------
@@ -279,3 +276,25 @@ The :data:`__version__` constant
 
    The version of :mod:`unittest_expander` as a :pep:`440`-compliant
    identifier (being a :class:`str`).
+
+
+The :data:`__version__` constant
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. class:: Substitute(actual_object)
+
+   *actual_object* is the object :ref:`to be proxied <about-substitute>`
+   (typically, it is a test method or test class, previously decorated
+   with :func:`foreach`).
+
+   ———
+
+   Apart from exposing in a transparent way nearly all attributes of
+   the proxied object, the public interface provided by this class
+   includes the following instance attribute:
+
+   .. attribute:: actual_object
+
+      The proxied object itself (unwrapped).
+
+   Substitute instances are *not* callable.
