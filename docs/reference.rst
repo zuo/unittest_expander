@@ -270,7 +270,7 @@ Non-essential constants and classes
 -----------------------------------
 
 The :data:`__version__` constant
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. data:: __version__
 
@@ -278,8 +278,8 @@ The :data:`__version__` constant
    identifier (being a :class:`str`).
 
 
-The :data:`__version__` constant
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The :class:`Substitute` class
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. class:: Substitute(actual_object)
 
@@ -297,4 +297,4 @@ The :data:`__version__` constant
 
       The proxied object itself (unwrapped).
 
-   Substitute instances are *not* callable.
+   :class:`Substitute` instances are *not* callable.

@@ -1,12 +1,13 @@
 Changes
 =======
 
-Unreleased (to be updated...)
------------------------------
+Unreleased...
+-------------
 
-* Documentation: important completionto the *Narrative Documentation*
-  part (regarding the deprecation introduced in the previous version of
-  *unittest_expander*) as well as several minor improvements and fixes.
+* Documentation: an important completion to the *Narrative
+  Documentation* part (regarding the deprecation introduced
+  in the previous version of *unittest_expander*) as well as
+  several minor improvements and fixes.
 
 
 0.4.3 (2023-03-21)

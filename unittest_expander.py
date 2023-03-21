@@ -348,15 +348,16 @@ OK
 
 .. note::
 
-   Parameter collections -- such as *sequences* (e.g., :class:`list`s),
-   *mappings* (e.g., :class:`dict`s), *sets* (e.g., :class:`set`s and
-   :class:`frozenset`s) or just ready :class:`paramseq` instances -- do
-   not need to be created or bound within the test class body; you
-   could, for example, import them from a separate module. Obviously,
-   that makes data/code reuse and refactorization easier.
+   Parameter collections -- such as *sequences* (e.g., :class:`list`
+   instances), *mappings* (e.g., :class:`dict` instances), *sets*
+   (e.g., :class:`set` or :class:`frozenset` instances) or just ready
+   :class:`paramseq` instances -- do not need to be created or bound
+   within the test class body; you could, for example, import them from
+   a separate module. Obviously, that makes data/code reuse and
+   refactorization easier.
 
    Also, note that the signatures of the :func:`foreach` decorator and
-   the :class:`paramseq` constructor are identical: you pass in either
+   the :class:`paramseq`'s constructor are identical: you pass in either
    exactly one positional argument which is a parameter collection or
    several (more than one) positional and/or keyword arguments being
    singular parameter values or tuples of parameter values, or
@@ -366,8 +367,8 @@ OK
 
    We said that a parameter collection can be a *sequence* (among
    others; see the note above).  To be more precise: it can be a
-   *sequence* except that it *cannot be a text string* (:class:`str` in
-   Py3, :class:`str` or :class:`unicode` in Py2).
+   *sequence*, except that it *cannot be a text string* (:class:`str`
+   in Python 3, :class:`str` or :class:`unicode` in Python 2).
 
 .. warning::
 
@@ -438,9 +439,10 @@ test_is_even_negated_when_incremented__<random odd> ... ok
 OK
 
 A callable object (such as the :term:`generator` function in the example
-above) which is passed to the :class:`paramseq` constructor can accept
-either no arguments or one positional argument -- in the latter case the
-*test class* will be passed in.
+above) which is passed to the :class:`paramseq`'s constructor (or
+directly to :func:`foreach`) can accept either no arguments or one
+positional argument -- in the latter case the *test class* will be
+passed in.
 
 .. note::
 
@@ -448,13 +450,13 @@ either no arguments or one positional argument -- in the latter case the
    be iterated over (consumed) -- *when* the :func:`expand` decorator
    is being executed, *before* generating parametrized test methods.
 
-What *should also be emphasized* is that those operations (the
-aforementioned call and iterating over its result) will be performed
-*separately* for each use of :func:`foreach` with our :class:`paramseq`
-instance as its argument (or with another :class:`paramseq` instance
-that includes our instance; see the following code snippet in which the
-``input_values_and_results`` instance includes the previously created
-``randomized`` instance):
+   What should also be emphasized is that those operations (the
+   aforementioned call and iterating over its result) will be
+   performed *separately* for each use of :func:`foreach` with our
+   :class:`paramseq` instance as its argument (or with another
+   :class:`paramseq` instance that includes our instance; see the
+   following code snippet in which the ``input_values_and_results``
+   instance includes the previously created ``randomized`` instance).
 
 >>> @expand
 ... class Test_is_even(unittest.TestCase):
@@ -2706,7 +2708,7 @@ __all__ = (
     'Substitute',
 )
 
-__version__ = '0.4.4rc1'
+__version__ = '0.4.4rc2'
 
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)
