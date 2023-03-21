@@ -1743,7 +1743,7 @@ If you don't like how parametrized test method/class names are generated
 
   * ``{base_name}`` -- the name of the original test method or test class,
   * ``{base_obj}`` -- the original test method (technically: function)
-     or test class,
+    or test class,
   * ``{label}`` -- the test label (automatically generated or
     explicitly specified with :meth:`param.label`),
   * ``{count}`` -- consecutive number (within a single application of
@@ -1878,7 +1878,7 @@ Set those attributes to :obj:`None` to restore the default behavior:
 Name clashes avoided automatically
 ==================================
 
-:func:`expand` tries to avoid name clashes.  When it detects that a
+:func:`expand` tries to avoid name clashes: when it detects that a
 newly generated name clashes with an existing one, it adds a suffix
 to the new name.  E.g.:
 
@@ -2708,7 +2708,7 @@ __all__ = (
     'Substitute',
 )
 
-__version__ = '0.4.4rc2'
+__version__ = '0.4.4'
 
 
 _CLASS_TYPES = (type,) if _PY3 else (type, types.ClassType)

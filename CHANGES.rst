@@ -1,8 +1,8 @@
 Changes
 =======
 
-Unreleased...
--------------
+0.4.4 (2023-03-21)
+------------------
 
 * Documentation: an important completion to the *Narrative
   Documentation* part (regarding the deprecation introduced
