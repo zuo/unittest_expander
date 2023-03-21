@@ -2452,12 +2452,12 @@ class param(object):
         return self._clone_adding(label_list=[text])
 
     @classmethod
-    def _from_param_item(cls, param_item):
-        if isinstance(param_item, param):
-            return param_item
-        if isinstance(param_item, tuple):
-            return cls(*param_item)
-        return cls(param_item)
+    def _from_pseq_item(cls, pseq_item):
+        if isinstance(pseq_item, param):
+            return pseq_item
+        if isinstance(pseq_item, tuple):
+            return cls(*pseq_item)
+        return cls(pseq_item)
 
     @classmethod
     def _combine_instances(cls, param_instances):
@@ -2605,41 +2605,41 @@ class paramseq(object):
         if len(args) == 1 and not kwargs:
             [param_col] = args
             if type(param_col) is cls:
-                # the sole positional argument is a ready paramseq, so
-                # let's just return it
+                # the sole positional argument is a ready paramseq
+                # object, so let's just return it
                 return param_col
             # the sole positional argument is a parameter collection --
             # its items are parameter values or tuples of such values
-            # (to be coerced to param instances) or just ready param
+            # (to be coerced to param instances), or just ready param
             # instances
-            new = cls._from_param_collections(param_col)
+            new = cls._make_new_wrapping_param_collections(param_col)
         else:
             # each value in args/kwargs is a parameter value or a tuple
-            # of such values (to be coerced to a `param` instance) or
+            # of such values (to be coerced to a `param` instance), or
             # just a ready param instance; in the case of kwargs each of
             # them will be additionally .label()-ed with the respective
-            # key (argument name)
-            new = cls._from_param_collections(list(args), kwargs)
+            # key, i.e., the argument name (see: _generate_raw_params())
+            new = cls._make_new_wrapping_param_collections(list(args), kwargs)
         return new
 
     def __add__(self, other):
         if self._is_legal_param_collection(other):
-            return self._from_param_collections(self, other)
+            return self._make_new_wrapping_param_collections(self, other)
         return NotImplemented
 
     def __radd__(self, other):
         if self._is_legal_param_collection(other):
-            return self._from_param_collections(other, self)
+            return self._make_new_wrapping_param_collections(other, self)
         return NotImplemented
 
     def context(self, context_manager_factory, *args, **kwargs):
         ctx = _Context(context_manager_factory, *args, **kwargs)
-        new = self._from_param_collections(self)
+        new = self._make_new_wrapping_param_collections(self)
         new._context_list.append(ctx)                                   # noqa
         return new
 
     @classmethod
-    def _from_param_collections(cls, *param_collections):
+    def _make_new_wrapping_param_collections(cls, *param_collections):
         cls._verify_param_collections_are_legal(param_collections)
         new = super(paramseq, cls).__new__(cls)
         new._param_collections = param_collections
@@ -2685,8 +2685,8 @@ class paramseq(object):
                 for param_inst in param_col._generate_params(test_cls):
                     yield param_inst
             elif isinstance(param_col, collections_abc.Mapping):
-                for label, param_item in param_col.items():
-                    yield param._from_param_item(param_item).label(label)      # noqa
+                for label, pseq_item in param_col.items():
+                    yield param._from_pseq_item(pseq_item).label(label)        # noqa
             else:
                 if callable(param_col):
                     param_col = self._param_collection_callable_to_iterable(
@@ -2695,8 +2695,8 @@ class paramseq(object):
                 else:
                     assert isinstance(param_col, (collections_abc.Sequence,
                                                   collections_abc.Set))
-                for param_item in param_col:
-                    yield param._from_param_item(param_item)                   # noqa
+                for pseq_item in param_col:
+                    yield param._from_pseq_item(pseq_item)                     # noqa
 
     @staticmethod
     def _param_collection_callable_to_iterable(param_col, test_cls):
@@ -2709,6 +2709,7 @@ class paramseq(object):
 # test *method* decorator...
 def foreach(*args, **kwargs):
     pseq = paramseq(*args, **kwargs)                                           # noqa
+
     def decorator(base_func):
         if not isinstance(base_func, types.FunctionType):
             raise TypeError(
@@ -2716,6 +2717,7 @@ def foreach(*args, **kwargs):
                 'decorated with @foreach...)'.format(base_func))
         _mark_test_method(base_func, pseq)
         return base_func
+
     return decorator
 
 
@@ -2742,51 +2744,50 @@ def _mark_test_method(base_func, pseq):
 
 
 def _expand_test_methods(test_cls):
-    dir_names = _get_dir_names(test_cls)
-    protected_names = _get_protected_names(test_cls, dir_names)
+    dir_names = frozenset(_generate_dir_names(test_cls))
+    initially_seen_names = frozenset(_generate_initially_seen_names(
+        test_cls,
+        dir_names))
+    seen_names = set(initially_seen_names)
     (to_be_substituted,
      to_be_added) = _get_attrs_to_substitute_and_add(
         test_cls,
         dir_names,
-        protected_names)
+        seen_names)
+    assert dir_names <= initially_seen_names <= seen_names
+    assert set(to_be_substituted) <= dir_names
+    assert set(to_be_added).isdisjoint(initially_seen_names)
+    assert set(to_be_added) <= seen_names
     for base_name, obj in to_be_substituted.items():
-        assert base_name in dir_names
         setattr(test_cls, base_name, Substitute(obj))
     for func_name, func in to_be_added.items():
-        assert func_name not in protected_names
         setattr(test_cls, func_name, func)
-        protected_names.add(func_name)
 
 
-def _get_dir_names(test_cls):
-    return {
-        name for name in dir(test_cls)
-        if isinstance(name, str)}  # (just in case...)
+def _generate_dir_names(test_cls):
+    for name in dir(test_cls):
+        if isinstance(name, str):  # (<- just in case...)
+            yield name
 
 
-def _get_protected_names(test_cls, dir_names):
+def _generate_initially_seen_names(test_cls, dir_names):
+    # note: we are extremely cautious with our policy of avoiding any
+    # name clashes (see also: _may_name_be_already_taken()...)
+    for name in dir_names:
+        yield name
     # (typically, adding test_cls is redundant, as __mro__ should
-    # already include it, but let's do it -- just in case...)
+    # already include it, but let's do it anyway -- just in case...)
     namespaces = (test_cls,) + getattr(test_cls, '__mro__', ())
-    protected_names = set(dir_names)
-    protected_names.update(
-        name
-        for cls in namespaces
-            for name in getattr(cls, '__dict__', {}))
-    protected_names.update(
-        name
-        for cls in namespaces
-            for name in getattr(cls, '__slots__', {}))
-    protected_names = {
-        name for name in protected_names
-        if isinstance(name, str)}  # (just in case...)
-    return protected_names
+    for spec_attr in ('__dict__', '__slots__'):
+        for cls in namespaces:
+            for name in getattr(cls, spec_attr, ()):
+                if isinstance(name, str):  # (<- just in case...)
+                    yield name
 
 
-def _get_attrs_to_substitute_and_add(test_cls, dir_names, protected_names):
+def _get_attrs_to_substitute_and_add(test_cls, dir_names, seen_names):
     to_be_substituted = dict()
     to_be_added = dict()
-    seen_names = set(protected_names)
     for base_name in sorted(dir_names):
         obj = getattr(test_cls, base_name, None)
         if isinstance(obj, Substitute):
@@ -2800,6 +2801,7 @@ def _get_attrs_to_substitute_and_add(test_cls, dir_names, protected_names):
                 test_cls, stored_paramseq_objs,
                 base_name, base_func, seen_names,
                 accepted_generic_kwargs):
+            assert func.__name__ not in to_be_added
             to_be_added[func.__name__] = func
         to_be_substituted[base_name] = obj
     return to_be_substituted, to_be_added
@@ -2901,10 +2903,11 @@ def _set_name(func, test_cls, base_name, base_func, label, count, seen_names):
         label=label,
         count=count)
     uniq_tag = 2
-    while _does_name_seem_already_present(name, test_cls, seen_names):
-        # ensure that, for a particular class, names are unique
+    while _may_name_be_already_taken(name, test_cls, seen_names):
+        # ensure that, within this test class, the name will be unique
         name = '{}__{}'.format(stem_name, uniq_tag)
         uniq_tag += 1
+    assert name not in seen_names
     seen_names.add(name)
     func.__name__ = name
 
@@ -2919,9 +2922,7 @@ def _get_name_pattern_and_formatter():
     return pattern, formatter
 
 
-def _does_name_seem_already_present(name, test_cls, seen_names):
-    # note that we are extremely cautious in our policy of avoiding
-    # potential name clashes...
+def _may_name_be_already_taken(name, test_cls, seen_names):
     if name in seen_names:
         return True
     if hasattr(test_cls, name):

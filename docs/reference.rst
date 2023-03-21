@@ -193,4 +193,6 @@ The :class:`Substitute` class
 
       The proxied object itself (unwrapped).
 
+   ———
+
    :class:`Substitute` instances are *not* callable.
