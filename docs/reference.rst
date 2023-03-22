@@ -47,7 +47,7 @@ The :func:`foreach` method decorator
    test methods*).
 
    To learn what arguments need to be passed to the :func:`foreach`
-   call, see the description :class:`paramseq` (note that the call
+   call, see the description of :class:`paramseq` (note that the call
    signatures of :func:`foreach` and the :class:`paramseq`'s constructor
    are the same).
 
@@ -139,7 +139,7 @@ The :class:`param` class
    ———
 
    A :class:`param` instance is the canonical form of a parameter
-   collection's *item*. It represents a single :ref:`combination of test
+   collection's *item*. It represents :ref:`a single combination of test
    parameter values <param-basics>`.
 
    The public interface provided by this class includes the following
@@ -181,11 +181,9 @@ Non-essential constants and classes
    (typically, it is a test method, previously decorated with
    :func:`foreach`).
 
-   ———
-
-   Apart from exposing in a transparent way nearly all attributes of
-   the proxied object, the public interface provided by this class
-   includes the following instance attribute:
+   Apart from exposing in a transparent way nearly all attributes
+   of the proxied object, the public interface provided by the
+   :class:`Substitute` class includes the following instance attribute:
 
    .. attribute:: actual_object
 
