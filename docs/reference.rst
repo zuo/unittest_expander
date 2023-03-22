@@ -60,11 +60,12 @@ The :class:`paramseq` class
    *param_collection* must be a parameter collection -- that is, one of:
 
    * a :class:`paramseq` instance,
-   * a *sequence* **not being** a :class:`tuple`, *text string* or
-     :class:`bytes`/:class:`bytearray` (in other words, such an object
-     for whom ``isinstance(obj, collections.abc.Sequence) and not
-     isinstance(obj, (tuple, str, bytes, bytearray))`` returns
-     :obj:`True` in Python 3) -- for example, a :class:`list`,
+   * a *sequence* **not being** a
+     :class:`tuple`/:class:`str`/:class:`unicode`/:class:`bytes`/:class:`bytearray`
+     (in other words, such an object for whom ``isinstance(obj,
+     collections.abc.Sequence) and not isinstance(obj, (tuple,
+     str, bytes, bytearray))`` returns :obj:`True` in Python 3)
+     -- for example, a :class:`list`,
    * a *mapping* (i.e., such an object that ``isinstance(obj,
      collections.abc.Mapping)`` returns :obj:`True` in Python 3)
      -- for example, a :class:`dict`,
@@ -124,7 +125,7 @@ The :class:`paramseq` class
 
       Returns a new :class:`paramseq` instance containing clones
       of the items of the instance we operate on -- each cloned with a
-      :meth:`param.context` call (see below), to which all given
+      :meth:`param.context` call (see below) to which all given
       arguments are passed.
 
 

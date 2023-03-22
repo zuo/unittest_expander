@@ -23,8 +23,9 @@
 
 """
 *unittest_expander* is a Python library that provides flexible and
-easy-to-use tools to parametrize your unit tests, especially those
-based on :class:`unittest.TestCase` from the Python standard library.
+easy-to-use tools to parametrize your unit tests, especially (but not
+limited to) those based on :class:`unittest.TestCase` from the Python
+standard library.
 
 The :mod:`unittest_expander` module provides the following tools:
 
@@ -88,10 +89,10 @@ Let's run this stuff...
 >>> # a helper function that will run tests in our examples --
 >>> # NORMALLY YOU DON'T NEED IT, of course!
 >>> import sys
->>> def run_tests(*test_case_classes):
+>>> def run_tests(*test_classes):
 ...     suite = unittest.TestSuite(
 ...         unittest.TestLoader().loadTestsFromTestCase(cls)
-...         for cls in test_case_classes)
+...         for cls in test_classes)
 ...     unittest.TextTestRunner(stream=sys.stdout, verbosity=2).run(suite)
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
@@ -379,13 +380,12 @@ object (e.g., a :term:`generator iterator`):
 >>> from random import randint
 >>> 
 >>> @paramseq   # <- yes, used as a decorator
-... def randomized(test_case_cls):
-...     LO, HI = test_case_cls.LO, test_case_cls.HI
-...     print('DEBUG: LO = {}; HI = {}'.format(LO, HI))
+... def randomized(test_cls):
+...     print('DEBUG: LO = {0.LO}; HI = {0.HI}'.format(test_cls))
 ...     print('----')
-...     yield param(randint(LO, HI) * 2,
+...     yield param(randint(test_cls.LO, test_cls.HI) * 2,
 ...                 expected=True).label('random even')
-...     yield param(randint(LO, HI) * 2 + 1,
+...     yield param(randint(test_cls.LO, test_cls.HI) * 2 + 1,
 ...                 expected=False).label('random odd')
 ...
 >>> @expand
