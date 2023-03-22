@@ -77,7 +77,7 @@ So let's write our tests in a smarter way:
 ...         sys.stdout.write(' [DEBUG: separate test setUp] ')
 ...         sys.stdout.flush()
 
-As you see, it's fairly simple: you attach parameter collections to your
+As you see, it's fairly simple: you bind parameter collections to your
 test methods with the :func:`foreach` decorator and decorate the whole
 test class with the :func:`expand` decorator.  The latter does the
 actual job, i.e., generates (and adds to the test class) parametrized
@@ -356,12 +356,12 @@ OK
    a separate module. Obviously, that makes data/code reuse and
    refactorization easier.
 
-   Also, note that the signatures of the :func:`foreach` decorator and
-   the :class:`paramseq`'s constructor are identical: you pass in either
-   exactly one positional argument which is a parameter collection or
+   Also, note that the call signatures of :func:`foreach` and the
+   :class:`paramseq` constructor are identical: you pass in either
+   exactly one positional argument which is a parameter collection, or
    several (more than one) positional and/or keyword arguments being
-   singular parameter values or tuples of parameter values, or
-   :class:`param` instances.
+   :class:`param` instances or tuples of parameter values, or singular
+   parameter values.
 
 .. note::
 
@@ -422,7 +422,7 @@ OK
 
 A callable object (such as the :term:`generator` function in the example
 above) which is passed to the :class:`paramseq`'s constructor (or
-directly to :func:`foreach`)  can accept either no arguments or one
+directly to :func:`foreach`) can accept either no arguments or one
 positional argument -- in the latter case the *test class* will be
 passed in.
 

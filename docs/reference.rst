@@ -3,8 +3,8 @@ Module Contents
 
 .. module:: unittest_expander
 
-The module :mod:`unittest_expander`'s public interface consists of the
-following functions, classes and constants.
+The public interface of the :mod:`unittest_expander` module consists of
+the following functions, classes and constants.
 
 (See: :doc:`narrative_documentation` -- for a much richer description of
 most of them, including a lot of usage examples...)
@@ -16,14 +16,15 @@ The :func:`expand` class decorator
 .. decorator:: expand
 
    Apply this decorator to a *test class* to generate actual
-   *parametrized* test methods, that is, to "expand" test parameter
-   specifications which were earlier attached (by using :func:`foreach`)
-   to test methods owned by the test class.
+   *parametrized test methods*, i.e., to "expand" parameter collections
+   which have been bound (by applying :func:`foreach`) to original *test
+   methods*.
 
-   The public interface provided by :func:`expand` includes also the
-   following attributes (making it possible to :ref:`customize how
-   names of parametrized test methods are generated
-   <custom-name-formatting>`):
+   ———
+
+   The public interface of :func:`expand` includes also the following
+   attributes (making it possible to :ref:`customize how names of
+   parametrized test methods are generated <custom-name-formatting>`):
 
    .. attribute:: expand.global_name_pattern
 
@@ -39,14 +40,16 @@ The :func:`foreach` method decorator
 
 .. decorator:: foreach(*param_collection_items, **param_collection_labeled_items)
 
-   Apply this decorator to a *test method* to attach to it the specified
-   test parameters (only then it will be possible to generate, by using
-   :func:`expand`, actual *parametrized* test methods).
+   Call this function, specifying parameter collections to be bound to a
+   *test method*, and then apply the resultant decorator to that method
+   (only then it will be possible -- by applying :func:`expand` to the
+   *test class* owning the method -- to generate actual *parametrized
+   test methods*).
 
-   The given argument(s) specify the test parameters to be attached.
-   To learn more about these arguments -- see the description of
-   :class:`paramseq` (the call signatures of the :func:`foreach`
-   decorator and the :class:`paramseq`'s constructor are the same).
+   To learn what arguments need to be passed to the :func:`foreach`
+   call, see the description :class:`paramseq` (note that the call
+   signatures of :func:`foreach` and the :class:`paramseq`'s constructor
+   are the same).
 
 
 The :class:`paramseq` class
@@ -78,10 +81,10 @@ The :class:`paramseq` class
    Each *item* of a parameter collection is supposed to be:
 
    * a :class:`param` instance,
-   * a :class:`tuple` (converted automatically to a :class:`param`
-     which contains parameter values being the items of that tuple),
-   * any other object (converted automatically to a :class:`param`
-     which contains only one parameter value: that object).
+   * a :class:`tuple` (to be converted automatically to a :class:`param`
+     which will contain parameter values being the items of that tuple),
+   * any other object (to be converted automatically to a :class:`param`
+     which will contain only one parameter value: that object).
 
 *or*
 
@@ -95,7 +98,7 @@ The :class:`paramseq` class
    ———
 
    A :class:`paramseq` instance is the canonical form of a parameter
-   collection -- whose items are :class:`param` instances.
+   collection.
 
    The public interface provided by this class includes the following
    instance methods:
@@ -165,17 +168,11 @@ The :class:`param` class
 Non-essential constants and classes
 -----------------------------------
 
-The :data:`__version__` constant
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. data:: __version__
 
    The version of :mod:`unittest_expander` as a :pep:`440`-compliant
    identifier (being a :class:`str`).
 
-
-The :class:`Substitute` class
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. class:: Substitute(actual_object)
 
@@ -193,6 +190,6 @@ The :class:`Substitute` class
 
       The proxied object itself (unwrapped).
 
-   ———
+   .. note::
 
-   :class:`Substitute` instances are *not* callable.
+      :class:`Substitute` instances are *not* callable.
