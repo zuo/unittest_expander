@@ -106,23 +106,24 @@ The :class:`paramseq` class
    .. method:: __add__(param_collection)
 
       Returns a new :class:`paramseq` instance -- being a result of
-      concatenation of the current :class:`paramseq` instance and given
-      *param_collection* (see the description of the :class:`paramseq`
-      constructor's argument *param_collection*...).
+      concatenation of the :class:`paramseq` instance we operate on
+      and the given *param_collection* (see the description of the
+      :class:`paramseq` constructor's argument *param_collection*...).
 
    .. method:: __radd__(param_collection)
 
       Returns a new :class:`paramseq` instance -- being a result of
-      concatenation of given *param_collection* (see the description of
-      the :class:`paramseq` constructor's argument *param_collection*...)
-      and the current :class:`paramseq` instance.
+      concatenation of the given *param_collection* (see the description
+      of the :class:`paramseq` constructor's argument
+      *param_collection*...) and the :class:`paramseq` instance we
+      operate on.
 
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \
                        _enable_exc_suppress_=False)
 
       Returns a new :class:`paramseq` instance containing clones
-      of the items of the current instance -- each cloned with a
+      of the items of the instance we operate on -- each cloned with a
       :meth:`param.context` call (see below), to which all given
       arguments are passed.
 
@@ -149,8 +150,8 @@ The :class:`param` class
                        _enable_exc_suppress_=False)
 
       Returns a new :class:`param` instance being a clone of the
-      current instance, with the specified context manager factory
-      (and its arguments) attached.
+      the instance we operate on, with the specified context manager
+      factory (and its arguments) attached.
 
       By default, the possibility to suppress exceptions by returning
       a *true* value from context manager's :meth:`__exit__` is
@@ -162,7 +163,7 @@ The :class:`param` class
    .. method:: label(text)
 
       Returns a new :class:`param` instance being a clone of the
-      current instance, with the specified textual label attached.
+      instance we operate on, with the specified textual label attached.
 
 
 Non-essential constants and classes

@@ -348,13 +348,13 @@ OK
 
 .. note::
 
-   Parameter collections -- such as *sequences* (e.g., :class:`list`
-   instances), *mappings* (e.g., :class:`dict` instances), *sets*
-   (e.g., :class:`set` or :class:`frozenset` instances) or just ready
-   :class:`paramseq` instances -- do not need to be created or bound
-   within the test class body; you could, for example, import them from
-   a separate module. Obviously, that makes data/code reuse and
-   refactorization easier.
+   Parameter collections -- being *sequences* (e.g., :class:`list`
+   instances), or *mappings* (e.g., :class:`dict` instances), or *sets*
+   (e.g., :class:`set` or :class:`frozenset` instances), or callable
+   objects (see below...), or just ready :class:`paramseq` instances --
+   do not need to be created or bound within the test class body; you
+   could, for example, import them from a separate module. Obviously,
+   that makes data/code reuse and refactorization easier.
 
    Also, note that the call signatures of :func:`foreach` and the
    :class:`paramseq` constructor are identical: you pass in either
@@ -422,7 +422,7 @@ OK
 
 A callable object (such as the :term:`generator` function in the example
 above) which is passed to the :class:`paramseq`'s constructor (or
-directly to :func:`foreach`) can accept either no arguments or one
+directly to :func:`foreach`) should accept either no arguments or one
 positional argument -- in the latter case the *test class* will be
 passed in.
 
@@ -430,7 +430,8 @@ passed in.
 
    The callable object will be called -- and its *iterable* result will
    be iterated over (consumed) -- *when* the :func:`expand` decorator
-   is being executed, *before* generating parametrized test methods.
+   is being executed, *directly before* generating parametrized test
+   methods.
 
    What should also be emphasized is that those operations (the
    aforementioned call and iterating over its result) will be
@@ -1430,7 +1431,7 @@ Name clashes avoided automatically
 
 :func:`expand` does its best to avoid name conflicts: when it detects
 that a newly generated name could clash with an existing name (whether
-the latter was generated recently -- by the current application of
+the latter was generated recently -- by the ongoing application of
 :func:`expand` -- or might have already existed), it adds a suffix
 to the newly generated name to avoid the clash.  E.g.:
 
