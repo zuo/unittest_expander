@@ -46,7 +46,7 @@ The :func:`foreach` method decorator
    *test class* owning the method -- to generate actual *parametrized
    test methods*).
 
-   To learn what arguments need to be passed to the :func:`foreach`
+   To learn more about arguments which are passed to the :func:`foreach`
    call, see the description of :class:`paramseq` (note that the call
    signatures of :func:`foreach` and the :class:`paramseq`'s constructor
    are the same).
