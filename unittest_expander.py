@@ -861,8 +861,8 @@ True
 Note that contexts are handled *directly* before (by running
 :meth:`__enter__`) and after (by running :meth:`__exit__`) each relevant
 test method call, that is, *after* the :meth:`setUp` and *before*
-:meth:`tearDown` calls (if those :mod:`unittest.TestCase`-specific
-methods are implemented) -- so :meth:`setUp` and :meth:`tearDown` are
+:meth:`tearDown` calls (if those :class:`unittest.TestCase`-specific
+methods are engaged) -- so :meth:`setUp` and :meth:`tearDown` are
 not affected by any errors related to those contexts.
 
 Obviously, if an error in :meth:`setUp` occurs then the test method is
