@@ -1,9 +1,10 @@
 *unittest_expander* -- test parametrization library
 ===================================================
 
-This is the documentation of *unittest_expander* -- a library which
+This is the documentation for *unittest_expander* -- a library which
 provides flexible and easy-to-use tools **to parametrize Python unit
-tests**, especially those based on :class:`unittest.TestCase`.
+tests**, especially (but not limited to) those based on
+:class:`unittest.TestCase`.
 
 .. toctree::
    :maxdepth: 2

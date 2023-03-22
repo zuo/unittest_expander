@@ -967,7 +967,7 @@ It does **not** apply to context managers declared with
 :meth:`param.context` or :meth:`paramseq.context`: if :meth:`__exit__`
 of such a context manager returns a *true* value, it is ignored and
 the exception (if any) is propagated anyway.  The rationale of this
-behavior is that suppressing exceptions is generally not a good idea
+behavior is that silencing exceptions is generally not a good idea
 when dealing with testing (it could easily make your tests leaky and
 useless).
 
@@ -1332,8 +1332,8 @@ you can customize that globally by:
     object,
   * ``{label}`` -- the test label (automatically generated or
     explicitly specified with :meth:`param.label`),
-  * ``{count}`` -- consecutive number (within a single application of
-    :func:`@expand`) of the generated parametrized test method;
+  * ``{count}`` -- the consecutive number (within a single application
+    of :func:`@expand`) of the generated parametrized test method;
 
   (in future versions of *unittest_expander* more replacement fields may
   be made available)
@@ -1430,10 +1430,10 @@ Name clashes avoided automatically
 ==================================
 
 :func:`expand` does its best to avoid name conflicts: when it detects
-that a newly generated name could clash with an existing name (whether
-the latter was generated recently -- by the ongoing application of
-:func:`expand` -- or might have already existed), it adds a suffix
-to the newly generated name to avoid the clash.  E.g.:
+that a newly generated name could clash with an existing one (whether
+the latter was generated recently -- as an effect of the ongoing
+application of :func:`expand` -- or might have already existed), it
+adds a suffix to the newly generated name to avoid the clash.  E.g.:
 
 >>> def setting_attrs(attr_dict):
 ...     def deco(cls):
