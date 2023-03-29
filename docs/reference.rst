@@ -47,9 +47,9 @@ The :func:`foreach` method decorator
    test methods*).
 
    To learn more about what needs to be passed to the :func:`foreach`
-   call, see the description of :class:`paramseq`'s constructor (note
-   that the call signatures of :func:`foreach` and that constructor are
-   the same).
+   call, see the description of the :class:`paramseq`'s constructor
+   (note that the call signatures of :func:`foreach` and that
+   constructor are the same).
 
 
 The :class:`paramseq` class
@@ -196,4 +196,5 @@ Non-essential constants and classes
 
    .. note::
 
-      :class:`Substitute` instances are *not* callable.
+      A :class:`Substitute` instance is *never* callable -- even though,
+      typically, the proxied object is.
