@@ -2104,6 +2104,7 @@ TypeError: ...is not a...
     ...         setattr(Y, 'abc__<1>', '...whatever...')
     ...
     ...         class Z: irrelevant = '...whatever...'
+    ...         Z.__slots__ = ['xyz__<4>__3', 'xyz__<4>__5', 'blah_blah_blah']
     ...
     ...         self.__mro__ = (X, Y, Z)
     ...         self.__slots__ = ['xyz__<4>__2']
@@ -2177,9 +2178,9 @@ TypeError: ...is not a...
     ...             int,
     ...             None,
     ...          ),
-    ...         'xyz__<4>__3': (   # (because 'xyz__<4>' already in PseudoClass.__dict__
-    ...             Function,      #  and 'xyz__<4>__2' already in PseudoClass.__slots__)
-    ...             'WeirdPseudoMetaclass.__init__.<locals>.xyz__<4>__3',
+    ...         'xyz__<4>__4': (   # (because 'xyz__<4>', 'xyz__<4>__2' abd 'xyz__<4>__3'
+    ...             Function,      #  already in PseudoClass.__mro__ namespaces)
+    ...             'WeirdPseudoMetaclass.__init__.<locals>.xyz__<4>__4',
     ...          ),
     ...         'qwerty': (
     ...             Substitute,
@@ -2213,8 +2214,8 @@ TypeError: ...is not a...
     ...         'xyz': Substitute,
     ...         'xyz__<3>': Function,
     ...         'xyz__<4>': int,
-    ...         'xyz__<4>__3': Function,  # (because 'xyz__<4>' already in PseudoClass.__dict__
-    ...         'qwerty': Substitute,     #  and 'xyz__<4>__2' already in PseudoClass.__slots__)
+    ...         'xyz__<4>__4': Function,  # (because 'xyz__<4>', 'xyz__<4>__2' abd 'xyz__<4>__3'
+    ...         'qwerty': Substitute,     #  already in PseudoClass.__mro__ namespaces)
     ...         'qwerty__<5>__2': Function, # (because hasattr(PseudoClass, 'qwerty__<5>') is true)
     ...         'qwerty__<6>__2': Function,   # (because 'qwerty__<6>' already in dir(PseudoClass))
     ...         'disregarded': types.MethodType,
@@ -2488,22 +2489,22 @@ class param(object):
     @staticmethod
     def _get_combined_context_list(all_context_lists):
         flag = expand.legacy_context_ordering
-        if flag is None:
-            warnings.warn(
-                'XXX',
-                DeprecationWarning,
-                stacklevel=4)  ### XXX
-        elif not isinstance(flag, bool):
+        if not isinstance(flag, bool):
             raise TypeError(
                 '`expand.legacy_context_ordering` must be '
-                'False, True or None (found: {!r})'.format(flag))
-        elif not flag:
-            all_context_lists.reverse()
-        combined_context_list = [
-            ctx
-            for context_list in all_context_lists
-                for ctx in context_list]
-        return combined_context_list
+                'True or False (found: {!r})'.format(flag))
+        nonempty_lists = list(filter(None, all_context_lists))
+        if len(nonempty_lists) >= 2:
+            if flag:
+                warnings.warn(
+                    'XXX',
+                    DeprecationWarning,
+                    stacklevel=4)  ### XXX
+            else:
+                nonempty_lists.reverse()
+        return [ctx
+                for context_list in nonempty_lists
+                    for ctx in context_list]
 
     def _clone_adding(self, context_list=None, label_list=None):
         """
@@ -2613,34 +2614,34 @@ class paramseq(object):
             # its items are parameter values or tuples of such values
             # (to be coerced to param instances), or just ready param
             # instances
-            new = cls._make_new_wrapping_param_collections(param_col)
+            new = cls._make_new_that_wraps_param_collections(param_col)
         else:
             # each value in args/kwargs is a parameter value or a tuple
             # of such values (to be coerced to a `param` instance), or
             # just a ready param instance; in the case of kwargs each of
             # them will be additionally .label()-ed with the respective
             # key, i.e., the argument name (see: _generate_raw_params())
-            new = cls._make_new_wrapping_param_collections(list(args), kwargs)
+            new = cls._make_new_that_wraps_param_collections(list(args), kwargs)
         return new
 
     def __add__(self, other):
         if self._is_legal_param_collection(other):
-            return self._make_new_wrapping_param_collections(self, other)
+            return self._make_new_that_wraps_param_collections(self, other)
         return NotImplemented
 
     def __radd__(self, other):
         if self._is_legal_param_collection(other):
-            return self._make_new_wrapping_param_collections(other, self)
+            return self._make_new_that_wraps_param_collections(other, self)
         return NotImplemented
 
     def context(self, context_manager_factory, *args, **kwargs):
         ctx = _Context(context_manager_factory, *args, **kwargs)
-        new = self._make_new_wrapping_param_collections(self)
+        new = self._make_new_that_wraps_param_collections(self)
         new._context_list.append(ctx)                                   # noqa
         return new
 
     @classmethod
-    def _make_new_wrapping_param_collections(cls, *param_collections):
+    def _make_new_that_wraps_param_collections(cls, *param_collections):
         cls._verify_param_collections_are_legal(param_collections)
         new = super(paramseq, cls).__new__(cls)
         new._param_collections = param_collections
@@ -2732,8 +2733,8 @@ def expand(test_cls=None):
 expand.global_name_pattern = None
 expand.global_name_formatter = None
 
-expand.legacy_context_ordering = None
-expand.legacy_signature_introspection = None
+expand.legacy_context_ordering = True
+expand.legacy_signature_introspection = True
 
 
 def _mark_test_method(base_func, pseq):
@@ -2829,11 +2830,15 @@ if _PY3:
         return obj
 
     def _get_accepted_generic_kwargs(base_func):
+        if not _is_legacy_signature_introspection_enabled():
+            return frozenset()
         spec = inspect.getfullargspec(base_func)
-        accepted_generic_kwargs = set(
+        accepted_generic_kwargs = frozenset(
             _GENERIC_KWARGS if spec.varkw is not None
             else (kw for kw in _GENERIC_KWARGS
                   if kw in (spec.args + spec.kwonlyargs)))
+        if accepted_generic_kwargs:
+            _emit_legacy_signature_introspection_deprecation_warning()
         return accepted_generic_kwargs
 
 else:
@@ -2843,12 +2848,32 @@ else:
         return obj.__func__
 
     def _get_accepted_generic_kwargs(base_func):
+        if not _is_legacy_signature_introspection_enabled():
+            return frozenset()
         spec = inspect.getargspec(base_func)
-        accepted_generic_kwargs = set(
+        accepted_generic_kwargs = frozenset(
             _GENERIC_KWARGS if spec.keywords is not None
             else (kw for kw in _GENERIC_KWARGS
                   if kw in spec.args))
+        if accepted_generic_kwargs:
+            _emit_legacy_signature_introspection_deprecation_warning()
         return accepted_generic_kwargs
+
+
+def _is_legacy_signature_introspection_enabled():
+    flag = expand.legacy_signature_introspection
+    if not isinstance(flag, bool):
+        raise TypeError(
+            '`expand.legacy_signature_introspection` must '
+            'be True or False (found: {!r})'.format(flag))
+    return flag
+
+
+def _emit_legacy_signature_introspection_deprecation_warning():
+    warnings.warn(
+        'xxxxxxxxxxxx',
+        DeprecationWarning,
+        stacklevel=4)  ### XXX
 
 
 def _generate_parametrized_functions(test_cls, paramseq_objs,
