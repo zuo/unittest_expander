@@ -2296,6 +2296,41 @@ TypeError: ...is not a...
     >>> @expand
     ... class DummyTest(unittest.TestCase):
     ...     @foreach(
+    ...         paramseq([param(42)])
+    ...         .context(ErrDebugCM, tag='outer')
+    ...         .context(ErrDebugCM, tag='mid-outer')
+    ...         .context(ErrDebugCM, tag='mid-inner')
+    ...         .context(ErrDebugCM, tag='inner'),
+    ...     )
+    ...     def test(self, n):
+    ...         debug.append(
+    ...             'test  # context_targets={!r}'
+    ...             .format(current.context_targets))
+    ...
+    >>> debug = []  # see earlier definition of ErrDebugCM()...
+    >>> run_tests(DummyTest)  # doctest: +ELLIPSIS
+    test... ok
+    ...Ran 1 test...
+    OK
+    >>> debug == [
+    ...     "init:outer",
+    ...     "enter:outer",
+    ...     "init:mid-outer",
+    ...     "enter:mid-outer",
+    ...     "init:mid-inner",
+    ...     "enter:mid-inner",
+    ...     "init:inner",
+    ...     "enter:inner",
+    ...     "test  # context_targets=['outer', 'mid-outer', 'mid-inner', 'inner']",
+    ...     "exit:inner",
+    ...     "exit:mid-inner",
+    ...     "exit:mid-outer",
+    ...     "exit:outer",
+    ... ]
+    True
+    >>> @expand
+    ... class DummyTest(unittest.TestCase):
+    ...     @foreach(
     ...         paramseq([param(42).context(ErrDebugCM, tag='outer')
     ...                            .context(ErrDebugCM, tag='mid-outer')])
     ...         .context(ErrDebugCM, tag='mid-inner')
