@@ -509,7 +509,7 @@ OK
 Combining several :func:`foreach` to get Cartesian product
 ==========================================================
 
-You can apply two or more :func:`foreach` decorators to the same test
+You can stack up two or more :func:`foreach` decorators to the same test
 method -- to combine several parameter collections, obtaining the
 Cartesian product of them:
 
@@ -1288,6 +1288,182 @@ FAILED (failures=1, errors=4)
 True
 
 
+.. _context-order
+
+Context order
+=============
+
+As you can see in earlier examples, a test method call can be surrouned
+by multiple context managers -- they form a hierarchy, i.e., are nested
+one in another.
+
+>>> @expand
+... class DummyTest(unittest.TestCase):
+...     @foreach([
+...         param(42).context(ErrDebugCM, tag='outer')
+...                  .context(ErrDebugCM, tag='mid-outer')
+...                  .context(ErrDebugCM, tag='mid-inner')
+...                  .context(ErrDebugCM, tag='inner'),
+...     ])
+...     def test(self, n):
+...         debug.append(
+...             'test  # context_targets={!r}'
+...             .format(current.context_targets))
+...
+>>> debug = []  # see earlier definition of ErrDebugCM()...
+>>> run_tests(DummyTest)  # doctest: +ELLIPSIS
+test... ok
+...Ran 1 test...
+OK
+>>> debug == [
+...     "init:outer",
+...     "enter:outer",
+...     "init:mid-outer",
+...     "enter:mid-outer",
+...     "init:mid-inner",
+...     "enter:mid-inner",
+...     "init:inner",
+...     "enter:inner",
+...     "test  # context_targets=['outer', 'mid-outer', 'mid-inner', 'inner']",
+...     "exit:inner",
+...     "exit:mid-inner",
+...     "exit:mid-outer",
+...     "exit:outer",
+... ]
+True
+
+As you see, the rule seems to be simple: the *higher* (or more to left)
+a context is declared, the more *outside* it is. The *lower* (or more to
+right) -- the more *inside*. (Let's name this rule: "higher -> outer,
+lower -> inner".)
+
+Unfortunatelly, due to a design mistake made in early stages of
+development of *unittest_expander*, this rule is not kept we stack up
+two or more :func:`foreach` decorators (to :ref:`obtain the Cartesian
+product <foreach-cartesian>` of given parameter collections):
+
+.. warning::
+
+   Here we describe a **deprecated** behavior... Please, read on!
+
+.. doctest::
+    :hide:
+
+    >>> expand.legacy_context_ordering
+    True
+
+>>> @expand
+... class DummyTest(unittest.TestCase):
+...     @foreach([
+...         param(1).context(ErrDebugCM, tag='inner'),  # <- we'd prefer 'outer' here...
+...     ])
+...     @foreach([
+...         param(2).context(ErrDebugCM, tag='mid-outer')
+...                 .context(ErrDebugCM, tag='mid-inner'),
+...     ])
+...     @foreach([
+...         param(3).context(ErrDebugCM, tag='outer'),  # <- we'd prefer 'inner' here...
+...     ])
+...     def test(self, *args):
+...         debug.append(
+...             'test  # context_targets={!r}'
+...             .format(current.context_targets))
+...
+>>> debug = []
+>>> run_tests(DummyTest)  # doctest: +ELLIPSIS
+test... ok
+...Ran 1 test...
+OK
+>>> debug == [
+...     "init:outer",
+...     "enter:outer",
+...     "init:mid-outer",
+...     "enter:mid-outer",
+...     "init:mid-inner",
+...     "enter:mid-inner",
+...     "init:inner",
+...     "enter:inner",
+...     "test  # context_targets=['outer', 'mid-outer', 'mid-inner', 'inner']",
+...     "exit:inner",
+...     "exit:mid-inner",
+...     "exit:mid-outer",
+...     "exit:outer",
+... ]
+True
+
+What a mess!
+
+We can, however, make the context ordering be consistently compliant
+with the "higher -> outer, lower -> inner" rule -- by setting the global
+swich :attr:`expand.legacy_context_ordering` to :obj:`False`:
+
+>>> expand.legacy_context_ordering = False
+>>> @expand
+... class DummyTest(unittest.TestCase):
+...     @foreach([
+...         param(1).context(ErrDebugCM, tag='outer'),
+...     ])
+...     @foreach([
+...         param(2).context(ErrDebugCM, tag='mid-outer')
+...                 .context(ErrDebugCM, tag='mid-inner'),
+...     ])
+...     @foreach([
+...         param(3).context(ErrDebugCM, tag='inner'),
+...     ])
+...     def test(self, *args):
+...         debug.append(
+...             'test  # context_targets={!r}'
+...             .format(current.context_targets))
+...
+>>> # Note: the following change of the value of the attribute
+>>> # `expand.legacy_context_ordering` does not affect further
+>>> # uses of the test class defined above because the @expand
+>>> # decorator has already been applied to that class.
+>>> expand.legacy_context_ordering = True
+>>> debug = []
+>>> run_tests(DummyTest)  # doctest: +ELLIPSIS
+test... ok
+...Ran 1 test...
+OK
+>>> debug == [
+...     "init:outer",
+...     "enter:outer",
+...     "init:mid-outer",
+...     "enter:mid-outer",
+...     "init:mid-inner",
+...     "enter:mid-inner",
+...     "init:inner",
+...     "enter:inner",
+...     "test  # context_targets=['outer', 'mid-outer', 'mid-inner', 'inner']",
+...     "exit:inner",
+...     "exit:mid-inner",
+...     "exit:mid-outer",
+...     "exit:outer",
+... ]
+True
+
+.. warning::
+
+   In the current version of the library the legacy (messy)
+   behavior described earlier is enabled when the global option
+   :attr:`expand.legacy_context_ordering` is set to :obj:`True`; note
+   that it *is* by default (however, a deprecation warning will be
+   emitted when it is detected then that you stack up two or more
+   :func:`foreach` decorators that bring contexts...). You can swich
+   to the new behavior (consistently providing the "higher -> outer,
+   lower -> inner" context ordering) by setting
+   :attr:`expand.legacy_context_ordering` to :obj:`False` (then the
+   deprecation warning will not be emitted).
+
+   **Note** that the new behavior will become the only one in the
+   *0.6.0* version of *unittest_expander*; then the only legal value of
+   :attr:`expand.legacy_context_ordering` will be :obj:`False`.
+
+   ***What to do now?*** To ensure your code is forward compatible switch
+   to the new behavior by setting :attr:`expand.legacy_context_ordering`
+   to :obj:`False` and adjusting your code appropriately (if necessary).
+
+
 .. _current-special-object:
 
 Access the current parametrized test's metadata via :obj:`current`
@@ -1320,7 +1496,7 @@ Deprecated feature: accepting `label` and `context_targets` as keyword arguments
    in the version *0.6.0*; then the only legal value of
    :attr:`expand.legacy_signature_introspection` will be :obj:`False`.
 
-   ***What to do?*** To ensure that your code is forward compatible,
+   ***What to do now?*** To ensure your code is forward compatible,
    :ref:`make use <current-special-object>` of :attr:`current.label` and
    :attr:`current.context_targets` whenever you need that information in
    you test method definitions (instead of having your test methods
@@ -2116,6 +2292,101 @@ TypeError: ...is not a...
     ...     'enter', 3, 'exit',
     ... ]
     True
+
+    >>> expand.legacy_context_ordering
+    True
+    >>> @expand
+    ... class DummyTest(unittest.TestCase):
+    ...     @foreach(
+    ...         paramseq([param(1)]).context(ErrDebugCM, tag='inner')
+    ...     )
+    ...     @foreach(
+    ...         [param().context(ErrDebugCM, tag='almost-inner')]
+    ...     )
+    ...     @foreach(
+    ...         paramseq([param(2).context(ErrDebugCM, tag='mid-outer')])
+    ...         .context(ErrDebugCM, tag='mid-inner')
+    ...     )
+    ...     @foreach(
+    ...         paramseq([param(3)]).context(ErrDebugCM, tag='outer')
+    ...     )
+    ...     def test(self, i, m, o):
+    ...         assert (i, m, o) == (3, 2, 1)
+    ...         debug.append(
+    ...             'test  # context_targets={!r}'
+    ...             .format(current.context_targets))
+    ...
+    >>> debug = []
+    >>> run_tests(DummyTest)  # doctest: +ELLIPSIS
+    test... ok
+    ...Ran 1 test...
+    OK
+    >>> debug == [
+    ...     "init:outer",
+    ...     "enter:outer",
+    ...     "init:mid-outer",
+    ...     "enter:mid-outer",
+    ...     "init:mid-inner",
+    ...     "enter:mid-inner",
+    ...     "init:almost-inner",
+    ...     "enter:almost-inner",
+    ...     "init:inner",
+    ...     "enter:inner",
+    ...     "test  # context_targets=['outer', 'mid-outer', 'mid-inner', 'almost-inner', 'inner']",
+    ...     "exit:inner",
+    ...     "exit:almost-inner",
+    ...     "exit:mid-inner",
+    ...     "exit:mid-outer",
+    ...     "exit:outer",
+    ... ]
+    True
+    >>> expand.legacy_context_ordering = False
+    >>> @expand
+    ... class DummyTest(unittest.TestCase):
+    ...     @foreach(
+    ...         paramseq([param(1)]).context(ErrDebugCM, tag='outer')
+    ...     )
+    ...     @foreach(
+    ...         paramseq([param(2).context(ErrDebugCM, tag='mid-outer')])
+    ...         .context(ErrDebugCM, tag='mid-inner')
+    ...     )
+    ...     @foreach(
+    ...         [param().context(ErrDebugCM, tag='almost-inner')]
+    ...     )
+    ...     @foreach(
+    ...         paramseq([param(3)]).context(ErrDebugCM, tag='inner')
+    ...     )
+    ...     def test(self, i, m, o):
+    ...         assert (i, m, o) == (3, 2, 1)
+    ...         debug.append(
+    ...             'test  # context_targets={!r}'
+    ...             .format(current.context_targets))
+    ...
+    >>> debug = []
+    >>> run_tests(DummyTest)  # doctest: +ELLIPSIS
+    test... ok
+    ...Ran 1 test...
+    OK
+    >>> debug == [
+    ...     "init:outer",
+    ...     "enter:outer",
+    ...     "init:mid-outer",
+    ...     "enter:mid-outer",
+    ...     "init:mid-inner",
+    ...     "enter:mid-inner",
+    ...     "init:almost-inner",
+    ...     "enter:almost-inner",
+    ...     "init:inner",
+    ...     "enter:inner",
+    ...     "test  # context_targets=['outer', 'mid-outer', 'mid-inner', 'almost-inner', 'inner']",
+    ...     "exit:inner",
+    ...     "exit:almost-inner",
+    ...     "exit:mid-inner",
+    ...     "exit:mid-outer",
+    ...     "exit:outer",
+    ... ]
+    True
+    >>> expand.legacy_context_ordering = True
 
     >>> expand.legacy_signature_introspection = True
     >>> debug = []
