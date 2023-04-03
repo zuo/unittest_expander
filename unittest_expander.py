@@ -1306,9 +1306,8 @@ one in another.
 ...                  .context(ErrDebugCM, tag='inner'),
 ...     ])
 ...     def test(self, n):
-...         debug.append(
-...             'test  # context_targets={!r}'
-...             .format(current.context_targets))
+...         debug.append('test  # context_targets={!r}'
+...                      .format(current.context_targets))
 ...
 >>> debug = []  # see earlier definition of ErrDebugCM()...
 >>> run_tests(DummyTest)  # doctest: +ELLIPSIS
@@ -1334,12 +1333,12 @@ True
 
 As you see, the rule seems to be simple: the *higher* (or more to left)
 a context is declared, the more *outside* it is. The *lower* (or more to
-right) -- the more *inside*. (Let's name this rule: "higher -> outer,
-lower -> inner".)
+right) -- the more *inside*. (Let's name this rule: "higher=outer,
+lower=inner".)
 
 Unfortunatelly, due to a design mistake made in early stages of
-development of *unittest_expander*, this rule is not kept we stack up
-two or more :func:`foreach` decorators (to :ref:`obtain the Cartesian
+development of *unittest_expander*, this rule is not kept when we stack
+up two or more :func:`foreach` decorators (to :ref:`obtain the Cartesian
 product <foreach-cartesian>` of given parameter collections):
 
 .. warning::
@@ -1365,9 +1364,8 @@ product <foreach-cartesian>` of given parameter collections):
 ...         param(3).context(ErrDebugCM, tag='outer'),  # <- we'd prefer 'inner' here...
 ...     ])
 ...     def test(self, *args):
-...         debug.append(
-...             'test  # context_targets={!r}'
-...             .format(current.context_targets))
+...         debug.append('test  # context_targets={!r}'
+...                      .format(current.context_targets))
 ...
 >>> debug = []
 >>> run_tests(DummyTest)  # doctest: +ELLIPSIS
@@ -1394,8 +1392,8 @@ True
 What a mess!
 
 We can, however, make the context ordering be consistently compliant
-with the "higher -> outer, lower -> inner" rule -- by setting the global
-swich :attr:`expand.legacy_context_ordering` to :obj:`False`:
+with the "higher=outer, lower=inner" rule by setting the
+:attr:`expand.legacy_context_ordering` global swich to :obj:`False`:
 
 >>> expand.legacy_context_ordering = False
 >>> @expand
@@ -1411,15 +1409,9 @@ swich :attr:`expand.legacy_context_ordering` to :obj:`False`:
 ...         param(3).context(ErrDebugCM, tag='inner'),
 ...     ])
 ...     def test(self, *args):
-...         debug.append(
-...             'test  # context_targets={!r}'
-...             .format(current.context_targets))
+...         debug.append('test  # context_targets={!r}'
+...                      .format(current.context_targets))
 ...
->>> # Note: the following change of the value of the attribute
->>> # `expand.legacy_context_ordering` does not affect further
->>> # uses of the test class defined above because the @expand
->>> # decorator has already been applied to that class.
->>> expand.legacy_context_ordering = True
 >>> debug = []
 >>> run_tests(DummyTest)  # doctest: +ELLIPSIS
 test... ok
@@ -1442,6 +1434,9 @@ OK
 ... ]
 True
 
+Now the behavior is consistent and always compliant with the
+aforementioned rule!
+
 .. warning::
 
    In the current version of the library the legacy (messy)
@@ -1450,18 +1445,23 @@ True
    that it *is* by default (however, a deprecation warning will be
    emitted when it is detected then that you stack up two or more
    :func:`foreach` decorators that bring contexts...). You can swich
-   to the new behavior (consistently providing the "higher -> outer,
-   lower -> inner" context ordering) by setting
+   to the new behavior (consistently providing the "higher=outer,
+   lower=inner" context ordering) by setting
    :attr:`expand.legacy_context_ordering` to :obj:`False` (then the
    deprecation warning will not be emitted).
 
-   **Note** that the new behavior will become the only one in the
-   *0.6.0* version of *unittest_expander*; then the only legal value of
+   Note that the new behavior will become the only one in the *0.6.0*
+   version of *unittest_expander*; then the only legal value of
    :attr:`expand.legacy_context_ordering` will be :obj:`False`.
 
-   ***What to do now?*** To ensure your code is forward compatible switch
+   **What to do now?** To ensure your code is forward compatible, switch
    to the new behavior by setting :attr:`expand.legacy_context_ordering`
-   to :obj:`False` and adjusting your code appropriately (if necessary).
+   to :obj:`False` and appropriately adjusting your code (if necessary).
+
+.. doctest::
+    :hide:
+
+     >>> expand.legacy_context_ordering = True
 
 
 .. _current-special-object:
@@ -1474,15 +1474,15 @@ XXX TODO
 
 .. _label-and-context-targets-as-kwargs:
 
-Deprecated feature: accepting `label` and `context_targets` as keyword arguments
-================================================================================
+Deprecated feature: accepting ``label`` and ``context_targets`` as keyword arguments
+====================================================================================
 
 .. warning::
 
-   Here we describe a **deprecated** feature: automatic passing `label`
-   and/or `context_targets` to test methods if the :func:`expand`
+   Here we describe a **deprecated** feature: automatic passing ``label``
+   and/or ``context_targets`` to test methods if the :func:`expand`
    decorator's machinery detected that the method is able to accept
-   `label` and/or `context_targets` as keyword argument(s).
+   ``label`` and/or ``context_targets`` as keyword argument(s).
 
    In the current version of the library this feature is enabled when
    the global option :attr:`expand.legacy_signature_introspection`
@@ -1492,20 +1492,20 @@ Deprecated feature: accepting `label` and `context_targets` as keyword arguments
    setting :attr:`expand.legacy_signature_introspection` to :obj:`False`
    (then the deprecation warning will not be emitted).
 
-   **Note** that the feature will be **removed** from *unittest_expander*
+   Note that the feature will be **removed** from *unittest_expander*
    in the version *0.6.0*; then the only legal value of
    :attr:`expand.legacy_signature_introspection` will be :obj:`False`.
 
-   ***What to do now?*** To ensure your code is forward compatible,
+   **What to do now?** To ensure your code is forward compatible,
    :ref:`make use <current-special-object>` of :attr:`current.label` and
    :attr:`current.context_targets` whenever you need that information in
    you test method definitions (instead of having your test methods
-   accepting `label` and/or `context_targets` as keyword arguments), and
+   accepting ``label`` and/or ``context_targets`` as keyword arguments), and
    switch :attr:`expand.legacy_signature_introspection` to :obj:`False`
    (and, obviously, make sure your code works correctly with that).
 
 If the :attr:`expand.legacy_signature_introspection` global option is
-:obj:`True` and a test method is able to accept the `label` keyword
+:obj:`True` and a test method is able to accept the ``label`` keyword
 argument, the appropriate label (either auto-generated from parameter
 values or explicitly specified with :meth:`param.label`) will be passed
 to the method as that argument:
@@ -1533,7 +1533,7 @@ test_is_even__<sys.maxsize> ... [DEBUG: 'sys.maxsize'] ok
 OK
 
 Similarly, if the aforementioned option is :obj:`True` and a test method
-is able to accept the `context_targets` keyword argument then a list of
+is able to accept the ``context_targets`` keyword argument then a list of
 context manager as-targets* (i.e., objects returned by context managers'
 :meth:`__enter__`) will be passed to the method as that argument:
 
@@ -2328,6 +2328,7 @@ TypeError: ...is not a...
     ...     "exit:outer",
     ... ]
     True
+
     >>> @expand
     ... class DummyTest(unittest.TestCase):
     ...     @foreach(
