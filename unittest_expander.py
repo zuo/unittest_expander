@@ -1444,14 +1444,14 @@ aforementioned rule!
    :attr:`expand.legacy_context_ordering` is set to :obj:`True`; note
    that it *is* by default (however, a deprecation warning will be
    emitted when it is detected then that you stack up two or more
-   :func:`foreach` decorators that bring contexts...). You can swich
-   to the new behavior (consistently providing the "higher=outer,
-   lower=inner" context ordering) by setting
+   :func:`foreach` decorators that bring contexts...). As stated above,
+   You can swich to the new behavior (consistently providing the
+   "higher=outer, lower=inner" context ordering) by setting
    :attr:`expand.legacy_context_ordering` to :obj:`False` (then the
    deprecation warning will not be emitted).
 
    Note that the new behavior will become the only one in the *0.6.0*
-   version of *unittest_expander*; then the only legal value of
+   version of *unittest_expander*. Also, then the only legal value of
    :attr:`expand.legacy_context_ordering` will be :obj:`False`.
 
    **What to do now?** To ensure your code is forward compatible, switch
