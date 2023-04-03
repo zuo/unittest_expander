@@ -1740,7 +1740,10 @@ Name clashes avoided automatically
 that a newly generated name could clash with an existing one (whether
 the latter was generated recently -- as an effect of the ongoing
 application of :func:`expand` -- or might have already existed), it
-adds a suffix to the newly generated name to avoid the clash.  E.g.:
+adds a suffix to the newly generated name to avoid the clash.
+
+As shown in the following example, the machinery of :func:`expand` is
+really careful when it comes to avoiding name conflicts:
 
 >>> def setting_attrs(attr_dict):
 ...     def deco(cls):
@@ -2001,10 +2004,10 @@ OK
 The :func:`foreach` decorator is designed to be applied *only* to
 regular test methods (i.e., instance methods, *not* static or class
 methods) -- that is, technicaly, to *functions* being attributes of
-test (or test mix-in) classes.
+test (or test base/mix-in) classes.
 
-You should *not* apply :func:`foreach` to anything else or a
-:exc:`TypeError` will be raised:
+If you apply :func:`foreach` to anything but a function object, a
+:exc:`TypeError` is raised:
 
 >>> @foreach(1, 2, 3)
 ... class What:
