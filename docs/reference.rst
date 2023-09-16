@@ -20,7 +20,7 @@ The :func:`expand` class decorator
    which have been bound (by applying :func:`foreach`) to original *test
    methods*.
 
-   ———
+   ―
 
    The public interface of :func:`expand` includes also the following
    attributes (making it possible to :ref:`customize how names of
@@ -100,12 +100,12 @@ The :class:`paramseq` class
    collection's *item* (see above); for each keyword argument (if any),
    its name will be used to :meth:`~param.label` the *item* it refers to.
 
-   ———
+   ―
 
    A :class:`paramseq` instance is the canonical form of a parameter
    collection.
 
-   The public interface provided by this class includes the following
+   The public interface of a :class:`paramseq` includes the following
    instance methods:
 
    .. method:: __add__(param_collection)
@@ -141,13 +141,13 @@ The :class:`param` class
    *args* and *kwargs* specify actual (positional and keyword) arguments
    to be passed to test method call(s).
 
-   ———
+   ―
 
    A :class:`param` instance is the canonical form of a parameter
    collection's *item*. It represents :ref:`a single combination of test
    parameter values <param-basics>`.
 
-   The public interface provided by this class includes the following
+   The public interface of a :class:`param` includes the following
    instance methods:
 
    .. method:: context(context_manager_factory, \
@@ -171,24 +171,34 @@ The :class:`param` class
       instance we operate on, with the specified textual label attached.
 
 
+The :obj:`current` special object
+---------------------------------
+
+.. data:: current
+
+   A special singleton object XXX...........
+
 Non-essential constants and classes
 -----------------------------------
 
 .. data:: __version__
 
-   The version of :mod:`unittest_expander` as a :pep:`440`-compliant
-   identifier (being a :class:`str`).
+   The version of :mod:`unittest_expander` as a :class:`str` being a
+   :pep:`440`-compliant identifier.
 
 
 .. class:: Substitute(actual_object)
 
-   *actual_object* is the object :ref:`to be proxied <about-substitute>`
-   (typically, it is a test method, previously decorated with
-   :func:`foreach`).
+   A kind of attribute-access-proxying wrapper, `automatically applied
+   <about-substitute>` by the machinery of :func:`expand` to each test
+   method previously decorated with :func:`foreach`.
+
+   The sole constructor argument (*actual_object*) is the object (test
+   method) to be proxied.
 
    Apart from exposing in a transparent way nearly all attributes
-   of the proxied object, the public interface provided by the
-   :class:`Substitute` class includes the following instance attribute:
+   of the proxied object, the public interface of a :class:`Substitute`
+   includes the following instance attribute:
 
    .. attribute:: actual_object
 
@@ -196,5 +206,5 @@ Non-essential constants and classes
 
    .. note::
 
-      A :class:`Substitute` instance is *never* callable -- even though,
-      typically, the proxied object is.
+      A :class:`Substitute` instance is *never* callable -- even though
+      (typically) the proxied object is.

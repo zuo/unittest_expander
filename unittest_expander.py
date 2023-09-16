@@ -1331,10 +1331,10 @@ OK
 ... ]
 True
 
-As you see, the rule seems to be simple: the *higher* (or more to left)
-a context is declared, the more *outside* it is. The *lower* (or more to
-right) -- the more *inside*. (Let's name this rule: "higher=outer,
-lower=inner".)
+As you can see, the rule seems to be simple: the *higher* (or more to
+the left) a context is declared, the more *outside* it is. The *lower*
+(or more to the right) -- the more *inside*. (Let's name this rule:
+"higher=outer, lower=inner".)
 
 Unfortunatelly, due to a design mistake made in early stages of
 development of *unittest_expander*, this rule is not kept when we stack
@@ -1392,7 +1392,7 @@ True
 What a mess!
 
 We can, however, make the context ordering be consistently compliant
-with the "higher=outer, lower=inner" rule by setting the
+with the aforementioned "higher=outer, lower=inner" rule by setting the
 :attr:`expand.legacy_context_ordering` global swich to :obj:`False`:
 
 >>> expand.legacy_context_ordering = False
@@ -1435,28 +1435,29 @@ OK
 True
 
 Now the behavior is consistent and always compliant with the
-aforementioned rule!
+"higher=outer, lower=inner" rule!
 
 .. warning::
 
    In the current version of the library the legacy (messy)
    behavior described earlier is enabled when the global option
-   :attr:`expand.legacy_context_ordering` is set to :obj:`True`; note
-   that it *is* by default (however, a deprecation warning will be
-   emitted when it is detected then that you stack up two or more
-   :func:`foreach` decorators that bring contexts...). As stated above,
-   You can swich to the new behavior (consistently providing the
-   "higher=outer, lower=inner" context ordering) by setting
-   :attr:`expand.legacy_context_ordering` to :obj:`False` (then the
-   deprecation warning will not be emitted).
+   :attr:`expand.legacy_context_ordering` is set to :obj:`True`. Note
+   that -- for the sake of backward compatibility -- it *is* by default
+   (however, in such a case, a deprecation warning will be emitted when
+   it is detected that two or more :func:`foreach` decorators that bring
+   contexts are stacked up...). As stated above, you can swich to the
+   new behavior (consistently providing the "higher=outer, lower=inner"
+   context ordering) by setting :attr:`expand.legacy_context_ordering`
+   to :obj:`False` (then the deprecation warning will not be emitted).
 
    Note that the new behavior will become the only one in the *0.6.0*
-   version of *unittest_expander*. Also, then the only legal value of
+   version of *unittest_expander*; then, the only legal value of
    :attr:`expand.legacy_context_ordering` will be :obj:`False`.
 
    **What to do now?** To ensure your code is forward compatible, switch
    to the new behavior by setting :attr:`expand.legacy_context_ordering`
-   to :obj:`False` and appropriately adjusting your code (if necessary).
+   to :obj:`False` and appropriately adjusting your test code (if
+   necessary).
 
 .. doctest::
     :hide:
@@ -1485,25 +1486,26 @@ Deprecated feature: accepting ``label`` and ``context_targets`` as keyword argum
    ``label`` and/or ``context_targets`` as keyword argument(s).
 
    In the current version of the library this feature is enabled when
-   the global option :attr:`expand.legacy_signature_introspection`
-   is set to :obj:`True`; note that it *is* by default (however, a
-   deprecation warning will be emitted when it is detected that your
-   code really makes use of the feature). The feature can be disabled by
-   setting :attr:`expand.legacy_signature_introspection` to :obj:`False`
-   (then the deprecation warning will not be emitted).
+   the global option :attr:`expand.legacy_signature_introspection` is
+   set to :obj:`True`. Note that -- for the sake of backward
+   compatibility -- it *is* by default (however, a deprecation warning
+   will be emitted when it is detected that your code really makes use
+   of the feature). The feature can be disabled by setting
+   :attr:`expand.legacy_signature_introspection` to :obj:`False` (then
+   the deprecation warning will not be emitted).
 
    Note that the feature will be **removed** from *unittest_expander*
-   in the version *0.6.0*; then the only legal value of
+   in the version *0.6.0*; then, the only legal value of
    :attr:`expand.legacy_signature_introspection` will be :obj:`False`.
 
    **What to do now?** To ensure your code is forward compatible,
    :ref:`make use <current-special-object>` of :attr:`current.label` and
    :attr:`current.context_targets` whenever you need that information in
-   you test method definitions (instead of having your test methods
+   your test method definitions (instead of having your test methods
    accepting ``label`` and/or ``context_targets`` as keyword arguments),
    and switch :attr:`expand.legacy_signature_introspection` to
-   :obj:`False` (and, obviously, make sure your code works correctly
-   with that).
+   :obj:`False` (and, obviously, make sure your test code works
+   correctly with that).
 
 If the :attr:`expand.legacy_signature_introspection` global option is
 :obj:`True` and a test method is able to accept the ``label`` keyword
