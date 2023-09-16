@@ -1488,7 +1488,7 @@ Deprecated feature: accepting ``label`` and ``context_targets`` as keyword argum
    the global option :attr:`expand.legacy_signature_introspection`
    is set to :obj:`True`; note that it *is* by default (however, a
    deprecation warning will be emitted when it is detected that your
-   code really makes use the feature). The feature can be disabled by
+   code really makes use of the feature). The feature can be disabled by
    setting :attr:`expand.legacy_signature_introspection` to :obj:`False`
    (then the deprecation warning will not be emitted).
 
@@ -1500,9 +1500,10 @@ Deprecated feature: accepting ``label`` and ``context_targets`` as keyword argum
    :ref:`make use <current-special-object>` of :attr:`current.label` and
    :attr:`current.context_targets` whenever you need that information in
    you test method definitions (instead of having your test methods
-   accepting ``label`` and/or ``context_targets`` as keyword arguments), and
-   switch :attr:`expand.legacy_signature_introspection` to :obj:`False`
-   (and, obviously, make sure your code works correctly with that).
+   accepting ``label`` and/or ``context_targets`` as keyword arguments),
+   and switch :attr:`expand.legacy_signature_introspection` to
+   :obj:`False` (and, obviously, make sure your code works correctly
+   with that).
 
 If the :attr:`expand.legacy_signature_introspection` global option is
 :obj:`True` and a test method is able to accept the ``label`` keyword
@@ -1742,7 +1743,7 @@ the latter was generated recently -- as an effect of the ongoing
 application of :func:`expand` -- or might have already existed), it
 adds a suffix to the newly generated name to avoid the clash.
 
-As shown in the following example, the machinery of :func:`expand` is
+As shown in the following examples, the machinery of :func:`expand` is
 really careful when it comes to avoiding name conflicts:
 
 >>> def setting_attrs(attr_dict):
@@ -2011,6 +2012,14 @@ If you apply :func:`foreach` to anything but a function object, a
 
 >>> @foreach(1, 2, 3)
 ... class What:
+...     '''I am not a function'''                   # doctest: +ELLIPSIS
+...
+Traceback (most recent call last):
+  ...
+TypeError: ...is not a function...
+
+>>> @foreach(1, 2, 3)
+... class WhatTest(unittest.TestCase):
 ...     '''I am not a function'''                   # doctest: +ELLIPSIS
 ...
 Traceback (most recent call last):
