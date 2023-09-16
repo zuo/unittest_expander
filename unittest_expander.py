@@ -125,17 +125,17 @@ arguments:
 ...         (2, True),
 ...         (17, False),
 ...     )
-...     def test_is_even(self, n, expected):
+...     def test(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<-1,False> ... ok
-test_is_even__<-14,True> ... ok
-test_is_even__<0,True> ... ok
-test_is_even__<17,False> ... ok
-test_is_even__<2,True> ... ok
+test__<-1,False> ... ok
+test__<-14,True> ... ok
+test__<0,True> ... ok
+test__<17,False> ... ok
+test__<2,True> ... ok
 ...Ran 5 tests...
 OK
 
@@ -164,17 +164,17 @@ objects instead of tuples:
 ...         param(2, expected=True),
 ...         param(17, expected=False),
 ...     )
-...     def test_is_even(self, n, expected):
+...     def test(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<-1,expected=False> ... ok
-test_is_even__<-14,expected=True> ... ok
-test_is_even__<0,expected=True> ... ok
-test_is_even__<17,expected=False> ... ok
-test_is_even__<2,expected=True> ... ok
+test__<-1,expected=False> ... ok
+test__<-14,expected=True> ... ok
+test__<0,expected=True> ... ok
+test__<17,expected=False> ... ok
+test__<2,expected=True> ... ok
 ...Ran 5 tests...
 OK
 
@@ -191,14 +191,14 @@ We can use the :meth:`~param.label` method of :class:`param` objects:
 ...         param(sys.maxsize, expected=False).label('sys.maxsize'),
 ...         param(-sys.maxsize, expected=False).label('-sys.maxsize'),
 ...     )
-...     def test_is_even(self, n, expected):
+...     def test(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<-sys.maxsize> ... ok
-test_is_even__<sys.maxsize> ... ok
+test__<-sys.maxsize> ... ok
+test__<sys.maxsize> ... ok
 ...Ran 2 tests...
 OK
 
@@ -214,7 +214,7 @@ special object :ref:`described later <current-special-object>`):
 ...         param(sys.maxsize, expected=False).label('sys.maxsize'),
 ...         param(-sys.maxsize, expected=False).label('-sys.maxsize'),
 ...     )
-...     def test_is_even(self, n, expected):
+...     def test(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
@@ -223,8 +223,8 @@ special object :ref:`described later <current-special-object>`):
 ...         sys.stdout.flush()
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<-sys.maxsize> ... [DEBUG: '-sys.maxsize'] ok
-test_is_even__<sys.maxsize> ... [DEBUG: 'sys.maxsize'] ok
+test__<-sys.maxsize> ... [DEBUG: '-sys.maxsize'] ok
+test__<sys.maxsize> ... [DEBUG: 'sys.maxsize'] ok
 ...Ran 2 tests...
 OK
 
@@ -244,7 +244,7 @@ into :func:`foreach`:
 ...         'non-integer': (1.2345, False),
 ...         'horrible abuse!': ('%s', False),
 ...     })
-...     def test_is_even(self, n, expected):
+...     def test(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
@@ -253,8 +253,8 @@ into :func:`foreach`:
 ...         sys.stdout.flush()
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<horrible abuse!> ... [DEBUG: 'horrible abuse!'] ok
-test_is_even__<non-integer> ... [DEBUG: 'non-integer'] ok
+test__<horrible abuse!> ... [DEBUG: 'horrible abuse!'] ok
+test__<non-integer> ... [DEBUG: 'non-integer'] ok
 ...Ran 2 tests...
 OK
 
@@ -267,7 +267,7 @@ OK
 ...         noninteger=(1.2345, False),
 ...         horrible_abuse=('%s', False),
 ...     )
-...     def test_is_even(self, n, expected):
+...     def test(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
@@ -276,8 +276,8 @@ OK
 ...         sys.stdout.flush()
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<horrible_abuse> ... [DEBUG: 'horrible_abuse'] ok
-test_is_even__<noninteger> ... [DEBUG: 'noninteger'] ok
+test__<horrible_abuse> ... [DEBUG: 'horrible_abuse'] ok
+test__<noninteger> ... [DEBUG: 'noninteger'] ok
 ...Ran 2 tests...
 OK
 
@@ -335,26 +335,26 @@ Just transform them (or at least the first of them) into
 ...     all_params = basic + huge + other + just_dict + just_list
 ...
 ...     @foreach(all_params)
-...     def test_is_even(self, n, expected):
+...     def test(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<-1,expected=False> ... ok
-test_is_even__<-14,expected=True> ... ok
-test_is_even__<-15,False> ... ok
-test_is_even__<-sys.maxsize> ... ok
-test_is_even__<15,expected=False> ... ok
-test_is_even__<17,expected=False> ... ok
-test_is_even__<18->True> ... ok
-test_is_even__<2,expected=True> ... ok
-test_is_even__<<12399999999...>,False> ... ok
-test_is_even__<expected=True,n=<12399999999...>> ... ok
-test_is_even__<horribleabuse> ... ok
-test_is_even__<just zero, because why not?> ... ok
-test_is_even__<noninteger> ... ok
-test_is_even__<sys.maxsize> ... ok
+test__<-1,expected=False> ... ok
+test__<-14,expected=True> ... ok
+test__<-15,False> ... ok
+test__<-sys.maxsize> ... ok
+test__<15,expected=False> ... ok
+test__<17,expected=False> ... ok
+test__<18->True> ... ok
+test__<2,expected=True> ... ok
+test__<<12399999999...>,False> ... ok
+test__<expected=True,n=<12399999999...>> ... ok
+test__<horribleabuse> ... ok
+test__<just zero, because why not?> ... ok
+test__<noninteger> ... ok
+test__<sys.maxsize> ... ok
 ...Ran 14 tests...
 OK
 
@@ -406,7 +406,7 @@ object (e.g., a :term:`generator iterator`):
 ...     HI = 100
 ...
 ...     @foreach(randomized)
-...     def test_is_even(self, n, expected):
+...     def test_even(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
@@ -414,7 +414,7 @@ object (e.g., a :term:`generator iterator`):
 ...     # reusing the same instance of paramseq to show that the underlying
 ...     # callable is called separately for each use of @foreach:
 ...     @foreach(randomized)
-...     def test_is_even_negated_when_incremented(self, n, expected):
+...     def test_not_even_when_incremented(self, n, expected):
 ...         actual = (not is_even(n + 1))
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
@@ -424,10 +424,10 @@ DEBUG: LO = -100; HI = 100
 DEBUG: LO = -100; HI = 100
 ----
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<random even> ... ok
-test_is_even__<random odd> ... ok
-test_is_even_negated_when_incremented__<random even> ... ok
-test_is_even_negated_when_incremented__<random odd> ... ok
+test_even__<random even> ... ok
+test_even__<random odd> ... ok
+test_not_even_when_incremented__<random even> ... ok
+test_not_even_when_incremented__<random odd> ... ok
 ...Ran 4 tests...
 OK
 
@@ -470,13 +470,13 @@ passed in.
 ...     ]
 ...
 ...     @foreach(input_values_and_results)
-...     def test_is_even(self, n, expected):
+...     def test_even(self, n, expected):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
 ...
 ...     @foreach(input_values_and_results)
-...     def test_is_even_negated_when_incremented(self, n, expected):
+...     def test_not_even_when_incremented(self, n, expected):
 ...         actual = (not is_even(n + 1))
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
@@ -486,20 +486,20 @@ DEBUG: LO = -999999; HI = 999999
 DEBUG: LO = -999999; HI = 999999
 ----
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<-1,expected=False> ... ok
-test_is_even__<-14,expected=True> ... ok
-test_is_even__<0,expected=True> ... ok
-test_is_even__<17,expected=False> ... ok
-test_is_even__<2,expected=True> ... ok
-test_is_even__<random even> ... ok
-test_is_even__<random odd> ... ok
-test_is_even_negated_when_incremented__<-1,expected=False> ... ok
-test_is_even_negated_when_incremented__<-14,expected=True> ... ok
-test_is_even_negated_when_incremented__<0,expected=True> ... ok
-test_is_even_negated_when_incremented__<17,expected=False> ... ok
-test_is_even_negated_when_incremented__<2,expected=True> ... ok
-test_is_even_negated_when_incremented__<random even> ... ok
-test_is_even_negated_when_incremented__<random odd> ... ok
+test_even__<-1,expected=False> ... ok
+test_even__<-14,expected=True> ... ok
+test_even__<0,expected=True> ... ok
+test_even__<17,expected=False> ... ok
+test_even__<2,expected=True> ... ok
+test_even__<random even> ... ok
+test_even__<random odd> ... ok
+test_not_even_when_incremented__<-1,expected=False> ... ok
+test_not_even_when_incremented__<-14,expected=True> ... ok
+test_not_even_when_incremented__<0,expected=True> ... ok
+test_not_even_when_incremented__<17,expected=False> ... ok
+test_not_even_when_incremented__<2,expected=True> ... ok
+test_not_even_when_incremented__<random even> ... ok
+test_not_even_when_incremented__<random odd> ... ok
 ...Ran 14 tests...
 OK
 
@@ -540,27 +540,27 @@ Cartesian product of them:
 ...     # let's combine them (7 * 2 -> 14 parametrized tests)
 ...     @foreach(input_values_and_results)
 ...     @foreach(input_types)
-...     def test_is_even(self, input_type, n, expected):
+...     def test(self, input_type, n, expected):
 ...         n = input_type(n)
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<floating, -1,expected=False> ... ok
-test_is_even__<floating, -14,expected=True> ... ok
-test_is_even__<floating, 0,expected=True> ... ok
-test_is_even__<floating, 17,expected=False> ... ok
-test_is_even__<floating, 2,expected=True> ... ok
-test_is_even__<floating, random even> ... ok
-test_is_even__<floating, random odd> ... ok
-test_is_even__<integer, -1,expected=False> ... ok
-test_is_even__<integer, -14,expected=True> ... ok
-test_is_even__<integer, 0,expected=True> ... ok
-test_is_even__<integer, 17,expected=False> ... ok
-test_is_even__<integer, 2,expected=True> ... ok
-test_is_even__<integer, random even> ... ok
-test_is_even__<integer, random odd> ... ok
+test__<floating, -1,expected=False> ... ok
+test__<floating, -14,expected=True> ... ok
+test__<floating, 0,expected=True> ... ok
+test__<floating, 17,expected=False> ... ok
+test__<floating, 2,expected=True> ... ok
+test__<floating, random even> ... ok
+test__<floating, random odd> ... ok
+test__<integer, -1,expected=False> ... ok
+test__<integer, -14,expected=True> ... ok
+test__<integer, 0,expected=True> ... ok
+test__<integer, 17,expected=False> ... ok
+test__<integer, 2,expected=True> ... ok
+test__<integer, random even> ... ok
+test__<integer, random odd> ... ok
 ...Ran 14 tests...
 OK
 
@@ -1521,7 +1521,7 @@ to the method as that argument:
 ...         param(sys.maxsize, expected=False).label('sys.maxsize'),
 ...         param(-sys.maxsize, expected=False).label('-sys.maxsize'),
 ...     )
-...     def test_is_even(self, n, expected, label):
+...     def test(self, n, expected, label):
 ...         actual = is_even(n)
 ...         self.assertTrue(isinstance(actual, bool))
 ...         self.assertEqual(actual, expected)
@@ -1530,8 +1530,8 @@ to the method as that argument:
 ...         sys.stdout.flush()
 ...
 >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
-test_is_even__<-sys.maxsize> ... [DEBUG: '-sys.maxsize'] ok
-test_is_even__<sys.maxsize> ... [DEBUG: 'sys.maxsize'] ok
+test__<-sys.maxsize> ... [DEBUG: '-sys.maxsize'] ok
+test__<sys.maxsize> ... [DEBUG: 'sys.maxsize'] ok
 ...Ran 2 tests...
 OK
 
@@ -2198,7 +2198,7 @@ TypeError: ...is not a function...
     TypeError: ...not a legal parameter collection...
 
     >>> @expand()  # <- effectively, same as `@expand` without `()`
-    ... class Test_is_even(unittest.TestCase):
+    ... class TestWithVariousParamSeqBuildingStyles(unittest.TestCase):
     ...
     ...     params1a = paramseq() + [
     ...         (-14, True),
@@ -2255,7 +2255,7 @@ TypeError: ...is not a function...
     ...         self.assertTrue(isinstance(actual, bool))
     ...         self.assertEqual(actual, expected)
     ...
-    >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
+    >>> run_tests(TestWithVariousParamSeqBuildingStyles)  # doctest: +ELLIPSIS
     test_is_even__<'Foo', -1,False> ... ok
     test_is_even__<'Foo', -14,True> ... ok
     test_is_even__<'Foo', -15,False> ... ok
@@ -2276,7 +2276,7 @@ TypeError: ...is not a function...
     test_is_even__<'Foo', sys.maxsize> ... ok
     ...Ran 18 tests...
     OK
-    >>> type(Test_is_even.test_is_even) is Substitute
+    >>> type(TestWithVariousParamSeqBuildingStyles.test_is_even) is Substitute
     True
 
     >>> debug = []
@@ -2943,7 +2943,7 @@ if _PY3:
     __doc__ += """
     >>> expand.legacy_signature_introspection = True
     >>> @expand
-    ... class Test_is_even(unittest.TestCase):
+    ... class TestWithVariousArgsAndAnnotations(unittest.TestCase):
     ...
     ...     # (let's also cover test methods whose signatures include
     ...     # *various kinds of arguments* and *type annotations*...)
@@ -2979,7 +2979,7 @@ if _PY3:
     ...     # def test_xxx(self, label='tralala', /):
     ...     #     self.assertEqual(label, 'tralala')
     ...
-    >>> run_tests(Test_is_even)  # doctest: +ELLIPSIS
+    >>> run_tests(TestWithVariousArgsAndAnnotations)  # doctest: +ELLIPSIS
     test_is_even__<-1,expected=False> ... ok
     test_is_even__<-14,expected=True> ... ok
     test_is_even__<0,expected=True> ... ok
