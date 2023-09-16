@@ -31,7 +31,8 @@ The :mod:`unittest_expander` module provides the following tools:
 
 * a test class decorator: :func:`expand`,
 * a test method decorator: :func:`foreach`,
-* two helper classes: :class:`param` and :class:`paramseq`.
+* two helper classes: :class:`param` and :class:`paramseq`,
+* and a special object: :obj:`current`.
 
 Let's see how to use them...
 
@@ -1288,7 +1289,7 @@ FAILED (failures=1, errors=4)
 True
 
 
-.. _context-order
+.. _context-order:
 
 Context order
 =============
@@ -1343,7 +1344,7 @@ product <foreach-cartesian>` of given parameter collections):
 
 .. warning::
 
-   Here we describe a **deprecated** behavior... Please, read on!
+   Here we describe a **deprecated** behavior... But, please, read on!
 
 .. doctest::
     :hide:
@@ -1435,16 +1436,18 @@ OK
 True
 
 Now the behavior is consistent and always compliant with the
-"higher=outer, lower=inner" rule!
+"higher=outer, lower=inner" rule.
+
+And, also, is forward compatible!
 
 .. warning::
 
-   In the current version of the library the legacy (messy)
+   In the current version of the library, the legacy (messy)
    behavior described earlier is enabled when the global option
    :attr:`expand.legacy_context_ordering` is set to :obj:`True`. Note
-   that -- for the sake of backward compatibility -- it *is* by default
-   (however, in such a case, a deprecation warning will be emitted when
-   it is detected that two or more :func:`foreach` decorators that bring
+   that -- for backward compatibility reasons -- it *is* by default
+   (however, in such a case, a deprecation warning is emitted when it
+   is detected that two or more :func:`foreach` decorators that bring
    contexts are stacked up...). As stated above, you can swich to the
    new behavior (consistently providing the "higher=outer, lower=inner"
    context ordering) by setting :attr:`expand.legacy_context_ordering`
@@ -1485,12 +1488,12 @@ Deprecated feature: accepting ``label`` and ``context_targets`` as keyword argum
    decorator's machinery detected that the method is able to accept
    ``label`` and/or ``context_targets`` as keyword argument(s).
 
-   In the current version of the library this feature is enabled when
+   In the current version of the library, this feature is enabled when
    the global option :attr:`expand.legacy_signature_introspection` is
-   set to :obj:`True`. Note that -- for the sake of backward
-   compatibility -- it *is* by default (however, a deprecation warning
-   will be emitted when it is detected that your code really makes use
-   of the feature). The feature can be disabled by setting
+   set to :obj:`True`. Note that -- for backward compatibility reasons
+   -- it *is* by default (however, a deprecation warning is emitted when
+   it is detected that your code really makes use of the feature). The
+   feature can be disabled by setting
    :attr:`expand.legacy_signature_introspection` to :obj:`False` (then
    the deprecation warning will not be emitted).
 

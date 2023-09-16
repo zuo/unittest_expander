@@ -4,7 +4,7 @@ Module Contents
 .. module:: unittest_expander
 
 The public interface of the :mod:`unittest_expander` module consists of
-the following functions, classes and constants.
+the following functions, classes, objects and constants.
 
 (See: :doc:`narrative_documentation` -- for a much richer description of
 most of them, including a lot of usage examples...)
@@ -22,13 +22,43 @@ The :func:`expand` class decorator
 
    ―
 
-   The public interface of :func:`expand` includes also the following
-   attributes (making it possible to :ref:`customize how names of
+   The public interface of :func:`expand` includes also the attributes
+   described below.
+
+   Two of them make it possible to :ref:`customize how names of
    parametrized test methods are generated <custom-name-formatting>`):
 
    .. attribute:: expand.global_name_pattern
 
+      :type: :class:`str` or :obj:`None`
+      :value: :obj:`None` (use the default pattern)
+
    .. attribute:: expand.global_name_formatter
+
+      :type: :class:`string.Formatter`-like object or :obj:`None`
+      :value: :obj:`None` (use the default formatter)
+
+   Other two allow -- respectively -- to :ref:`switch the context
+   ordering style <context-order>`, and to decide whether :ref:`a
+   certain deprecated, signature-introspection-based feature
+   <label-and-context-targets-as-kwargs>` shall be enabled:
+
+   .. attribute:: expand.legacy_context_ordering
+
+      :type: :class:`bool`
+      :value: :obj:`True`
+
+   .. attribute:: expand.legacy_signature_introspection
+
+      :type: :class:`bool`
+      :value: :obj:`True`
+
+   .. warning::
+
+      For each of the last two attributes, :obj:`True` (the default
+      value) dictates a deprecated (legacy) behavior, whereas only
+      :obj:`False` is compatible with future versions of
+      *unittest_expander*.
 
 
 The :func:`foreach` method decorator
@@ -106,7 +136,7 @@ The :class:`paramseq` class
    collection.
 
    The public interface of a :class:`paramseq` includes the following
-   instance methods:
+   methods:
 
    .. method:: __add__(param_collection)
 
@@ -148,7 +178,7 @@ The :class:`param` class
    parameter values <param-basics>`.
 
    The public interface of a :class:`param` includes the following
-   instance methods:
+   methods:
 
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \
