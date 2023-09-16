@@ -189,9 +189,9 @@ Non-essential constants and classes
 
 .. class:: Substitute(actual_object)
 
-   A kind of attribute-access-proxying wrapper, `automatically applied
-   <about-substitute>` by the machinery of :func:`expand` to each test
-   method previously decorated with :func:`foreach`.
+   A kind of attribute-access-proxying wrapper, :ref:`automatically
+   applied <about-substitute>` by the machinery of :func:`expand` to
+   each test method previously decorated with :func:`foreach`.
 
    The sole constructor argument (*actual_object*) is the object (test
    method) to be proxied.
