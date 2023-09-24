@@ -31,8 +31,7 @@ The :mod:`unittest_expander` module provides the following tools:
 
 * a test class decorator: :func:`expand`,
 * a test method decorator: :func:`foreach`,
-* two helper classes: :class:`param` and :class:`paramseq`,
-* and a special object: :obj:`current`.
+* and a few helpers: :class:`param`, :class:`paramseq` and :obj:`current`.
 
 Let's see how to use them...
 
@@ -1904,7 +1903,7 @@ True
 True
 
 Note that, most probably, you should name such mix-in or "test template"
-base classes in a way that will prevent the test loader you use from
+base classes in a way that prevents the test loader you use from
 including them; for the same reason, typically, it is better to avoid
 making them subclasses of :class:`unittest.TestCase`.
 

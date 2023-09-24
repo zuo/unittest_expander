@@ -1,7 +1,7 @@
 *unittest_expander* -- test parametrization library
 ===================================================
 
-This is the documentation for *unittest_expander* -- a library which
+Welcome to the documentation for *unittest_expander* -- a library that
 provides flexible and easy-to-use tools **to parametrize Python unit
 tests**, especially (but not limited to) those based on
 :class:`unittest.TestCase`.

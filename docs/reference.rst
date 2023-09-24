@@ -26,7 +26,7 @@ The :func:`expand` class decorator
    described below.
 
    Two of them make it possible to :ref:`customize how names of
-   parametrized test methods are generated <custom-name-formatting>`):
+   parametrized test methods are generated <custom-name-formatting>`:
 
    .. attribute:: expand.global_name_pattern
 
@@ -76,10 +76,10 @@ The :func:`foreach` method decorator
    *test class* owning the method -- to generate actual *parametrized
    test methods*).
 
-   To learn more about what needs to be passed to the :func:`foreach`
-   call, see the description of the :class:`paramseq`'s constructor
-   (note that the call signatures of :func:`foreach` and that
-   constructor are the same).
+   To learn more about what needs to be passed to :func:`foreach`, see
+   the description (below) of the :class:`paramseq`'s constructor (note
+   that the call signatures of :func:`foreach` and that constructor are
+   the same).
 
 
 The :class:`paramseq` class
@@ -135,21 +135,20 @@ The :class:`paramseq` class
    A :class:`paramseq` instance is the canonical form of a parameter
    collection.
 
-   The public interface of a :class:`paramseq` includes the following
-   methods:
+   Its public interface includes the following methods:
 
    .. method:: __add__(param_collection)
 
       Returns a new :class:`paramseq` instance -- being a result of
       concatenation of the :class:`paramseq` instance we operate on
-      and the given *param_collection* (see the description of the
+      and the given *param_collection* (see the above description of the
       :class:`paramseq` constructor's argument *param_collection*...).
 
    .. method:: __radd__(param_collection)
 
       Returns a new :class:`paramseq` instance -- being a result of
-      concatenation of the given *param_collection* (see the description
-      of the :class:`paramseq` constructor's argument
+      concatenation of the given *param_collection* (see the above
+      description of the :class:`paramseq` constructor's argument
       *param_collection*...) and the :class:`paramseq` instance we
       operate on.
 
@@ -159,7 +158,7 @@ The :class:`paramseq` class
 
       Returns a new :class:`paramseq` instance containing clones
       of the items of the instance we operate on -- each cloned with a
-      :meth:`param.context` call (see below) to which all given
+      :meth:`param.context` call (see below...) to which all given
       arguments are passed.
 
 
@@ -177,8 +176,7 @@ The :class:`param` class
    collection's *item*. It represents :ref:`a single combination of test
    parameter values <param-basics>`.
 
-   The public interface of a :class:`param` includes the following
-   methods:
+   Its public interface includes the following methods:
 
    .. method:: context(context_manager_factory, \
                        *its_args, **its_kwargs, \

@@ -19,8 +19,8 @@ Python standard library).
 Installing
 ----------
 
-The easiest way to install the library is to execute (preferably in a
-`virtualenv`_) the command::
+**The easiest way** to install the library is to execute (preferably in
+a `virtualenv`_) the command::
 
     python -m pip install unittest_expander
 
@@ -28,16 +28,16 @@ The easiest way to install the library is to execute (preferably in a
 have the *pip* tool installed -- see:
 https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 
-Alternatively, you can `download`_ the library source archive, unpack
-it, ``cd`` to the unpacked directory and execute (preferably in a
-`virtualenv`_) the following command::
+**Alternatively**, you can `download`_ the library source archive,
+unpack it, ``cd`` to the unpacked directory, and execute (preferably in
+a `virtualenv`_) the following command::
 
     python -m pip install .
 
 Note: you may need to have administrator privileges if you do *not*
 operate in a *virtualenv*.
 
-It is also possible to use the library without installing it: as its
+**It is also possible** to use the library without installing it: as its
 code is contained in a single file (``unittest_expander.py``), you can
 just copy it into your project.
 
