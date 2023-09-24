@@ -204,7 +204,50 @@ The :obj:`current` special object
 
 .. data:: current
 
-   A special singleton object XXX...........
+   A special singleton object which, when used during execution of a
+   parametrized test method, provides (in a `thread-local`_ manner)
+   access to the following properties of the currently executed test:
+
+   .. attribute:: current.label
+
+      :type: :class:`str`
+      :value: the :ref:`test's label <test-labels>`
+
+   .. attribute:: current.context_targets
+
+      :type: :class:`list`
+      :value: the :ref:`test's context manager as-targets <test-context-targets>`
+
+   .. attribute:: current.args
+
+      :type: :class:`tuple`
+      :value: all positional arguments obtained by the currently
+              executed parametrized test method
+
+   .. attribute:: current.kwargs
+
+      :type: :class:`dict`
+      :value: all keyword arguments obtained by the currently
+              executed parametrized test method
+
+   .. attribute:: current.count
+
+      :type: :class:`int`
+      :value: the consecutive number (within a single application of
+              :func:`@expand`) of the generated parametrized test method
+
+   .. attribute:: current.base_name
+
+      :type: :class:`str`
+      :value: the name of the original (non-parametrized) test method
+
+   .. attribute:: current.base_obj
+
+      :type: :class:`function <types.FunctionType>`
+      :value: the original (non-parametrized) test method itself
+
+.. _thread-local: https://docs.python.org/library/threading.html#thread-local-data
+
 
 Non-essential constants and classes
 -----------------------------------
@@ -221,8 +264,8 @@ Non-essential constants and classes
    applied <about-substitute>` by the machinery of :func:`expand` to
    each test method previously decorated with :func:`foreach`.
 
-   The sole constructor argument (*actual_object*) is the object (test
-   method) to be proxied.
+   The sole constructor argument (*actual_object*) is the object
+   (typically, a test method) to be proxied.
 
    Apart from exposing in a transparent way nearly all attributes
    of the proxied object, the public interface of a :class:`Substitute`

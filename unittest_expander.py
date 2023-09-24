@@ -178,6 +178,8 @@ test__<2,expected=True> ... ok
 ...Ran 5 tests...
 OK
 
+.. _test-labels:
+
 Generated *labels* of our tests (attached to the names of the generated
 test methods) became less cryptic.  But what to do if we need to label
 our parameters explicitly?
@@ -645,6 +647,8 @@ test_save_load_with_spaces__<load='',save=''> ... ok
 test_save_load_with_spaces__<load='abc',save='abc'> ... ok
 ...Ran 4 tests...
 OK
+
+.. _`test-context-targets`
 
 As you can see in the above example, a *sequence* of context manager
 *as-targets* (i.e., objects returned by context managers'
@@ -2860,7 +2864,7 @@ TypeError: ...is not a function...
     ...             None,
     ...          ),
     ...         'xyz__<4>__4': (   # (because 'xyz__<4>', 'xyz__<4>__2' abd 'xyz__<4>__3'
-    ...             Function,      #  already in PseudoClass.__mro__ namespaces)
+    ...             Function,      #  are already in PseudoClass.__mro__ namespaces)
     ...             'WeirdPseudoMetaclass.__init__.<locals>.xyz__<4>__4',
     ...          ),
     ...         'qwerty': (
@@ -2896,7 +2900,7 @@ TypeError: ...is not a function...
     ...         'xyz__<3>': Function,
     ...         'xyz__<4>': int,
     ...         'xyz__<4>__4': Function,  # (because 'xyz__<4>', 'xyz__<4>__2' abd 'xyz__<4>__3'
-    ...         'qwerty': Substitute,     #  already in PseudoClass.__mro__ namespaces)
+    ...         'qwerty': Substitute,     #  are already in PseudoClass.__mro__ namespaces)
     ...         'qwerty__<5>__2': Function, # (because hasattr(PseudoClass, 'qwerty__<5>') is true)
     ...         'qwerty__<6>__2': Function,   # (because 'qwerty__<6>' already in dir(PseudoClass))
     ...         'disregarded': types.MethodType,
