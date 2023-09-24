@@ -205,8 +205,8 @@ The :obj:`current` special object
 .. data:: current
 
    A special singleton object which, when used during execution of a
-   parametrized test method, provides (in a `thread-local`_ manner)
-   access to the following properties of the (currently executed) test:
+   parametrized test method, provides access (in a `thread-local`_
+   manner) to the following properties of the (currently executed) test:
 
    .. attribute:: current.label
 
@@ -216,20 +216,26 @@ The :obj:`current` special object
 
    .. attribute:: current.context_targets
 
-      :type: :class:`list`
-      :value: the :ref:`test's context manager as-targets <test-context-targets>`
+      :type: :class:`~collections.abc.Sequence`
+      :value: the :ref:`test contexts' as-targets <test-context-targets>`
+              (i.e., objects returned by :meth:`__enter__` of each of the
+              context managers specified with :meth:`param.context`...)
 
    .. attribute:: current.args
 
       :type: :class:`tuple`
-      :value: all positional arguments obtained by the currently
-              executed parametrized test method
+      :value: all *positional arguments* obtained by the currently
+              executed parametrized test method (in particular,
+              including all positional arguments passed to the
+              :class:`param` constructor)
 
    .. attribute:: current.kwargs
 
       :type: :class:`dict`
-      :value: all keyword arguments obtained by the currently
-              executed parametrized test method
+      :value: all *keyword arguments* obtained by the currently
+              executed parametrized test method (in particular,
+              including all keyword arguments passed to the
+              :class:`param` constructor)
 
    .. attribute:: current.count
 
