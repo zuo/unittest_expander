@@ -3009,6 +3009,9 @@ if _PY3:
             'test_whatever(self, x: str, y: str, *args')
 else:
     __doc__ = __doc__.replace(
+        'NO TESTS RAN',
+        'OK')
+    __doc__ = __doc__.replace(
         '<EXCEPTION WHEN NOT-A-CONTEXT-MANAGER GIVEN>',
         'AttributeError: ...__exit__...')
 
