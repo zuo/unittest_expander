@@ -648,7 +648,7 @@ test_save_load_with_spaces__<load='abc',save='abc'> ... ok
 ...Ran 4 tests...
 OK
 
-.. _`test-context-targets`
+.. _test-context-targets:
 
 As you can see in the above example, a *sequence* of context manager
 *as-targets* (i.e., objects returned by context managers'
@@ -1649,7 +1649,7 @@ you can customize that globally by:
   * ``{label}`` -- the test label (automatically generated or
     explicitly specified with :meth:`param.label`),
   * ``{count}`` -- the consecutive number (within a single application
-    of :func:`@expand`) of the generated parametrized test method;
+    of :func:`expand`) of the generated parametrized test method;
 
   (in future versions of *unittest_expander* more replacement fields may
   be made available)

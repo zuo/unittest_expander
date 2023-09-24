@@ -206,12 +206,13 @@ The :obj:`current` special object
 
    A special singleton object which, when used during execution of a
    parametrized test method, provides (in a `thread-local`_ manner)
-   access to the following properties of the currently executed test:
+   access to the following properties of the (currently executed) test:
 
    .. attribute:: current.label
 
       :type: :class:`str`
-      :value: the :ref:`test's label <test-labels>`
+      :value: the :ref:`test's label <test-labels>` (automatically
+              generated or explicitly specified with :meth:`param.label`)
 
    .. attribute:: current.context_targets
 
@@ -234,7 +235,7 @@ The :obj:`current` special object
 
       :type: :class:`int`
       :value: the consecutive number (within a single application of
-              :func:`@expand`) of the generated parametrized test method
+              :func:`expand`) of the generated parametrized test method
 
    .. attribute:: current.base_name
 
@@ -243,7 +244,7 @@ The :obj:`current` special object
 
    .. attribute:: current.base_obj
 
-      :type: :class:`function <types.FunctionType>`
+      :type: :data:`function <types.FunctionType>`
       :value: the original (non-parametrized) test method itself
 
 .. _thread-local: https://docs.python.org/library/threading.html#thread-local-data
