@@ -2761,7 +2761,7 @@ TypeError: ...is not a function...
     >>> run_tests(TestWithEmptyParamCollections)           # doctest: +ELLIPSIS
     <BLANKLINE>
     ...Ran 0 test...
-    OK
+    NO TESTS RAN
 
     >>> class Some(object): pass
     >>> not_a_method = Some()
@@ -2934,6 +2934,7 @@ import sys
 # Python-versions-compatibility-related non-public constants
 _PY3 = (sys.version_info[0] >= 3)
 _PY3_11_OR_NEWER = (sys.version_info[:2] >= (3, 11))
+_PY3_11_OR_OLDER = (sys.version_info[:2] <= (3, 11))
 _PY3_7_OR_OLDER = (sys.version_info[:2] <= (3, 7))
 
 if _PY3:
@@ -2945,6 +2946,11 @@ if _PY3:
         __doc__ = __doc__.replace(
             '<EXCEPTION WHEN NOT-A-CONTEXT-MANAGER GIVEN>',
             'AttributeError: ...__enter__...')
+
+    if _PY3_11_OR_OLDER:
+        __doc__ = __doc__.replace(
+            'NO TESTS RAN',
+            'OK')
 
     __doc__ += """
     >>> expand.legacy_signature_introspection = True
