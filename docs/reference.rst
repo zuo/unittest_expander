@@ -221,17 +221,17 @@ The :obj:`current` special object
               (i.e., objects returned by :meth:`__enter__` of each of the
               context managers specified with :meth:`param.context`...)
 
-   .. attribute:: current.args
+   .. attribute:: current.all_args
 
-      :type: :class:`tuple`
+      :type: :class:`~collections.abc.Sequence`
       :value: all *positional arguments* obtained by the currently
               executed parametrized test method (in particular,
               including all positional arguments passed to the
               :class:`param` constructor)
 
-   .. attribute:: current.kwargs
+   .. attribute:: current.all_kwargs
 
-      :type: :class:`dict`
+      :type: :class:`~collections.abc.Mapping`
       :value: all *keyword arguments* obtained by the currently
               executed parametrized test method (in particular,
               including all keyword arguments passed to the

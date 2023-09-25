@@ -3684,8 +3684,8 @@ def _make_parametrized_func(test_cls, base_name, base_func,
             count=count,
             label=label,
             context_targets=context_targets,
-            args=args,
-            kwargs=kwargs,
+            all_args=args,
+            all_kwargs=kwargs,
         ):
             with cm_factory(context_targets):
                 return base_func(*args, **kwargs)
