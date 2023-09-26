@@ -40,7 +40,7 @@ def main():
     else:
         sys.exit(
             'Error: unittest_expander.__version__ ({!r}) differs '
-            'from the version number from {} ({!r})'.format(
+            'from the version number in {} ({!r})'.format(
                 ver_module,
                 SETUP_FILENAME,
                 ver_setup))
