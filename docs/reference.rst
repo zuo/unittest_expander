@@ -211,31 +211,33 @@ The :obj:`current` special object
    .. attribute:: current.label
 
       :type: :class:`str`
-      :value: the :ref:`test's label <test-labels>` (automatically
-              generated or explicitly specified with :meth:`param.label`)
+      :value: the :ref:`test's label <test-labels>` (which was
+              automatically generated or explicitly specified with
+              :meth:`param.label`...)
 
    .. attribute:: current.context_targets
 
       :type: :class:`~collections.abc.Sequence`
       :value: the :ref:`test contexts' as-targets <test-context-targets>`
               (i.e., objects returned by :meth:`__enter__` of each of the
-              context managers specified with :meth:`param.context`...)
+              context managers which were specified with
+              :meth:`param.context`...)
 
    .. attribute:: current.all_args
 
       :type: :class:`~collections.abc.Sequence`
       :value: all *positional arguments* obtained by the currently
               executed parametrized test method (in particular,
-              including all positional arguments passed to the
-              :class:`param` constructor)
+              including all positional arguments which were passed
+              to the :class:`param` constructor...)
 
    .. attribute:: current.all_kwargs
 
       :type: :class:`~collections.abc.Mapping`
       :value: all *keyword arguments* obtained by the currently
               executed parametrized test method (in particular,
-              including all keyword arguments passed to the
-              :class:`param` constructor)
+              including all keyword arguments which were passed
+              to the :class:`param` constructor...)
 
    .. attribute:: current.count
 

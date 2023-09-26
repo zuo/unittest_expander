@@ -58,9 +58,9 @@ different parameters.  At the same time, it is not the best idea to
 test many cases in a loop within one test method -- because of lack
 of test isolation (tests depend on other ones -- they may inherit some
 state which can affect their results), less information on failures (a
-test failure prevents subsequent tests from being run), less clear
-result messages (you don't see at first glance which case is the
-actual culprit), etc.
+test failure or fixture-related error may prevent subsequent tests from
+being run), less clear fail messages (when you don't see at first glance
+which case is the actual culprit), etc.
 
 So let's write our tests in a smarter way:
 
@@ -1510,8 +1510,8 @@ Deprecated feature: accepting ``label`` and ``context_targets`` as keyword argum
    your test method definitions (instead of having your test methods
    accepting ``label`` and/or ``context_targets`` as keyword arguments),
    and switch :attr:`expand.legacy_signature_introspection` to
-   :obj:`False` (and, obviously, make sure your test code works
-   correctly with that).
+   :obj:`False` (and, obviously, make sure your tests work correctly
+   with that).
 
 If the :attr:`expand.legacy_signature_introspection` global option is
 :obj:`True` and a test method is able to accept the ``label`` keyword
